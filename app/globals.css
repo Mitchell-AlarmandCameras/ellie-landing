@@ -1,0 +1,290 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ═══════════════════════════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════════════════════════ */
+:root {
+  --navy:            #000080;
+  --gold:            #D4AF37;
+  --gold-light:      #f5e9b8;
+  --gold-dark:       #b8952e;
+  --gold-mid:        #c9a227;
+
+  /* 5-stop metallic gold — used for buttons and key accents */
+  --gold-gradient: linear-gradient(
+    135deg,
+    #b8952e  0%,
+    #D4AF37  25%,
+    #f5e9b8  50%,
+    #D4AF37  75%,
+    #b8952e  100%
+  );
+
+  /* Shimmer variant for text */
+  --gold-text-gradient: linear-gradient(
+    105deg,
+    #b8952e  0%,
+    #D4AF37  30%,
+    #f7ebb5  50%,
+    #D4AF37  70%,
+    #b8952e  100%
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BASE
+═══════════════════════════════════════════════════════════════ */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-white text-gray-900 antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Playfair Display', Georgia, serif;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   KEYFRAMES
+═══════════════════════════════════════════════════════════════ */
+
+/* Gold shimmer sweeps left→right across text / buttons */
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+/* Modal entry: slides up from below */
+@keyframes slideUp {
+  from { transform: translateY(44px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* Success state: scales in */
+@keyframes fadeInScale {
+  from { transform: scale(0.95); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+
+/* Scroll-line pulse in hero */
+@keyframes scrollPulse {
+  0%, 100% { opacity: 0.25; transform: scaleY(1);   }
+  50%       { opacity: 0.55; transform: scaleY(1.15); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   COMPONENTS
+═══════════════════════════════════════════════════════════════ */
+@layer components {
+
+  /* ── CTA Button — 5-stop metallic gold ─────────────────────── */
+  .btn-gold {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem 2.5rem;
+    color: #000080;
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #D4AF37;
+
+    /* 5-stop gradient, double-width for shimmer sweep */
+    background: linear-gradient(
+      135deg,
+      #b8952e  0%,
+      #D4AF37  20%,
+      #f5e9b8  50%,
+      #D4AF37  80%,
+      #b8952e  100%
+    );
+    background-size: 200% auto;
+    transition: background-position 0.55s ease, box-shadow 0.3s ease,
+                transform 0.25s ease;
+  }
+
+  .btn-gold:hover:not(:disabled) {
+    background-position: right center;
+    box-shadow: 0 6px 28px rgba(212, 175, 55, 0.40),
+                0 2px  8px rgba(212, 175, 55, 0.20);
+    transform: translateY(-2px);
+  }
+
+  .btn-gold:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(212, 175, 55, 0.25);
+  }
+
+  .btn-gold:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* ── Dividers ───────────────────────────────────────────────── */
+  .gold-divider {
+    @apply mx-auto my-6;
+    width: 56px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, #b8952e 20%, #D4AF37 50%, #b8952e 80%, transparent 100%);
+  }
+
+  .gold-divider-wide {
+    @apply mx-auto my-8;
+    width: 110px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, #b8952e 20%, #D4AF37 50%, #b8952e 80%, transparent 100%);
+  }
+
+  /* ── Eyebrow label ──────────────────────────────────────────── */
+  .section-label {
+    @apply text-xs font-semibold uppercase;
+    font-family: 'Inter', sans-serif;
+    color: #D4AF37;
+    letter-spacing: 0.35em;
+  }
+
+  /* ── Glassmorphism nav ──────────────────────────────────────── */
+  /* Base state — at top of page */
+  .nav-glass {
+    background: rgba(255, 255, 255, 0.78);
+    backdrop-filter: blur(14px) saturate(180%);
+    -webkit-backdrop-filter: blur(14px) saturate(180%);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.10);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);
+    transition: background 0.4s ease, backdrop-filter 0.4s ease,
+                border-color 0.4s ease, box-shadow 0.4s ease;
+  }
+
+  /* Elevated state — once user scrolls */
+  .nav-glass-scrolled {
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(24px) saturate(200%);
+    -webkit-backdrop-filter: blur(24px) saturate(200%);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.22);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07),
+                0 1px  0  rgba(212, 175, 55, 0.12);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════════════════════════ */
+.modal-slide-up {
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.modal-fade-in {
+  animation: fadeInScale 0.42s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FORM FIELDS
+═══════════════════════════════════════════════════════════════ */
+.field-input {
+  width: 100%;
+  padding: 0.875rem 1.1rem;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  color: #111827;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.field-input::placeholder { color: #9ca3af; }
+
+.field-input:focus {
+  border-color: #000080;
+  box-shadow: 0 0 0 2px rgba(0, 0, 128, 0.08);
+}
+
+.field-input.field-error {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.07);
+}
+
+.field-input:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Native select — custom navy chevron */
+.field-select-wrap { position: relative; }
+
+.field-select-wrap::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left:  5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top:   5px solid #000080;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   UTILITIES
+═══════════════════════════════════════════════════════════════ */
+@layer utilities {
+
+  /* Metallic shimmer text  — use with .animate-gold-shimmer */
+  .text-gold-metallic {
+    background: linear-gradient(
+      105deg,
+      #b8952e  0%,
+      #D4AF37  25%,
+      #f7ebb5  50%,
+      #D4AF37  75%,
+      #b8952e  100%
+    );
+    background-size: 250% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 4s linear infinite;
+  }
+
+  /* Static gold gradient text (no animation) */
+  .text-gradient-gold {
+    background: linear-gradient(135deg, #b8952e 0%, #D4AF37 40%, #f5e9b8 60%, #D4AF37 80%, #b8952e 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Scroll-line pulse */
+  .animate-scroll-pulse {
+    animation: scrollPulse 2.2s ease-in-out infinite;
+  }
+
+  /* Animation delays for staggered reveals */
+  .delay-0   { animation-delay:   0ms; }
+  .delay-100 { animation-delay: 100ms; }
+  .delay-150 { animation-delay: 150ms; }
+  .delay-200 { animation-delay: 200ms; }
+  .delay-300 { animation-delay: 300ms; }
+  .delay-400 { animation-delay: 400ms; }
+  .delay-500 { animation-delay: 500ms; }
+}
