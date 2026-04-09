@@ -1259,7 +1259,8 @@ export default function Home() {
                 © {new Date().getFullYear()} The Style Refresh. All rights reserved.
               </p>
               {[
-                { label: "The Edit", href: "/blog" },
+                { label: "The Edit",       href: "/blog"    },
+                { label: "Contact",        href: "/contact" },
                 { label: "Privacy Policy", href: "/privacy" },
                 { label: "Terms of Service", href: "/terms" },
               ].map(({ label, href }) => (

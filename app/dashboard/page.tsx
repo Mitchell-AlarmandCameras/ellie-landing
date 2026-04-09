@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { currentWeek, archiveWeeks } from "@/data/lookbook";
 import ReferralButton from "@/components/ReferralButton";
+import ContactForm from "@/components/ContactForm";
 
 export const metadata: Metadata = {
   title: "VIP Room | ELLIE — The Style Refresh",
@@ -563,6 +564,22 @@ export default function DashboardPage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ── Contact Ellie ────────────────────────────────────────── */}
+      <section className="py-12 px-5 sm:px-8" style={{ borderTop: "1px solid var(--sand-border)" }}>
+        <div className="max-w-2xl mx-auto">
+          <p style={{ margin: "0 0 4px", fontSize: "10px", letterSpacing: "0.3em", textTransform: "uppercase", color: "var(--blush)", fontFamily: "Arial, sans-serif" }}>
+            Need Help?
+          </p>
+          <h2 style={{ margin: "0 0 6px", fontFamily: "DM Serif Display, serif", fontSize: "1.4rem", color: "var(--charcoal)", fontWeight: 400 }}>
+            Ask Ellie directly.
+          </h2>
+          <p style={{ margin: "0 0 20px", fontSize: "13px", color: "var(--warm-gray)", fontFamily: "Georgia, serif", lineHeight: 1.7 }}>
+            Billing question, missing brief, feedback — Ellie reads every message personally and responds within 24 hours.
+          </p>
+          <ContactForm compact />
         </div>
       </section>
 
