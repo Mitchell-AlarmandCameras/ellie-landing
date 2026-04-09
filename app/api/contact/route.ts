@@ -111,7 +111,7 @@ export async function POST(req: NextRequest) {
       await resend.emails.send({
         from:    `Style Refresh Support <${fromEmail}>`,
         to:      notifyEmail,
-        replyTo: email,
+        reply_to: email,
         subject: `[${(type ?? "general").toUpperCase()}] New inquiry from ${name || email}`,
         html: `<div style="font-family:sans-serif;font-size:14px;color:#111;line-height:1.6;">
           <p><strong>From:</strong> ${name || "(no name)"} &lt;${email}&gt;</p>
@@ -131,7 +131,7 @@ export async function POST(req: NextRequest) {
     await resend.emails.send({
       from:    `Ellie <${fromEmail}>`,
       to:      email,
-      replyTo: fromEmail,
+      reply_to: fromEmail,
       subject: "I received your message — The Style Refresh",
       html:    buildAutoReply(name ?? "", message!, siteUrl),
       headers: { "List-Unsubscribe": `<${siteUrl}/unsubscribe>` },

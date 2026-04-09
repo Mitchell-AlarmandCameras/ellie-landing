@@ -317,7 +317,7 @@ export async function POST(req: NextRequest) {
         resend.emails.send({
           from: `Ellie <${fromEmail}>`,
           to: notifyEmail,
-          replyTo: normalizedEmail,
+          reply_to: normalizedEmail,
           subject: `New Waitlist Application — ${trimmedName}`,
           html: buildAdminEmail(trimmedName, normalizedEmail, styleLabel, timestamp),
         }),

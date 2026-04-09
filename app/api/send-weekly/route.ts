@@ -162,7 +162,7 @@ async function getActiveSubscriberEmails(stripe: Stripe): Promise<string[]> {
     startingAfter = page.data[page.data.length - 1].id;
   }
 
-  return [...new Set(emails)];
+  return Array.from(new Set(emails));
 }
 
 async function runSend(req?: NextRequest): Promise<NextResponse> {

@@ -1296,7 +1296,7 @@ export default function Home() {
         >
           <button
             type="button"
-            onClick={handleCheckout}
+            onClick={() => handleCheckout("monthly")}
             disabled={checkoutLoading}
             className="btn-primary w-full max-w-md"
             style={{ minHeight: "48px", fontSize: "0.72rem" }}

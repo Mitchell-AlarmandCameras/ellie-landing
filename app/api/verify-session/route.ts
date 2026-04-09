@@ -3,7 +3,7 @@ import Stripe from "stripe";
 import { Resend } from "resend";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-04-10",
+  apiVersion: "2023-10-16",
 });
 
 function siteHostname(url: string): string {
@@ -210,7 +210,7 @@ export async function GET(req: NextRequest) {
         resend.emails.send({
           from:    `ELLIE <${fromEmail}>`,
           to:      notifyEmail,
-          replyTo: customerEmail,
+          reply_to: customerEmail,
           subject: `New Style Refresh Member — ${customerName || customerEmail}`,
           html: `<p style="font-family:sans-serif;color:#111;">
             <strong>New paid subscriber:</strong><br/>

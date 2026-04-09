@@ -359,7 +359,7 @@ export async function GET(req: NextRequest) {
 
   if (stripeKey) {
     try {
-      const stripe        = new Stripe(stripeKey, { apiVersion: "2024-04-10" });
+      const stripe        = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
       const fromEmail     = process.env.RESEND_FROM_EMAIL ?? "ellie@stylebyellie.com";
       const mailingAddress = (process.env.BUSINESS_MAILING_ADDRESS ?? "The Style Refresh · New York, NY").trim();
 
@@ -438,7 +438,7 @@ export async function GET(req: NextRequest) {
           to,
           subject: `A quick favor, ${firstName} — 4 weeks in`,
           html,
-          replyTo: fromEmail,
+          reply_to: fromEmail,
         });
         testimonialsCollected.push(error ? `testimonial FAIL ${to}` : `testimonial OK ${to}`);
         console.log(`[drip] testimonial-28d → ${to}`, error ?? "sent");
