@@ -194,14 +194,16 @@ REQUIREMENTS:
       Reformation dress   → https://www.thereformation.com/search?q=midi+dress
       Everlane tee        → https://www.everlane.com/search?q=fitted+crew+tee
       Everlane pants      → https://www.everlane.com/search?q=wide+leg+pants
-      Mejuri hoops        → https://mejuri.com/search?q=gold+hoop+earrings
-      Mejuri necklace     → https://mejuri.com/search?q=fine+chain+necklace
+      Mejuri earrings     → https://mejuri.com/collections/earrings
+      Mejuri necklace     → https://mejuri.com/collections/necklaces
+      Mejuri rings        → https://mejuri.com/collections/rings
+      Mejuri bracelets    → https://mejuri.com/collections/bracelets
       Adidas Stan Smith   → https://www.adidas.com/us/search?q=stan+smith+white
-      Baggu tote          → https://baggu.com/search?type=product&q=canvas+tote
-      Sézane dress        → https://www.sezane.com/us/result?q=slip+dress
-      Sézane top          → https://www.sezane.com/us/result?q=silk+blouse
-      Madewell jacket     → https://www.madewell.com/search#q=jean+jacket
-      Madewell jeans      → https://www.madewell.com/search#q=straight+leg+jeans
+      Baggu bags          → https://baggu.com/collections/bags
+      Anthropologie dress → https://www.anthropologie.com/search?q=slip+dress
+      Anthropologie top   → https://www.anthropologie.com/search?q=silk+blouse
+      Everlane jacket     → https://www.everlane.com/search?q=denim+jacket
+      Everlane jeans      → https://www.everlane.com/search?q=straight+leg+jeans
       Ganni dress         → https://www.ganni.com/en-us/search?q=floral+dress
       Frame jeans         → https://www.frame-store.com/search?q=wide+leg+jeans
       Veronica Beard      → https://veronicabeard.com/search?q=blazer
@@ -213,6 +215,8 @@ REQUIREMENTS:
       A.P.C.              → https://www.apc.fr/us/search/?q=blazer
       Staud               → https://www.staud.clothing/search?q=dress
       Jacquemus           → https://www.jacquemus.com/search?q=bag
+    AVOID these brands entirely — their websites block direct links: Sézane, Madewell, J.Crew, ASOS, Zara
+    Use verified alternatives instead: Anthropologie, Everlane, Reformation, Totême, Theory, Mejuri, Baggu
     Rules:
       1. ALWAYS use /search? format with specific descriptive keywords for the item
       2. Keywords should match the PIECE name (e.g. "wide leg trouser", "structured blazer", "block heel pump")
