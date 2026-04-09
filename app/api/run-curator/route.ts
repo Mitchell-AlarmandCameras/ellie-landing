@@ -176,7 +176,12 @@ REQUIREMENTS:
 • Prices: mix $80–$500 (accessible) and $500–$2,500 (aspirational)
 • editorialLead: one sentence setting the week's mood/season
 • editorsNote per look: one insider observation — specific, not generic
-• buyLink: use the brand's real product page URL where possible; brand homepage if unsure
+• buyLink: MUST be a specific category or product page URL — never a homepage. Examples:
+    Good: https://www.thereformation.com/collections/pants
+    Good: https://mejuri.com/collections/hoops
+    Good: https://www.nordstrom.com/sr?keyword=silk+blouse+theory
+    Bad:  https://www.thereformation.com (homepage — not acceptable)
+  Use retailer search URLs (e.g. nordstrom.com/sr?keyword=...) when you cannot confirm a specific product page.
 
 WOMEN'S BRANDS TO DRAW FROM (use your knowledge, don't limit to this list):
 Net-a-Porter, Totême, A.P.C., Reformation, Sézane, Theory, Frame, Veronica Beard,
