@@ -18,6 +18,7 @@ import Stripe from "stripe";
 ═══════════════════════════════════════════════════════════════════════════ */
 
 export const runtime    = "nodejs";
+export const dynamic    = "force-dynamic"; // never cache this cron endpoint
 export const maxDuration = 60;
 
 const SITE_URL = (process.env.NEXT_PUBLIC_BASE_URL ?? "https://stylebyellie.com").replace(/\/$/, "");
