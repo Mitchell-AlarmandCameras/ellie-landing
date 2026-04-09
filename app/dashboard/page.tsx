@@ -102,11 +102,18 @@ export default function DashboardPage() {
             </a>
             <Link
               href="/"
-              className="text-xs uppercase tracking-widest transition-colors"
+              className="text-xs uppercase tracking-widest transition-colors hidden sm:block"
               style={{ fontSize: "0.78rem", fontFamily: "Inter, sans-serif", letterSpacing: "0.15em", color: "var(--warm-gray)" }}
             >
               ← Site
             </Link>
+            <a
+              href="/api/logout"
+              className="text-xs uppercase tracking-widest transition-colors"
+              style={{ fontSize: "0.78rem", fontFamily: "Inter, sans-serif", letterSpacing: "0.15em", color: "var(--blush)", border: "1px solid var(--blush)", padding: "0.3rem 0.8rem" }}
+            >
+              Log Out
+            </a>
           </div>
         </div>
       </header>
