@@ -176,16 +176,38 @@ REQUIREMENTS:
 • Prices: mix $80–$500 (accessible) and $500–$2,500 (aspirational)
 • editorialLead: one sentence setting the week's mood/season
 • editorsNote per look: one insider observation — specific, not generic
-• buyLink: ALWAYS use a Nordstrom search URL in this exact format:
-    https://www.nordstrom.com/sr?keyword=BRAND+ITEM+KEYWORDS
-    Examples:
-      https://www.nordstrom.com/sr?keyword=toteme+blazer+ivory
-      https://www.nordstrom.com/sr?keyword=reformation+linen+wide+leg+trousers+ecru
-      https://www.nordstrom.com/sr?keyword=mejuri+gold+hoop+earrings
-      https://www.nordstrom.com/sr?keyword=sam+edelman+block+heel+pump+black
-    Rules: lowercase, spaces replaced with +, include brand name + item type + key color/style.
-    Nordstrom search URLs NEVER expire and ALWAYS show relevant results even if exact items sell out.
-    Do NOT use brand homepages. Do NOT use specific product page URLs that may expire.
+• buyLink: ALWAYS link to the brand's own permanent collection or category page — NOT a search URL,
+    NOT a product page, NOT a homepage. Use the most specific permanent collection URL you know for that brand.
+    Examples by brand (use these exact patterns):
+      Totême blazer     → https://toteme-studio.com/collections/blazers
+      Theory pants      → https://www.theory.com/category/womens/pants-shorts
+      Vince tops        → https://www.vince.com/collections/womens-tanks-and-camisoles
+      Vince pants       → https://www.vince.com/collections/womens-pants
+      Sam Edelman pumps → https://www.samedelman.com/collections/pumps
+      Sam Edelman sandals → https://www.samedelman.com/collections/sandals
+      Tory Burch totes  → https://www.toryburch.com/en-us/handbags/totes
+      Reformation pants → https://www.thereformation.com/clothing/pants
+      Reformation dresses → https://www.thereformation.com/clothing/dresses
+      Everlane tees     → https://www.everlane.com/collections/womens-tshirts
+      Everlane pants    → https://www.everlane.com/collections/womens-pants-and-leggings
+      Mejuri hoops      → https://mejuri.com/collections/hoop-earrings
+      Mejuri necklaces  → https://mejuri.com/collections/necklaces
+      Adidas Stan Smith → https://www.adidas.com/us/stan_smith_shoes
+      Madewell denim jacket → https://www.madewell.com/category/denim-jackets
+      Madewell jeans    → https://www.madewell.com/category/womens/jeans
+      Sézane dresses    → https://www.sezane.com/us/category/dresses
+      Sézane tops       → https://www.sezane.com/us/category/tops
+      Ganni dresses     → https://www.ganni.com/en-us/clothing/dresses/
+      Frame jeans       → https://www.frame-store.com/collections/womens-jeans
+      Veronica Beard blazers → https://veronicabeard.com/collections/blazers
+      J.Crew blazers    → https://www.jcrew.com/womens_category/blazers
+      Banana Republic blazers → https://bananarepublic.gap.com/browse/category.do?cid=1024422
+      COS dresses       → https://www.cos.com/en_usd/women/womenswear/dresses.html
+      & Other Stories bags → https://www.stories.com/en_usd/bags.html
+      Baggu bags        → https://baggu.com/collections/all-bags
+    Rules: Link to a CATEGORY PAGE (e.g. /collections/blazers, /category/womens/pants) not a product page.
+    Category pages NEVER expire, always show in-stock items, and always match the right type of item.
+    Do NOT use Nordstrom search URLs. Do NOT use brand homepages. Do NOT use product detail pages.
 
 WOMEN'S BRANDS TO DRAW FROM (use your knowledge, don't limit to this list):
 Net-a-Porter, Totême, A.P.C., Reformation, Sézane, Theory, Frame, Veronica Beard,
