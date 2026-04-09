@@ -19,7 +19,7 @@ export default function DashboardPage() {
   const hasAccess    = cookieStore.get("ellie_access")?.value === "true";
   const customerId   = cookieStore.get("ellie_customer")?.value ?? "";
 
-  if (!hasAccess) redirect("/");
+  if (!hasAccess) redirect("/login");
 
   const week       = currentWeek;
   const hasArchive = archiveWeeks.length > 0;

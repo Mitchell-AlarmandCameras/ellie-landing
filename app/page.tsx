@@ -313,9 +313,9 @@ export default function Home() {
                 </a>
               ))}
 
-              {/* Member Login — blush bordered, bold, right beside the Join button */}
+              {/* VIP Room — goes to dashboard if logged in, login page if not */}
               <a
-                href="/login"
+                href="/dashboard"
                 className="uppercase tracking-widest transition-all duration-200"
                 style={{
                   fontSize:      "0.74rem",
@@ -328,7 +328,7 @@ export default function Home() {
                   whiteSpace:    "nowrap",
                 }}
               >
-                Member Login
+                VIP Room
               </a>
             </div>
 
@@ -1340,7 +1340,7 @@ export default function Home() {
               {checkoutLoading ? "Loading…" : "Join — $19/mo"}
             </button>
             <a
-              href="/login"
+              href="/dashboard"
               style={{
                 display:       "flex",
                 alignItems:    "center",
@@ -1358,7 +1358,7 @@ export default function Home() {
                 textDecoration:"none",
               }}
             >
-              Member Login
+              VIP Room
             </a>
           </div>
         </div>
