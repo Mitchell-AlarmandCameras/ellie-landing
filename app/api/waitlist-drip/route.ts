@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
+import Stripe from "stripe";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    GET /api/waitlist-drip
@@ -349,5 +350,108 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  return NextResponse.json({ ok: true, processed: results.length, results });
+  /* ── Member testimonial requests — sent 28 days after subscribing ──
+     Checks Stripe for subscriptions that are exactly 28 days old and sends
+     each member a warm personal note asking for a 1-2 sentence quote.
+     These become the social proof that drives future signups.              */
+  const testimonialsCollected: string[] = [];
+  const stripeKey = process.env.STRIPE_SECRET_KEY?.trim();
+
+  if (stripeKey) {
+    try {
+      const stripe        = new Stripe(stripeKey, { apiVersion: "2024-04-10" });
+      const fromEmail     = process.env.RESEND_FROM_EMAIL ?? "ellie@stylebyellie.com";
+      const mailingAddress = (process.env.BUSINESS_MAILING_ADDRESS ?? "The Style Refresh · New York, NY").trim();
+
+      /* List active subscriptions — Stripe returns newest first */
+      const subscriptions = await stripe.subscriptions.list({
+        status: "active",
+        limit:  100,
+        expand: ["data.customer"],
+      });
+
+      for (const sub of subscriptions.data) {
+        const createdDays = daysSince(new Date(sub.created * 1000).toISOString());
+        if (createdDays !== 28) continue;
+
+        const customer = sub.customer as Stripe.Customer;
+        if (!customer?.email) continue;
+
+        const firstName = (customer.name ?? "").split(" ")[0] || "there";
+        const to        = customer.email;
+
+        const html = `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"/><title>A favor, ${firstName}</title></head>
+<body style="margin:0;padding:0;background:#F5EFE4;font-family:Georgia,serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#F5EFE4;padding:40px 16px;">
+<tr><td align="center">
+<table width="540" cellpadding="0" cellspacing="0"
+       style="background:#FDFAF5;max-width:540px;width:100%;border:1px solid #DDD4C5;">
+  <tr><td style="height:3px;background:linear-gradient(90deg,transparent,#C4956A,transparent);"></td></tr>
+  <tr><td style="background:#EDE5D8;padding:26px 36px;text-align:center;">
+    <p style="margin:0;color:#C4956A;font-size:10px;letter-spacing:0.34em;text-transform:uppercase;font-family:Arial,sans-serif;">
+      Ellie · The Style Refresh
+    </p>
+  </td></tr>
+  <tr><td style="padding:30px 36px 12px;">
+    <p style="margin:0 0 16px;font-size:15px;color:#2C2C2C;font-family:Georgia,serif;line-height:1.75;">
+      Hi ${firstName},
+    </p>
+    <p style="margin:0 0 16px;font-size:15px;color:#2C2C2C;font-family:Georgia,serif;line-height:1.75;">
+      You've been a member for four weeks now — and I wanted to personally thank you.
+    </p>
+    <p style="margin:0 0 16px;font-size:15px;color:#2C2C2C;font-family:Georgia,serif;line-height:1.75;">
+      I have a small favor to ask. Would you be willing to share a sentence or two about 
+      your experience? Honest — good or bad — I genuinely want to know.
+    </p>
+    <p style="margin:0 0 16px;font-size:14px;color:#6B6560;font-family:Georgia,serif;line-height:1.7;font-style:italic;">
+      Something like: <em>"What I like most about the Monday brief is..."</em> or 
+      <em>"I joined because..."</em> — whatever feels natural.
+    </p>
+    <p style="margin:0 0 22px;font-size:15px;color:#2C2C2C;font-family:Georgia,serif;line-height:1.75;">
+      If you're comfortable, I may feature your words on the site — first name only, 
+      no last name, no personal details. Just reply to this email and I'll handle the rest.
+    </p>
+    <p style="margin:0 0 8px;font-size:15px;color:#2C2C2C;font-family:Georgia,serif;">
+      Thank you, truly.
+    </p>
+    <p style="margin:0;font-size:15px;color:#2C2C2C;font-family:Georgia,serif;">
+      — Ellie
+    </p>
+  </td></tr>
+  <tr><td style="padding:0 36px 8px;">
+    <div style="height:1px;background:linear-gradient(90deg,transparent,#C9B99A,transparent);"></div>
+  </td></tr>
+  <tr><td style="padding:16px 36px 22px;text-align:center;">
+    <p style="margin:0;font-size:10px;color:#B5A99A;font-family:Arial,sans-serif;line-height:1.6;">
+      ${mailingAddress}<br/>
+      Reply directly to this email with your thoughts.
+    </p>
+  </td></tr>
+</table>
+</td></tr></table>
+</body></html>`;
+
+        const { error } = await resend.emails.send({
+          from:    `Ellie <${fromEmail}>`,
+          to,
+          subject: `A quick favor, ${firstName} — 4 weeks in`,
+          html,
+          replyTo: fromEmail,
+        });
+        testimonialsCollected.push(error ? `testimonial FAIL ${to}` : `testimonial OK ${to}`);
+        console.log(`[drip] testimonial-28d → ${to}`, error ?? "sent");
+      }
+    } catch (stripeErr) {
+      console.error("[drip] Testimonial Stripe fetch failed:", stripeErr);
+    }
+  }
+
+  return NextResponse.json({
+    ok: true,
+    processed: results.length + testimonialsCollected.length,
+    drip: results,
+    testimonials: testimonialsCollected,
+  });
 }

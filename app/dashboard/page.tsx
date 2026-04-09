@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { currentWeek, archiveWeeks } from "@/data/lookbook";
+import ReferralButton from "@/components/ReferralButton";
 
 export const metadata: Metadata = {
   title: "VIP Room | ELLIE — The Style Refresh",
@@ -13,8 +14,9 @@ export const metadata: Metadata = {
    VIP ROOM — Server Component (cookie-gated)
 ═══════════════════════════════════════════════════════════════ */
 export default function DashboardPage() {
-  const cookieStore = cookies();
-  const hasAccess   = cookieStore.get("ellie_access")?.value === "true";
+  const cookieStore  = cookies();
+  const hasAccess    = cookieStore.get("ellie_access")?.value === "true";
+  const customerId   = cookieStore.get("ellie_customer")?.value ?? "";
 
   if (!hasAccess) redirect("/");
 
@@ -561,6 +563,30 @@ export default function DashboardPage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ── Refer a Friend ───────────────────────────────────────── */}
+      <section className="py-12 px-5 sm:px-8" style={{ background: "#EDE5D8", borderTop: "1px solid var(--sand-border)" }}>
+        <div className="max-w-2xl mx-auto">
+          <p style={{ margin: "0 0 4px", fontSize: "10px", letterSpacing: "0.3em", textTransform: "uppercase", color: "var(--blush)", fontFamily: "Arial, sans-serif" }}>
+            Refer a Friend
+          </p>
+          <h2 style={{ margin: "0 0 10px", fontFamily: "DM Serif Display, serif", fontSize: "1.5rem", color: "var(--charcoal)", fontWeight: 400 }}>
+            Give 50% off. Keep good company.
+          </h2>
+          <p style={{ margin: "0 0 20px", fontSize: "14px", color: "var(--warm-gray)", fontFamily: "Georgia, serif", lineHeight: 1.7 }}>
+            Share your unique link with a friend. They get 50% off their first month — 
+            and you get the satisfaction of sending someone something genuinely useful.
+            No limit on referrals.
+          </p>
+          {customerId ? (
+            <ReferralButton customerId={customerId} />
+          ) : (
+            <p style={{ fontSize: "12px", color: "var(--warm-gray)", fontFamily: "Arial, sans-serif" }}>
+              Referral link available after your first billing cycle. Check back soon.
+            </p>
+          )}
         </div>
       </section>
 

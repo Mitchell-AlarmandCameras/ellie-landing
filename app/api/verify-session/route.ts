@@ -244,9 +244,20 @@ export async function GET(req: NextRequest) {
       httpOnly: true,
       secure:   process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge:   60 * 60 * 24 * 30, // 30 days
+      maxAge:   60 * 60 * 24 * 30,
       path:     "/",
     });
+
+    /* Store customer ID so the dashboard can generate referral links */
+    if (session.customer) {
+      response.cookies.set("ellie_customer", String(session.customer), {
+        httpOnly: true,
+        secure:   process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge:   60 * 60 * 24 * 30,
+        path:     "/",
+      });
+    }
 
     return response;
   } catch (err) {

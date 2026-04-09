@@ -98,11 +98,13 @@ const faqs = [
 ];
 
 export default function Home() {
-  const [modalOpen,       setModalOpen]       = useState(false);
-  const [scrolled,        setScrolled]        = useState(false);
-  const [checkoutLoading, setCheckoutLoading] = useState(false);
-  const [checkoutError,   setCheckoutError]   = useState<string | null>(null);
-  const [openFaq,         setOpenFaq]         = useState<number | null>(null);
+  const [modalOpen,        setModalOpen]        = useState(false);
+  const [scrolled,         setScrolled]         = useState(false);
+  const [checkoutLoading,  setCheckoutLoading]  = useState(false);
+  const [checkoutError,    setCheckoutError]    = useState<string | null>(null);
+  const [openFaq,          setOpenFaq]          = useState<number | null>(null);
+  const [referralBanner,   setReferralBanner]   = useState<string | null>(null);
+  const [referralCode,     setReferralCode]     = useState<string | null>(null);
 
   /* Live preview — replaces hardcoded cards once Blob is configured */
   const [activePreviews,  setActivePreviews]  = useState(previews);
@@ -113,6 +115,20 @@ export default function Home() {
     const onScroll = () => setScrolled(window.scrollY > 60);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  /* Check for referral code in URL — show banner and store for checkout */
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const ref    = params.get("ref");
+    if (ref) {
+      setReferralCode(ref);
+      setReferralBanner("A friend referred you — you'll get 50% off your first month when you join today.");
+      sessionStorage.setItem("ellie_ref", ref);
+    } else {
+      const stored = sessionStorage.getItem("ellie_ref");
+      if (stored) setReferralCode(stored);
+    }
   }, []);
 
   /* Fetch live curated preview from Vercel Blob (auto-updates every Monday) */
@@ -145,11 +161,18 @@ export default function Home() {
       .catch(() => { /* network error — silently keep hardcoded fallback */ });
   }, []);
 
-  const handleCheckout = async () => {
+  const handleCheckout = async (plan: "monthly" | "annual" = "monthly") => {
     setCheckoutError(null);
     setCheckoutLoading(true);
     try {
-      const res  = await fetch("/api/checkout", { method: "POST" });
+      const body: Record<string, string> = { plan };
+      const code = referralCode || sessionStorage.getItem("ellie_ref") || "";
+      if (code) body.promoCode = code;
+      const res  = await fetch("/api/checkout", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify(body),
+      });
       const data = await res.json().catch(() => ({})) as { url?: string; error?: string };
       if (data.url) {
         window.location.href = data.url;
@@ -169,6 +192,38 @@ export default function Home() {
   return (
     <>
       <WaitlistModal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
+
+      {/* ── Referral banner (shown when ?ref=CODE in URL) ─────────── */}
+      {referralBanner && (
+        <div style={{
+          background:  "#C4956A",
+          color:       "#FDFAF5",
+          padding:     "10px 20px",
+          textAlign:   "center",
+          fontFamily:  "Arial, sans-serif",
+          fontSize:    "13px",
+          lineHeight:  1.5,
+          position:    "relative",
+        }}>
+          🎁 {referralBanner}
+          <button
+            onClick={() => setReferralBanner(null)}
+            aria-label="Dismiss"
+            style={{
+              position:   "absolute",
+              right:      "16px",
+              top:        "50%",
+              transform:  "translateY(-50%)",
+              background: "none",
+              border:     "none",
+              color:      "#FDFAF5",
+              fontSize:   "18px",
+              cursor:     "pointer",
+              lineHeight: 1,
+            }}
+          >×</button>
+        </div>
+      )}
 
       {checkoutError ? (
         <div
@@ -256,7 +311,7 @@ export default function Home() {
             {/* Nav CTA */}
             <button
               type="button"
-              onClick={handleCheckout}
+              onClick={() => handleCheckout("monthly")}
               disabled={checkoutLoading}
               className="btn-primary shrink-0"
               style={{ padding: "0.55rem 1.25rem", fontSize: "0.67rem", minHeight: "38px" }}
@@ -946,7 +1001,7 @@ export default function Home() {
 
               <button
                 type="button"
-                onClick={handleCheckout}
+                onClick={() => handleCheckout("monthly")}
                 disabled={checkoutLoading}
                 className="btn-primary w-full sm:w-auto"
                 style={{
@@ -967,6 +1022,55 @@ export default function Home() {
               >
                 Secure checkout · Billed monthly · Cancel anytime
               </p>
+
+              {/* Annual plan option */}
+              <div
+                style={{
+                  marginTop:    "20px",
+                  padding:      "14px 18px",
+                  border:       "1px solid rgba(196,149,106,0.4)",
+                  background:   "rgba(196,149,106,0.08)",
+                  textAlign:    "center",
+                }}
+              >
+                <p style={{
+                  margin: "0 0 8px",
+                  color: "rgba(253,250,245,0.7)",
+                  fontSize: "11px",
+                  fontFamily: "Arial, sans-serif",
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                }}>
+                  Best value
+                </p>
+                <button
+                  type="button"
+                  onClick={() => handleCheckout("annual")}
+                  disabled={checkoutLoading}
+                  style={{
+                    background:    "transparent",
+                    border:        "1px solid rgba(196,149,106,0.6)",
+                    color:         "#C4956A",
+                    padding:       "10px 28px",
+                    fontFamily:    "Arial, sans-serif",
+                    fontSize:      "11px",
+                    letterSpacing: "0.2em",
+                    textTransform: "uppercase",
+                    cursor:        checkoutLoading ? "default" : "pointer",
+                    width:         "100%",
+                  }}
+                >
+                  Annual Plan — $180/year
+                </button>
+                <p style={{
+                  margin: "6px 0 0",
+                  color:  "rgba(196,149,106,0.7)",
+                  fontSize: "10px",
+                  fontFamily: "Arial, sans-serif",
+                }}>
+                  Save $48 — equivalent to 2 months free
+                </p>
+              </div>
 
               <button
                 onClick={() => setModalOpen(true)}

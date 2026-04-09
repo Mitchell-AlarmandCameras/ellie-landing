@@ -92,7 +92,71 @@ intentional. Occasionally you include a look suitable for men or both.
 Tone: authoritative, specific, warm. No filler. No "chic" or "stunning". 
 Speak as if writing a short note to a trusted client — not a magazine spread.`;
 
-function buildUserPrompt(scrapedData: string, today: string, weekNumber: number): string {
+/* ─── Load 4-week click analytics from Blob ───────────────────── */
+async function loadClickAnalytics(): Promise<string> {
+  try {
+    const token = process.env.BLOB_READ_WRITE_TOKEN;
+    if (!token) return "";
+    const { list } = await import("@vercel/blob");
+
+    /* Build week keys for the past 4 Mondays */
+    const weekKeys: string[] = [];
+    for (let i = 0; i < 4; i++) {
+      const d   = new Date();
+      d.setDate(d.getDate() - i * 7);
+      const day    = d.getDay();
+      const monday = new Date(d);
+      monday.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
+      weekKeys.push(monday.toISOString().split("T")[0]);
+    }
+
+    type ClickRecord = { ts: string; src: string; url: string; retailer: string };
+    const allClicks: ClickRecord[] = [];
+
+    for (const wk of weekKeys) {
+      const { blobs } = await list({ prefix: `analytics/clicks/${wk}/` });
+      /* Cap reads so the Sunday job stays within its 60s budget */
+      const sample = blobs.slice(0, 150);
+      const reads  = await Promise.allSettled(sample.map(b => fetch(b.url).then(r => r.json())));
+      for (const r of reads) {
+        if (r.status === "fulfilled") allClicks.push(r.value as ClickRecord);
+      }
+    }
+
+    if (allClicks.length === 0) return "";
+
+    /* Aggregate by look type */
+    const bySrc: Record<string, number>      = {};
+    const byRetailer: Record<string, number> = {};
+    for (const c of allClicks) {
+      bySrc[c.src]          = (bySrc[c.src]          ?? 0) + 1;
+      byRetailer[c.retailer] = (byRetailer[c.retailer] ?? 0) + 1;
+    }
+
+    const topLooks = Object.entries(bySrc)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([k, v]) => `  ${k}: ${v} clicks (${Math.round(v / allClicks.length * 100)}%)`)
+      .join("\n");
+
+    const topRetailers = Object.entries(byRetailer)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6)
+      .map(([k, v]) => `  ${k}: ${v} clicks`)
+      .join("\n");
+
+    return `\nMEMBER CLICK ANALYTICS — LAST 4 WEEKS (${allClicks.length} total clicks):
+By look type:
+${topLooks}
+By retailer:
+${topRetailers}
+→ Use these signals to tune this week's curation: favor look types and retailers members click most.`;
+  } catch {
+    return "";
+  }
+}
+
+function buildUserPrompt(scrapedData: string, today: string, weekNumber: number, analytics = ""): string {
   return `It is Sunday. Generate this week's Monday Style Refresh brief.
 
 Use the scraped editorial and fashion data below as inspiration.
@@ -103,7 +167,7 @@ SCRAPED DATA:
 ${scrapedData}
 
 TODAY: ${today}
-WEEK NUMBER: ${weekNumber}
+WEEK NUMBER: ${weekNumber}${analytics}
 
 REQUIREMENTS:
 • Three complete looks: The Executive, The Weekender, The Wildcard
@@ -159,7 +223,7 @@ Return ONLY valid JSON — no markdown, no extra text — matching this structur
 }`;
 }
 
-async function callClaude(scrapedData: string, today: string, weekNumber: number): Promise<Record<string, unknown>> {
+async function callClaude(scrapedData: string, today: string, weekNumber: number, analytics = ""): Promise<Record<string, unknown>> {
   const apiKey = process.env.ANTHROPIC_API_KEY?.trim();
   if (!apiKey) throw new Error("ANTHROPIC_API_KEY not set");
 
@@ -174,7 +238,7 @@ async function callClaude(scrapedData: string, today: string, weekNumber: number
       model:      "claude-opus-4-5",
       max_tokens: 4096,
       system:     SYSTEM_PROMPT,
-      messages:   [{ role: "user", content: buildUserPrompt(scrapedData, today, weekNumber) }],
+      messages:   [{ role: "user", content: buildUserPrompt(scrapedData, today, weekNumber, analytics) }],
     }),
   });
 
@@ -349,7 +413,11 @@ export async function GET(req: NextRequest) {
 
     /* 3 — Generate with Claude */
     console.log("[curator] Calling Claude…");
-    const lookbook = await callClaude(scrapedData, today, weekNumber);
+    /* Load 4-week click performance data to feed back into Claude */
+    const analytics = await loadClickAnalytics();
+    if (analytics) console.log("[curator] Analytics loaded:", analytics.substring(0, 120));
+
+    const lookbook = await callClaude(scrapedData, today, weekNumber, analytics);
 
     /* 4 — Save to /tmp */
     try {

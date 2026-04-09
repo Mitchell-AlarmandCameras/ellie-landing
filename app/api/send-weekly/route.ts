@@ -55,7 +55,7 @@ function buildMemberEmail(lookbook: Lookbook, dashboardUrl: string, manageUrl: s
                 ${item.note}
               </span>
               <br/>
-              <a href="${trackLink(item.buyLink, trackBase)}"
+              <a href="${trackLink(item.buyLink, trackBase, `brief-${look.label.toLowerCase().replace(/\s+/g,"-")}`)}"
                  style="font-size:10px;color:#C4956A;font-family:Arial,sans-serif;
                          letter-spacing:0.1em;text-decoration:none;">
                 Shop now →
