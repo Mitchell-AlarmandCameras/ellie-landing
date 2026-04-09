@@ -80,10 +80,12 @@ export const metadata: Metadata = {
     },
   },
 
-  /* ── Favicons (add these files to /public) ── */
+  /* ── Favicons ── */
   icons: {
-    icon:  "/favicon.ico",
-    apple: "/apple-touch-icon.png",
+    icon:  [
+      { url: "/favicon.png", type: "image/png" },
+    ],
+    apple: "/favicon.png",
   },
 };
 
