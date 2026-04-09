@@ -294,7 +294,6 @@ export default function Home() {
                 { label: "This Week",  href: "#this-week"  },
                 { label: "The Edit",   href: "/blog"       },
                 { label: "Join",       href: "#join"       },
-                { label: "Member Login", href: "/login"    },
               ].map(({ label, href }) => (
                 <a
                   key={label}
@@ -307,6 +306,23 @@ export default function Home() {
                   {label}
                 </a>
               ))}
+
+              {/* Member Login — subtle bordered button, distinct from Join */}
+              <a
+                href="/login"
+                className="uppercase tracking-widest transition-all duration-200"
+                style={{
+                  fontSize:      "0.72rem",
+                  letterSpacing: "0.18em",
+                  fontFamily:    "Inter, sans-serif",
+                  color:         "var(--blush)",
+                  border:        "1px solid var(--blush)",
+                  padding:       "0.35rem 0.85rem",
+                  whiteSpace:    "nowrap",
+                }}
+              >
+                Member Login
+              </a>
             </div>
 
             {/* Nav CTA */}
