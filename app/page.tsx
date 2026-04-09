@@ -293,7 +293,8 @@ export default function Home() {
                 { label: "The Story",  href: "#the-story"  },
                 { label: "This Week",  href: "#this-week"  },
                 { label: "The Edit",   href: "/blog"       },
-                { label: "Join",       href: "#join"        },
+                { label: "Join",       href: "#join"       },
+                { label: "Member Login", href: "/login"    },
               ].map(({ label, href }) => (
                 <a
                   key={label}
