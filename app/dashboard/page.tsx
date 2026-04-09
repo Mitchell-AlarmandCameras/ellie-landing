@@ -504,21 +504,21 @@ export default function DashboardPage() {
             Coming for Members
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-            {[
+            [
               {
                 icon:  "◫",
                 title: "Style Archive",
-                desc:  "Every brief from the past 52 weeks, searchable by occasion, season, and budget.",
+                desc:  "Every brief from the past 52 weeks. Your complete style reference, always growing.",
               },
               {
                 icon:  "◈",
-                title: "Merchant Directory",
-                desc:  "The curated list of stockists, tailors, and makers Ellie trusts — by city.",
+                title: "Seasonal Lookbooks",
+                desc:  "Curated collections by season — Spring/Summer and Fall/Winter editions for members only.",
               },
               {
                 icon:  "◉",
-                title: "Personal Consultation",
-                desc:  "Book a direct 30-minute session with Ellie. Limited slots. Members only.",
+                title: "Member Perks",
+                desc:  "Exclusive discounts with Ellie's trusted retailers. Coming to members this season.",
               },
             ].map((item) => (
               <div
