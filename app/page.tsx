@@ -1269,9 +1269,18 @@ export default function Home() {
 
             {/* Legal row */}
             <div
-              className="flex flex-wrap items-center justify-center gap-x-6 gap-y-1 pt-3"
+              className="flex flex-col items-center gap-2 pt-3"
               style={{ borderTop: "1px solid var(--sand-border)" }}
             >
+              {/* Affiliate disclosure — FTC required */}
+              <p className="text-center" style={{ fontFamily: "Inter, sans-serif", color: "var(--warm-gray)", fontSize: "0.68rem", maxWidth: "560px" }}>
+                This site contains affiliate links. We may earn a small commission on purchases at no extra cost to you.
+              </p>
+              {/* Physical mailing address — CAN-SPAM required */}
+              <p className="text-center" style={{ fontFamily: "Inter, sans-serif", color: "var(--warm-gray)", fontSize: "0.68rem" }}>
+                {process.env.NEXT_PUBLIC_MAILING_ADDRESS ?? "The Style Refresh · PO Box 1 · New York, NY 10001"}
+              </p>
+            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-1">
               <p style={{ fontFamily: "Inter, sans-serif", color: "var(--warm-gray)", fontSize: "0.74rem" }}>
                 © {new Date().getFullYear()} The Style Refresh. All rights reserved.
               </p>
@@ -1297,6 +1306,7 @@ export default function Home() {
                   {label}
                 </Link>
               ))}
+            </div>
             </div>
           </div>
         </footer>
