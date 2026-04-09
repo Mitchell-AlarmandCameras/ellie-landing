@@ -504,7 +504,7 @@ export default function DashboardPage() {
             Coming for Members
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-            [
+            {[
               {
                 icon:  "◫",
                 title: "Style Archive",
