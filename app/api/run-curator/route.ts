@@ -176,12 +176,16 @@ REQUIREMENTS:
 • Prices: mix $80–$500 (accessible) and $500–$2,500 (aspirational)
 • editorialLead: one sentence setting the week's mood/season
 • editorsNote per look: one insider observation — specific, not generic
-• buyLink: MUST be a specific category or product page URL — never a homepage. Examples:
-    Good: https://www.thereformation.com/collections/pants
-    Good: https://mejuri.com/collections/hoops
-    Good: https://www.nordstrom.com/sr?keyword=silk+blouse+theory
-    Bad:  https://www.thereformation.com (homepage — not acceptable)
-  Use retailer search URLs (e.g. nordstrom.com/sr?keyword=...) when you cannot confirm a specific product page.
+• buyLink: ALWAYS use a Nordstrom search URL in this exact format:
+    https://www.nordstrom.com/sr?keyword=BRAND+ITEM+KEYWORDS
+    Examples:
+      https://www.nordstrom.com/sr?keyword=toteme+blazer+ivory
+      https://www.nordstrom.com/sr?keyword=reformation+linen+wide+leg+trousers+ecru
+      https://www.nordstrom.com/sr?keyword=mejuri+gold+hoop+earrings
+      https://www.nordstrom.com/sr?keyword=sam+edelman+block+heel+pump+black
+    Rules: lowercase, spaces replaced with +, include brand name + item type + key color/style.
+    Nordstrom search URLs NEVER expire and ALWAYS show relevant results even if exact items sell out.
+    Do NOT use brand homepages. Do NOT use specific product page URLs that may expire.
 
 WOMEN'S BRANDS TO DRAW FROM (use your knowledge, don't limit to this list):
 Net-a-Porter, Totême, A.P.C., Reformation, Sézane, Theory, Frame, Veronica Beard,
