@@ -95,10 +95,8 @@ export default function DashboardPage() {
               href="https://billing.stripe.com/p/login"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs uppercase tracking-widest transition-colors hidden sm:block"
+              className="text-xs uppercase tracking-widest transition-colors hidden sm:block hover:text-charcoal"
               style={{ fontSize: "0.78rem", fontFamily: "Inter, sans-serif", letterSpacing: "0.15em", color: "var(--warm-gray)" }}
-              onMouseEnter={e => (e.currentTarget.style.color = "var(--charcoal)")}
-              onMouseLeave={e => (e.currentTarget.style.color = "var(--warm-gray)")}
             >
               Manage Billing
             </a>
@@ -669,8 +667,6 @@ export default function DashboardPage() {
                 textTransform: "uppercase",
                 textDecoration: "none",
               }}
-              onMouseEnter={e => (e.currentTarget.style.color = "var(--charcoal)")}
-              onMouseLeave={e => (e.currentTarget.style.color = "var(--warm-gray)")}
             >
               Manage Subscription
             </a>
