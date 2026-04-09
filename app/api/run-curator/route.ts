@@ -176,38 +176,50 @@ REQUIREMENTS:
 • Prices: mix $80–$500 (accessible) and $500–$2,500 (aspirational)
 • editorialLead: one sentence setting the week's mood/season
 • editorsNote per look: one insider observation — specific, not generic
-• buyLink: ALWAYS link to the brand's own permanent collection or category page — NOT a search URL,
-    NOT a product page, NOT a homepage. Use the most specific permanent collection URL you know for that brand.
-    Examples by brand (use these exact patterns):
-      Totême blazer     → https://toteme-studio.com/collections/blazers
-      Theory pants      → https://www.theory.com/category/womens/pants-shorts
-      Vince tops        → https://www.vince.com/collections/womens-tanks-and-camisoles
-      Vince pants       → https://www.vince.com/collections/womens-pants
-      Sam Edelman pumps → https://www.samedelman.com/collections/pumps
-      Sam Edelman sandals → https://www.samedelman.com/collections/sandals
-      Tory Burch totes  → https://www.toryburch.com/en-us/handbags/totes
-      Reformation pants → https://www.thereformation.com/clothing/pants
-      Reformation dresses → https://www.thereformation.com/clothing/dresses
-      Everlane tees     → https://www.everlane.com/collections/womens-tshirts
-      Everlane pants    → https://www.everlane.com/collections/womens-pants-and-leggings
-      Mejuri hoops      → https://mejuri.com/collections/hoop-earrings
-      Mejuri necklaces  → https://mejuri.com/collections/necklaces
-      Adidas Stan Smith → https://www.adidas.com/us/stan_smith_shoes
-      Madewell denim jacket → https://www.madewell.com/category/denim-jackets
-      Madewell jeans    → https://www.madewell.com/category/womens/jeans
-      Sézane dresses    → https://www.sezane.com/us/category/dresses
-      Sézane tops       → https://www.sezane.com/us/category/tops
-      Ganni dresses     → https://www.ganni.com/en-us/clothing/dresses/
-      Frame jeans       → https://www.frame-store.com/collections/womens-jeans
-      Veronica Beard blazers → https://veronicabeard.com/collections/blazers
-      J.Crew blazers    → https://www.jcrew.com/womens_category/blazers
-      Banana Republic blazers → https://bananarepublic.gap.com/browse/category.do?cid=1024422
-      COS dresses       → https://www.cos.com/en_usd/women/womenswear/dresses.html
-      & Other Stories bags → https://www.stories.com/en_usd/bags.html
-      Baggu bags        → https://baggu.com/collections/all-bags
-    Rules: Link to a CATEGORY PAGE (e.g. /collections/blazers, /category/womens/pants) not a product page.
-    Category pages NEVER expire, always show in-stock items, and always match the right type of item.
-    Do NOT use Nordstrom search URLs. Do NOT use brand homepages. Do NOT use product detail pages.
+• buyLink: ALWAYS use the brand's own SEARCH URL with specific keywords for that exact item.
+    Search URLs are 100% reliable — they never 404, always return in-stock items, and always stay relevant.
+    Format: https://[brand-domain]/search?q=[item+keywords]
+    Examples by brand (copy these EXACT domain patterns):
+      Totême blazer       → https://toteme-studio.com/search?type=product&q=blazer
+      Totême trench       → https://toteme-studio.com/search?type=product&q=trench+coat
+      Theory trousers     → https://www.theory.com/search?q=wide+leg+trouser
+      Theory blazer       → https://www.theory.com/search?q=blazer
+      Vince camisole      → https://www.vince.com/search?q=silk+camisole
+      Vince pants         → https://www.vince.com/search?q=wide+leg+pants
+      Sam Edelman pump    → https://www.samedelman.com/search?q=block+heel+pump
+      Sam Edelman sandal  → https://www.samedelman.com/search?q=strappy+sandal
+      Tory Burch tote     → https://www.toryburch.com/en-us/search?q=leather+tote
+      Tory Burch dress    → https://www.toryburch.com/en-us/search?q=midi+dress
+      Reformation pants   → https://www.thereformation.com/search?q=linen+wide+leg+pant
+      Reformation dress   → https://www.thereformation.com/search?q=midi+dress
+      Everlane tee        → https://www.everlane.com/search?q=fitted+crew+tee
+      Everlane pants      → https://www.everlane.com/search?q=wide+leg+pants
+      Mejuri hoops        → https://mejuri.com/search?q=gold+hoop+earrings
+      Mejuri necklace     → https://mejuri.com/search?q=fine+chain+necklace
+      Adidas Stan Smith   → https://www.adidas.com/us/search?q=stan+smith+white
+      Baggu tote          → https://baggu.com/search?type=product&q=canvas+tote
+      Sézane dress        → https://www.sezane.com/us/result?q=slip+dress
+      Sézane top          → https://www.sezane.com/us/result?q=silk+blouse
+      Madewell jacket     → https://www.madewell.com/search#q=jean+jacket
+      Madewell jeans      → https://www.madewell.com/search#q=straight+leg+jeans
+      Ganni dress         → https://www.ganni.com/en-us/search?q=floral+dress
+      Frame jeans         → https://www.frame-store.com/search?q=wide+leg+jeans
+      Veronica Beard      → https://veronicabeard.com/search?q=blazer
+      J.Crew blazer       → https://www.jcrew.com/search?q=blazer
+      COS dress           → https://www.cos.com/en_usd/search.html?q=midi+dress
+      & Other Stories bag → https://www.stories.com/en_usd/search/?q=crossbody+bag
+      Banana Republic     → https://bananarepublic.gap.com/browse/search.do?searchText=blazer
+      Uniqlo              → https://www.uniqlo.com/us/en/search?q=linen+pants
+      A.P.C.              → https://www.apc.fr/us/search/?q=blazer
+      Staud               → https://www.staud.clothing/search?q=dress
+      Jacquemus           → https://www.jacquemus.com/search?q=bag
+    Rules:
+      1. ALWAYS use /search? format with specific descriptive keywords for the item
+      2. Keywords should match the PIECE name (e.g. "wide leg trouser", "structured blazer", "block heel pump")
+      3. NEVER use a product detail URL (they expire when products sell out)
+      4. NEVER use a brand homepage
+      5. NEVER guess a /collections/ or /category/ URL — only use the search pattern above
+      6. If unsure of a brand's search URL format, use: https://[domain]/search?q=[keywords]
 
 WOMEN'S BRANDS TO DRAW FROM (use your knowledge, don't limit to this list):
 Net-a-Porter, Totême, A.P.C., Reformation, Sézane, Theory, Frame, Veronica Beard,

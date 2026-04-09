@@ -56,8 +56,49 @@ export async function GET(req: NextRequest) {
     );
   }
 
+  /* ── Live link check before approval ────────────────────────────────────
+     Test every buyLink in the draft. Show results in the approval page so
+     broken links can be caught before Monday's email goes to members.      */
+  type LinkCheckResult = { piece: string; brand: string; url: string; ok: boolean; status: number | string };
+  const linkResults: LinkCheckResult[] = [];
+  try {
+    type DraftItem = { piece: string; brand: string; buyLink?: string };
+    type DraftLook = { items?: DraftItem[] };
+    const draftLooks = (lookbook.looks as DraftLook[]) ?? [];
+    const checks: Promise<void>[] = [];
+    for (const look of draftLooks) {
+      for (const item of (look.items ?? [])) {
+        if (!item.buyLink) continue;
+        const { piece, brand, buyLink } = item;
+        checks.push(
+          (async () => {
+            try {
+              const controller = new AbortController();
+              const timer = setTimeout(() => controller.abort(), 6000);
+              const res = await fetch(buyLink, {
+                method: "GET",
+                signal: controller.signal,
+                headers: { "User-Agent": "Mozilla/5.0 (compatible; StyleRefreshBot/1.0)" },
+                redirect: "follow",
+              });
+              clearTimeout(timer);
+              linkResults.push({ piece, brand, url: buyLink, ok: res.ok || res.status === 301 || res.status === 302, status: res.status });
+            } catch {
+              linkResults.push({ piece, brand, url: buyLink, ok: false, status: "timeout/error" });
+            }
+          })()
+        );
+      }
+    }
+    await Promise.all(checks);
+  } catch (checkErr) {
+    console.error("[approve-weekly] Link check error (non-fatal):", checkErr);
+  }
+  const brokenLinks  = linkResults.filter(r => !r.ok);
+  const workingLinks = linkResults.filter(r => r.ok);
+
   /* Save to approved path */
-  const approvedData = { ...lookbook, approvedAt: new Date().toISOString() };
+  const approvedData = { ...lookbook, approvedAt: new Date().toISOString(), linkCheckResults: linkResults };
   try {
     fs.writeFileSync(approvedPath, JSON.stringify(approvedData), "utf8");
   } catch (err) {
@@ -250,16 +291,45 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  const weekOf = String(lookbook.weekOf ?? "this week");
+  const weekOf  = String(lookbook.weekOf ?? "this week");
   const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL ?? "https://stylebyellie.com").replace(/\/$/, "");
   const sendUrl = `${baseUrl}/api/send-weekly`;
+
+  /* ── Build link check HTML table ────────────────────────────────────── */
+  const linkCheckHtml = linkResults.length === 0 ? "" : `
+    <div style="margin-top:28px;text-align:left;">
+      <p style="color:#2C2C2C;font-family:Arial,sans-serif;font-size:11px;
+                 letter-spacing:0.2em;text-transform:uppercase;margin:0 0 10px;">
+        Link Check — ${workingLinks.length}/${linkResults.length} OK
+        ${brokenLinks.length > 0 ? `<span style="color:#c0392b;"> · ${brokenLinks.length} need attention</span>` : `<span style="color:#27ae60;"> · All clear ✓</span>`}
+      </p>
+      <table style="width:100%;border-collapse:collapse;font-family:Arial,sans-serif;font-size:11px;">
+        ${linkResults.map(r => `
+          <tr style="border-bottom:1px solid #EDE7DC;">
+            <td style="padding:6px 4px;color:${r.ok ? "#27ae60" : "#c0392b"};font-size:14px;width:20px;">
+              ${r.ok ? "✓" : "✗"}
+            </td>
+            <td style="padding:6px 4px;color:#2C2C2C;">${r.brand} — ${r.piece}</td>
+            <td style="padding:6px 4px;color:#999;font-size:10px;">${r.status}</td>
+            <td style="padding:6px 4px;">
+              <a href="${r.url}" target="_blank" style="color:#C4956A;font-size:10px;word-break:break-all;">
+                ${r.url.length > 55 ? r.url.substring(0, 55) + "…" : r.url}
+              </a>
+            </td>
+          </tr>`).join("")}
+      </table>
+      ${brokenLinks.length > 0 ? `
+        <p style="margin:12px 0 0;color:#c0392b;font-size:11px;font-family:Arial,sans-serif;">
+          ⚠ ${brokenLinks.length} link(s) returned errors above. 
+          Consider updating <code>data/lookbook.ts</code> with corrected URLs before Monday.
+        </p>` : ""}
+    </div>`;
 
   return new NextResponse(
     `<!DOCTYPE html>
 <html><head><meta charset="UTF-8"/><title>Approved — Ellie Style Refresh</title></head>
-<body style="margin:0;padding:0;background:#F5EFE4;font-family:Georgia,serif;
-              display:flex;align-items:center;justify-content:center;min-height:100vh;">
-  <div style="max-width:500px;width:90%;text-align:center;padding:40px 0;">
+<body style="margin:0;padding:0;background:#F5EFE4;font-family:Georgia,serif;">
+  <div style="max-width:600px;width:90%;margin:0 auto;padding:48px 0;text-align:center;">
     <p style="color:#C4956A;font-size:10px;letter-spacing:0.32em;text-transform:uppercase;
                font-family:Arial,sans-serif;margin-bottom:10px;">
       Ellie · The Style Refresh
@@ -280,7 +350,8 @@ export async function GET(req: NextRequest) {
         Send Now →
       </a>
     </div>
-    <p style="color:#B5A99A;font-size:11px;font-family:Arial,sans-serif;">
+    ${linkCheckHtml}
+    <p style="color:#B5A99A;font-size:11px;font-family:Arial,sans-serif;margin-top:24px;">
       Approved at ${new Date().toLocaleString("en-US", { timeZone: "America/New_York" })} ET
     </p>
   </div>
