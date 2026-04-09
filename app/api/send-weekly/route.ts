@@ -3,6 +3,7 @@ import { Resend } from "resend";
 import Stripe from "stripe";
 import fs from "fs";
 import path from "path";
+import { createHmac } from "crypto";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    GET /api/send-weekly
@@ -17,6 +18,41 @@ export const maxDuration = 60;
 type LookItem = { piece: string; brand: string; price: string; note: string; buyLink: string };
 type Look     = { index: string; label: string; tagline: string; description: string; editorsNote: string; items: LookItem[] };
 type Lookbook = { weekOf: string; weekNumber: number; editorialLead: string; looks: Look[]; approvedAt?: string };
+
+/* ── OAuth 1.0a signer for Twitter API ────────────────────────────────── */
+async function buildOAuthHeader(
+  method: string,
+  url: string,
+  keys: { apiKey: string; apiSecret: string; accessToken: string; accessTokenSecret: string }
+): Promise<string> {
+  const nonce     = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+  const timestamp = Math.floor(Date.now() / 1000).toString();
+
+  const oauthParams: Record<string, string> = {
+    oauth_consumer_key:     keys.apiKey,
+    oauth_nonce:            nonce,
+    oauth_signature_method: "HMAC-SHA1",
+    oauth_timestamp:        timestamp,
+    oauth_token:            keys.accessToken,
+    oauth_version:          "1.0",
+  };
+
+  const paramStr = Object.entries(oauthParams)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+    .join("&");
+
+  const sigBase   = `${method}&${encodeURIComponent(url)}&${encodeURIComponent(paramStr)}`;
+  const sigKey    = `${encodeURIComponent(keys.apiSecret)}&${encodeURIComponent(keys.accessTokenSecret)}`;
+  const signature = createHmac("sha1", sigKey).update(sigBase).digest("base64");
+
+  const headerParts = { ...oauthParams, oauth_signature: signature };
+  const headerStr   = Object.entries(headerParts)
+    .map(([k, v]) => `${encodeURIComponent(k)}="${encodeURIComponent(v)}"`)
+    .join(", ");
+
+  return `OAuth ${headerStr}`;
+}
 
 function trackLink(url: string, trackBase: string, src = "brief"): string {
   if (!trackBase) return url;
@@ -263,6 +299,51 @@ async function runSend(req?: NextRequest): Promise<NextResponse> {
 
   /* Clean up approved file so it doesn't send again */
   try { fs.unlinkSync(approvedPath); } catch { /* ignore */ }
+
+  /* ── Post teaser to Twitter/X ───────────────────────────────────────────
+     Posts a Monday morning teaser when briefs go out.
+     Requires: TWITTER_API_KEY, TWITTER_API_SECRET,
+               TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET
+     (Twitter Basic plan $100/mo — skip these env vars to disable)       */
+  if (
+    process.env.TWITTER_API_KEY &&
+    process.env.TWITTER_API_SECRET &&
+    process.env.TWITTER_ACCESS_TOKEN &&
+    process.env.TWITTER_ACCESS_TOKEN_SECRET
+  ) {
+    try {
+      const looks      = lookbook.looks ?? [];
+      const lookLabels = looks.map(l => l.label).join(" · ");
+      const tweetText  =
+        `This week's edit just dropped for members.\n\n` +
+        `${lookLabels}\n\n` +
+        `Three complete looks. Every buy link sourced.\n\n` +
+        `Join → stylebyellie.com\n\n` +
+        `#StyleRefresh #WomensFashion #PersonalStylist #WeeklyLooks`;
+
+      /* OAuth 1.0a signing */
+      const oauthSign = await buildOAuthHeader("POST", "https://api.twitter.com/2/tweets", {
+        apiKey:             process.env.TWITTER_API_KEY,
+        apiSecret:          process.env.TWITTER_API_SECRET,
+        accessToken:        process.env.TWITTER_ACCESS_TOKEN,
+        accessTokenSecret:  process.env.TWITTER_ACCESS_TOKEN_SECRET,
+      });
+
+      const tweetRes = await fetch("https://api.twitter.com/2/tweets", {
+        method:  "POST",
+        headers: { Authorization: oauthSign, "Content-Type": "application/json" },
+        body:    JSON.stringify({ text: tweetText }),
+      });
+
+      if (!tweetRes.ok) {
+        console.error("[send-weekly] Twitter post failed:", await tweetRes.text());
+      } else {
+        console.log("[send-weekly] Tweet posted successfully.");
+      }
+    } catch (tweetErr) {
+      console.error("[send-weekly] Twitter posting failed (non-fatal):", tweetErr);
+    }
+  }
 
   console.log(`[send-weekly] Done. Sent: ${sentCount}, Failed: ${failed.length}`);
   return NextResponse.json({ success: true, weekOf: lookbook.weekOf, sent: sentCount, failed: failed.length });

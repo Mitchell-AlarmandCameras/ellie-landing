@@ -165,6 +165,91 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  /* ── Post to Pinterest ────────────────────────────────────────────────────
+     Creates one pin per look (3 total) every Sunday after approval.
+     Requires: PINTEREST_ACCESS_TOKEN, PINTEREST_BOARD_ID in Vercel env vars.
+     Optional: UNSPLASH_ACCESS_KEY for fresh fashion photos per look.
+     Falls back to curated Unsplash images if no key is set.              */
+  if (process.env.PINTEREST_ACCESS_TOKEN && process.env.PINTEREST_BOARD_ID) {
+    try {
+      type PinLookItem = { piece: string; brand: string; price: string };
+      type PinLook     = { label: string; tagline: string; description: string; editorsNote: string; items: PinLookItem[] };
+      const rawLooks   = (lookbook.looks as PinLook[]) ?? [];
+      const weekOfStr  = String(lookbook.weekOf ?? "");
+
+      /* Curated fallback fashion images (portrait, women's style) */
+      const fallbackImages = [
+        "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=800&q=80",
+        "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=800&q=80",
+        "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=800&q=80",
+      ];
+
+      /* Search queries matched to the three standard look types */
+      const imageQueries = [
+        "professional women blazer office fashion spring",
+        "casual women linen outfit weekend spring style",
+        "elegant women dress evening champagne style",
+      ];
+
+      for (let i = 0; i < rawLooks.length; i++) {
+        const look  = rawLooks[i];
+        const query = imageQueries[i] ?? "women fashion spring style";
+        let imageUrl = fallbackImages[i] ?? fallbackImages[0];
+
+        /* Try Unsplash for a fresh photo if key is available */
+        if (process.env.UNSPLASH_ACCESS_KEY) {
+          try {
+            const uRes = await fetch(
+              `https://api.unsplash.com/photos/random?query=${encodeURIComponent(query)}&orientation=portrait&client_id=${process.env.UNSPLASH_ACCESS_KEY}`
+            );
+            if (uRes.ok) {
+              const photo = await uRes.json() as { urls?: { regular?: string } };
+              if (photo.urls?.regular) imageUrl = photo.urls.regular;
+            }
+          } catch { /* use fallback */ }
+        }
+
+        const itemList = (look.items ?? [])
+          .map((item: PinLookItem) => `• ${item.piece} — ${item.brand} (${item.price})`)
+          .join("\n");
+
+        const pinDescription =
+          `${look.tagline}\n\n` +
+          `${look.description}\n\n` +
+          `${itemList}\n\n` +
+          `Ellie's note: ${look.editorsNote}\n\n` +
+          `Full brief + every buy link → stylebyellie.com\n\n` +
+          `#StyleRefresh #WomensFashion #PersonalStylist #WeeklyLooks #FashionCuration #OOTD #StyleInspiration`;
+
+        const pinRes = await fetch("https://api.pinterest.com/v5/pins", {
+          method: "POST",
+          headers: {
+            Authorization:  `Bearer ${process.env.PINTEREST_ACCESS_TOKEN}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            board_id:     process.env.PINTEREST_BOARD_ID,
+            title:        `${look.label} — ${weekOfStr} | The Style Refresh`,
+            description:  pinDescription,
+            link:         "https://stylebyellie.com",
+            media_source: { source_type: "image_url", url: imageUrl },
+          }),
+        });
+
+        if (!pinRes.ok) {
+          console.error(`[approve-weekly] Pinterest pin ${i + 1} failed:`, await pinRes.text());
+        } else {
+          console.log(`[approve-weekly] Pinterest pin posted: ${look.label}`);
+        }
+
+        /* Brief pause between pins to respect rate limits */
+        await new Promise(r => setTimeout(r, 600));
+      }
+    } catch (pinterestErr) {
+      console.error("[approve-weekly] Pinterest posting failed (non-fatal):", pinterestErr);
+    }
+  }
+
   const weekOf = String(lookbook.weekOf ?? "this week");
   const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL ?? "https://stylebyellie.com").replace(/\/$/, "");
   const sendUrl = `${baseUrl}/api/send-weekly`;
