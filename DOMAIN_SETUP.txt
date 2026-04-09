@@ -1,0 +1,254 @@
+================================================================================
+  STYLEBYELLIE.COM — FULL CHECKLIST (GoDaddy → Vercel → LIVE)
+  Do the steps in order. Check each line when done.
+================================================================================
+
+PART A — BUY THE DOMAIN ON GODADDY
+--------------------------------------------------------------------------------
+  A1. Go to https://www.godaddy.com and sign in.
+
+  A2. In the search bar, type:  stylebyellie.com
+      Press Enter.
+
+  A3. If it says “available,” add to cart and go to checkout.
+      If it says “taken,” stop — pick another name and search again.
+
+  A4. At checkout:
+      - Choose registration length (1 year is fine to start).
+      - Turn ON auto-renew if you never want to lose the name by accident.
+      - Skip expensive add-ons you do not need (SEO packages, etc.).
+      - Complete payment.
+
+  A5. After purchase, go to:  My Products  →  find  stylebyellie.com  →  open it.
+      You should see the domain as Active with an expiration date.
+
+  A6. (Optional) Turn on domain privacy if GoDaddy offers it and you want
+      your personal address hidden in WHOIS (often included or a small fee).
+
+
+PART B — ADD THE DOMAIN IN VERCEL (GET YOUR DNS “HOMEWORK”)
+--------------------------------------------------------------------------------
+  B1. Open https://vercel.com/dashboard and sign in.
+
+  B2. Click the project that deploys this Ellie site (repo with folder
+      ellie-landing).
+
+  B3. Click  Settings  (top)  →  Domains  (left).
+
+  B4. In the domain box, type:  stylebyellie.com  →  Add  (or Continue).
+
+  B5. If Vercel asks:
+      - Environment:  Production  — YES.
+      - Redirect stylebyellie.com to www.stylebyellie.com — your choice
+        (recommended is fine). Either way works.
+
+  B6. Click Save. Vercel may show  Invalid configuration  — that is normal
+      until DNS is set. Leave this tab open.
+
+  B7. Optional: also add  www.stylebyellie.com  the same way if Vercel lists it
+      separately.
+
+  B8. Find the section that lists the DNS RECORDS Vercel needs (Type, Name,
+      Value). Write them down or keep this tab open — you will copy them into
+      GoDaddy next. Do NOT guess; use exactly what Vercel shows.
+
+
+PART C — POINT GODADDY DNS TO VERCEL
+--------------------------------------------------------------------------------
+  C1. Go back to GoDaddy →  My Products  →  stylebyellie.com  →  DNS
+      (or  Manage DNS).
+
+  C2. If you see a “Website” or “Website Builder” or free site attached to
+      this domain, turn it OFF or delete that site so it does not override
+      your Vercel site.
+
+  C3. In the DNS records table:
+
+      - If there is an OLD A record for  @  (sometimes called “Name” blank
+        or “@”) pointing to GoDaddy parking — edit or delete it.
+
+      - If there is an OLD CNAME for  www  pointing somewhere wrong — edit
+        or delete it.
+
+      Add NEW records exactly as Vercel listed in Part B8. Typical pattern
+      (VERIFY ON VERCEL — use their values):
+
+        Type A     Name @       Value 76.76.21.21   (only if Vercel says so)
+        Type CNAME Name www     Value cname.vercel-dns.com  (or what Vercel shows)
+
+  C4. Save all changes.
+
+
+PART D — VERCEL ENVIRONMENT VARIABLE (PRODUCTION URL)
+--------------------------------------------------------------------------------
+  D1. Still in Vercel: same project →  Settings  →  Environment Variables.
+
+  D2. Find or add:  NEXT_PUBLIC_BASE_URL
+      Value:  https://stylebyellie.com
+      Environment:  Production  (and Preview if you want previews to match).
+
+  D3. Save. If Vercel asks, redeploy the project (Deployments → … → Redeploy)
+      so the new URL is baked in.
+
+
+PART E — DEPLOY THE RIGHT APP FROM THIS MONOREPO (CRITICAL)
+--------------------------------------------------------------------------------
+  The live site must build from the folder  ellie-landing  in THIS Git repo.
+  If Vercel is pointed at the repo root without that folder, or an OLD project
+  is still connected, visitors will see the WRONG site (navy/gold “Elite Edit”
+  with “Apply for the Inner Circle”) and will NOT see “Join $19/mo” or
+  “Start My Refresh — $19/mo”.
+
+  How to tell (open https://stylebyellie.com and View Source or DevTools):
+
+    WRONG (old deployment):  <title>Ellie | The Elite Edit</title>
+                             theme-color #000080, buttons say “Inner Circle”
+
+    RIGHT (this codebase):   <title>ELLIE | The Style Refresh</title>
+                             <html data-ellie-build="style-refresh" …>
+                             cream styling, “Join $19/mo” in the nav
+
+  Fix in Vercel (same team/project that owns stylebyellie.com):
+
+  E1. Project →  Settings  →  Git  → confirm the repository is the one that
+      contains the  ellie-landing  folder (AlarmEngine_PRO on GitHub).
+
+  E2. Settings  →  General  →  Root Directory  →  Edit  → set to:
+          ellie-landing
+      Save. (If the field is empty or “.”, the Next.js app in the subfolder
+      is never built — you get another project’s output or a failed layout.)
+
+  E3. Settings  →  Build & Deployment  → confirm Framework Preset is Next.js
+      or “Other” with default install/build after root is set.
+
+  E4. Deployments  →  Redeploy  the latest commit on  main  (or push a small
+      commit) and wait until it succeeds.
+
+  E5. Hard-refresh the domain (Ctrl+Shift+R) and re-check the <title> and
+      data-ellie-build attribute above.
+
+
+PART F — WAIT AND VERIFY (DNS + DOMAIN)
+--------------------------------------------------------------------------------
+  F1. Wait 5 to 60 minutes (sometimes up to a few hours). DNS is not instant.
+
+  F2. In Vercel →  Settings  →  Domains  → refresh until  stylebyellie.com
+      shows Valid / verified (green), not Invalid.
+
+  F3. Open a private/incognito browser window and go to:
+          https://stylebyellie.com
+      After Part E, you should see the Style Refresh homepage (Join $19/mo).
+
+  F4. Test: click Join / checkout once in test mode to confirm you return to
+      your site after Stripe (success URL uses NEXT_PUBLIC_BASE_URL).
+
+
+PART G — AUTOMATED MONDAY BRIEF (NEW — REQUIRES 3 EXTRA ENV VARS)
+--------------------------------------------------------------------------------
+  The site now auto-curates and sends three looks to every paying member each
+  Monday morning. Your only job: check your inbox Sunday evening and click
+  "Approve". Here is how it works:
+
+  Sunday 6 PM ET (auto):
+    Vercel runs a script that scrapes fashion sites, asks Claude AI to build
+    three complete looks (Executive, Weekender, Wildcard), then emails YOU
+    a preview with an Approve button.
+
+  You (Sunday evening):
+    Open the preview email. If you like the looks, click Approve.
+    If you don't, reply to the email — skip this week or edit manually.
+
+  Monday 7 AM ET (auto):
+    If you approved, the site sends the brief to every active Stripe subscriber.
+
+  REQUIRED ENV VARS (add in Vercel → Production alongside the others):
+
+    ANTHROPIC_API_KEY       = your Claude API key (from console.anthropic.com)
+    CURATOR_APPROVE_SECRET  = make up any long random string, e.g. "ellie-2026-xK9qwZ"
+                              (keep it private — it secures the approve link)
+    CRON_SECRET             = same value as CURATOR_APPROVE_SECRET (or a separate
+                              random string; Vercel uses this to verify cron calls)
+
+  OPTIONAL (nice to have):
+    RESEND_AUDIENCE_ID      = from Resend → Audiences → create one → copy the ID
+                              (auto-adds every new paid member to a contact list)
+
+  After adding vars, Redeploy. Crons run automatically from then on.
+  You can trigger a test manually: POST /api/run-curator with
+    Authorization: Bearer <CURATOR_APPROVE_SECRET>
+
+--------------------------------------------------------------------------------
+PART H — WAITLIST & MEMBER EMAILS (RESEND — DO THIS OR YOU GET NO MAIL)
+--------------------------------------------------------------------------------
+  The waitlist form uses Resend. You must set ALL THREE variables in Vercel
+  → Project → Settings → Environment Variables → Production, then redeploy:
+
+    RESEND_API_KEY       = from Resend → API Keys (starts with re_)
+    RESEND_FROM_EMAIL    = sender address Resend allows (see below)
+    RESEND_NOTIFY_EMAIL  = YOUR inbox that receives “new waitlist signup” alerts
+
+  G1. Create account at https://resend.com → API Keys → create key → paste.
+
+  G2. FROM address:
+      - Best: Resend → Domains → add stylebyellie.com → add DNS records they
+        show → wait until “Verified”. Then use e.g. hello@stylebyellie.com
+      - Testing only: onboarding@resend.dev (limits apply — see Resend docs)
+
+  G3. NOTIFY address must be a real inbox you check. Example: your Gmail
+      or business email. That is where “New Inner Circle Application” goes.
+
+  G4. After saving the three vars, Deployments → Redeploy. Test the waitlist
+      yourself: you should get BOTH (1) email to the applicant and (2) email
+      to RESEND_NOTIFY_EMAIL.
+
+  G4b. Quick check (no secrets shown): open in your browser
+          https://stylebyellie.com/api/waitlist
+        (use your real domain if different). JSON should show
+        "emailConfigured": true and each "checks" field true. If any check is
+        false, that variable is missing for Production on this deployment.
+
+  G5. If you still see nothing: check spam/junk for Resend. In Vercel → your
+      project → Logs → filter /api/waitlist and look for “[waitlist]” errors.
+
+  G6. Stripe Dashboard: add stylebyellie.com to allowed domains / branding
+      when you go live with real keys (separate from waitlist email).
+
+
+PART I — AUTOMATED VERCEL FIX (GITHUB ACTIONS — ONE-TIME SECRETS)
+--------------------------------------------------------------------------------
+  The assistant cannot log into your Vercel account. This repo includes a
+  workflow that fixes the monorepo root and deploys the Ellie app for you.
+
+  H1. Create a Vercel token:  https://vercel.com/account/tokens  → Create,
+      scope: Full Account (or your team that owns the project).
+
+  H2. In Vercel → your Ellie project → Settings → General, copy:
+        Project ID  (e.g. prj_…)
+        Vercel Team / User ID  (e.g. team_… — shown under “Project ID” area)
+
+  H3. GitHub → this repo → Settings → Secrets and variables → Actions →
+      New repository secret. Add at minimum:
+        VERCEL_TOKEN          = token from H1
+        VERCEL_PROJECT_ID     = project id from H2 (prj_…)
+      The workflow loads the correct org/team id from Vercel’s API automatically.
+      (You may keep VERCEL_ORG_ID from older steps — it is not required for the
+      updated workflow.)
+
+  H4. If the Action fails on “Could not load project” or PATCH 403/404, the
+      project may be under a team. Add:
+        VERCEL_TEAM_ID        = Team ID from
+          https://vercel.com/teams/YOUR_TEAM_SLUG/settings#team-id
+      (team_…), then re-run the workflow.
+
+  H5. Push any change to  main  (or GitHub → Actions → “Ellie — Vercel…”
+      → Run workflow). The workflow PATCHes  rootDirectory: ellie-landing
+      and runs a production deploy. Then hard-refresh stylebyellie.com.
+
+  H6. Copy your Production env vars (Stripe, Resend, NEXT_PUBLIC_BASE_URL)
+      from the Vercel dashboard into the same project — the workflow does not
+      duplicate those automatically.
+
+================================================================================
+  Stuck? Copy the exact DNS table from Vercel (Part B8) and match it line by
+  line in GoDaddy — no typos in the CNAME target.
+================================================================================

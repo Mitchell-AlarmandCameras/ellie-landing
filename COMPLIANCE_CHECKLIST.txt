@@ -1,0 +1,256 @@
+═══════════════════════════════════════════════════════════════════════════
+  THE STYLE REFRESH — MASTER COMPLIANCE CHECKLIST
+  Everything you must do to stay 100% legal and fully protected.
+  Items marked [CODE ✓] are already handled in the website code.
+  Items marked [YOUR ACTION] require steps you take outside of code.
+═══════════════════════════════════════════════════════════════════════════
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION A — EMAIL COMPLIANCE (CAN-SPAM Act — Federal Law)
+  Violations: Up to $51,744 per email sent in violation.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[CODE ✓]  Subject lines accurately describe the email content (no deception).
+[CODE ✓]  Every commercial email identifies The Style Refresh as the sender.
+[CODE ✓]  Every commercial email tells recipients why they're receiving it.
+[CODE ✓]  Every email has a mechanism to stop receiving them (cancel subscription link).
+[CODE ✓]  FTC affiliate disclosure is included in member briefs.
+[CODE ✓]  Emails use BUSINESS_MAILING_ADDRESS env variable for the required address footer.
+
+[YOUR ACTION — URGENT]
+  CAN-SPAM requires a valid PHYSICAL MAILING ADDRESS in every commercial email.
+  This can be a P.O. Box — it does NOT need to be your home address.
+
+  STEPS:
+  1. Get a P.O. Box at your local UPS Store or USPS post office (~$10-$20/month).
+     Alternatively, use a virtual mailbox service like Anytime Mailbox (~$10/month).
+  2. Go to Vercel → Your Project → Settings → Environment Variables → Production.
+  3. Add this variable:
+     Name:  BUSINESS_MAILING_ADDRESS
+     Value: The Style Refresh · PO Box XXXX · New York, NY XXXXX
+  4. Redeploy your site (Vercel → Deployments → Redeploy latest).
+
+  Until this is done, the emails show "[ADD MAILING ADDRESS]" as a placeholder —
+  which means you are not fully CAN-SPAM compliant.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION B — FTC COMPLIANCE (Federal Trade Commission)
+  Violations: Civil penalties and public enforcement actions.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[CODE ✓]  Affiliate disclosure included in weekly member brief emails.
+[CODE ✓]  Affiliate disclosure included in Terms of Service.
+
+[YOUR ACTION — BEFORE LAUNCH]
+  The website has a "Member Stories" testimonials section that is currently
+  HIDDEN (turned off in the code). It will show placeholder text only.
+
+  FTC Rule: All testimonials must be from REAL people with their genuine consent.
+  You CANNOT use invented or fictional quotes attributed to people.
+
+  ACTION:
+  After your first 3-5 members receive their Monday brief, email them personally:
+  "Hey [name], I'd love to share your experience on the site — would you be
+  willing to send me a sentence or two about what you thought? I'd use your
+  first name and city only."
+
+  Once you have 3 real quotes with permission:
+  1. Open ellie-landing/app/page.tsx
+  2. Find the testimonials array near the top of the file
+  3. Replace the placeholder text with real quotes, names, and cities
+  4. Change `{false && <section` to `{true && <section` to turn the section on
+  5. Commit and push to GitHub
+
+[YOUR ACTION — IF AFFILIATE LINKS]
+  Right now the buy links are direct retailer links (no commission to you).
+  If you ever sign up for affiliate programs (Amazon Associates, RewardStyle/LTK,
+  ShopStyle, etc.) and start using tracked affiliate links:
+
+  1. Add to every email brief: "This email contains affiliate links. We earn a
+     small commission if you purchase — at no cost to you. This never influences
+     our picks."
+  2. Add to the website footer: "Some links on this site may be affiliate links."
+  [CODE ✓] The weekly brief email already contains this disclosure.
+  You just need to make sure it stays there if you switch to affiliate links.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION C — PRIVACY LAW (GDPR, CCPA, NY SHIELD Act)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[CODE ✓]  Comprehensive Privacy Policy published at /privacy.
+[CODE ✓]  Cookie consent banner shown to all visitors on first visit.
+[CODE ✓]  Only one functional cookie used (ellie_access — login only).
+[CODE ✓]  No tracking pixels, advertising cookies, or third-party analytics.
+[CODE ✓]  CCPA rights disclosed in Privacy Policy.
+[CODE ✓]  GDPR rights disclosed in Privacy Policy.
+
+[YOUR ACTION]
+  The NY SHIELD Act requires businesses holding NY residents' data to implement
+  reasonable data security safeguards. Your current technical setup (HTTPS via
+  Vercel, Stripe for payments, no stored card data) satisfies the technical
+  requirements. The "administrative" requirement means you should:
+
+  1. Keep your Vercel, Stripe, Resend, and Anthropic accounts secured with
+     strong unique passwords and two-factor authentication (2FA). Do this now.
+  2. Never share your API keys with anyone.
+  3. If you ever hire help, use role-based access — not shared passwords.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION D — SALES TAX (New York State + Other States)
+  This is commonly missed and can cause serious liability years later.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[YOUR ACTION — IMPORTANT]
+  New York State taxes digital information services and SaaS subscriptions.
+  The Style Refresh ($19/month membership) likely qualifies as a taxable
+  digital service under NY Tax Law §1105(c)(1).
+
+  You have two choices:
+
+  OPTION 1 — USE STRIPE TAX (Recommended — automated):
+  1. Log into Stripe → Go to "Tax" in the left menu.
+  2. Enable "Stripe Tax" (Stripe calculates and collects tax automatically).
+  3. Register for a NY Sales Tax permit at: https://www.tax.ny.gov
+     (Search: "New York Vendor Registration" — it's free, takes 20 minutes.)
+  4. At the end of each quarter, Stripe Tax shows you what was collected.
+     You remit (pay) that amount to New York State using the portal above.
+
+  OPTION 2 — CONSULT A TAX ACCOUNTANT:
+  An accountant who knows digital/e-commerce taxation can advise you on
+  which states you have "nexus" in (meaning you owe sales tax there) and
+  handle filing for you. For a small business at $19/month, this is usually
+  inexpensive.
+
+  NOTE: Other states also tax digital subscriptions (TX, WA, CO, etc.).
+  As your subscriber base grows, you may owe tax in those states too.
+  Stripe Tax handles this automatically across all 50 states.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION E — BUSINESS FORMATION (Liability Protection)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[YOUR ACTION — WHEN READY]
+  Operating as a sole proprietor (no LLC) means your personal assets (savings,
+  car, home) can be reached in a lawsuit. For now, your Terms of Service include
+  a Limitation of Liability clause that helps.
+
+  WHEN YOU FORM THE LLC:
+  1. File Articles of Organization with NY Department of State: $200 filing fee.
+     Website: https://www.dos.ny.gov/corps/llcguide.html
+  2. NY requires you to publish an LLC formation notice in two newspapers for
+     6 consecutive weeks (~$500-$2,000 depending on county). This is unique to NY.
+  3. File a Biennial Statement every 2 years ($9 fee).
+  4. Get an EIN (Employer Identification Number) from the IRS — free, takes
+     5 minutes at irs.gov. Use this instead of your SSN for business.
+  5. Open a dedicated business bank account using the EIN and LLC name.
+  6. Update your Stripe account to the LLC name and EIN.
+
+  RECOMMENDED: Use a registered agent service like ZenBusiness ($49/year) or
+  Northwest Registered Agent to handle the LLC formation paperwork for you.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION F — FINANCIAL COMPLIANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[YOUR ACTION]
+  1. BOOKKEEPING: Track all revenue from Stripe separately from personal income.
+     Use a free tool (Wave Accounting — free) or paid (QuickBooks ~$30/month).
+     Even a simple spreadsheet works at first: date, amount, subscriber count.
+
+  2. INCOME TAX: Subscription revenue is ordinary income. As a sole proprietor,
+     you pay self-employment tax (15.3%) on top of regular income tax.
+     Pay estimated quarterly taxes to the IRS to avoid penalties:
+     April 15 / June 15 / September 15 / January 15.
+     Use IRS Form 1040-ES.
+
+  3. 1099 THRESHOLD: If any single person or company pays you more than $600/year
+     (unlikely with individual subscribers but possible), you may need to
+     issue them a 1099. For subscription businesses this rarely applies.
+
+  4. STRIPE 1099-K: Stripe will send you a 1099-K if you process more than
+     $5,000 (2024+) in payments. This goes to the IRS too. Keep records.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION G — EMAIL / DOMAIN CONFIGURATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[YOUR ACTION — FOR EMAIL DELIVERABILITY]
+  1. Set up SPF, DKIM, and DMARC DNS records on your domain.
+     These prevent your emails from being marked as spam and prove you own
+     the sending domain.
+     - Resend's dashboard guides you through adding these to your domain registrar.
+     - Without these, your emails will frequently land in spam.
+
+  2. Use a professional FROM address: hello@thestylerefresh.com (not Gmail).
+     This is already configured if you followed the Resend setup in DOMAIN_SETUP.txt.
+
+  3. Keep an unsubscribe rate below 0.1% to maintain good sender reputation.
+     If you get complaints, investigate immediately.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION H — TESTIMONIALS (FTC — ONCE YOU HAVE REAL MEMBERS)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When collecting real testimonials from members:
+
+  1. Get written permission. A simple reply email: "Yes, you can use that"
+     is sufficient. Keep a log of who gave permission and when.
+  2. Only use real, unedited quotes (or minimally edited for spelling only).
+  3. Use real first name and city. Never attribute a quote to a fictional person.
+  4. If you offer a discount in exchange for a testimonial, disclose it:
+     "[Received one free month in exchange for their honest review]"
+  5. Do not use quotes that claim specific results ("I lost weight" / "I made
+     $X more money") unless those results are typical and documented.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION I — ACCESSIBILITY (ADA / WCAG 2.1)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[CODE ✓]  All images have aria-hidden="true" or descriptive alt text.
+[CODE ✓]  Buttons have aria-label attributes for screen readers.
+[CODE ✓]  Role="alert" on error banners for screen readers.
+[CODE ✓]  Semantic HTML structure (nav, main, section, footer, article).
+[CODE ✓]  Color contrast ratios meet WCAG AA requirements (dark on cream).
+
+[YOUR ACTION — LOW PRIORITY BUT GOOD PRACTICE]
+  Run a free accessibility audit at https://wave.webaim.org once the site is live.
+  Fix any flagged issues. This is especially important if you ever face a demand
+  letter under the ADA (these have increased for e-commerce sites).
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION J — PRIORITY ORDER (DO THESE FIRST)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TODAY (before first paying customer):
+  □ Get a P.O. Box or virtual mailbox address
+  □ Add BUSINESS_MAILING_ADDRESS to Vercel env vars and redeploy
+  □ Enable 2FA on all accounts (Stripe, Vercel, Resend, GitHub, Anthropic)
+  □ Set up Stripe and link your personal bank account (already planned)
+
+THIS WEEK:
+  □ Enable Stripe Tax (5 minutes in Stripe dashboard)
+  □ Register for a NY Sales Tax permit (free, 20 minutes online)
+  □ Open a free Wave Accounting account and connect your Stripe
+
+THIS MONTH:
+  □ Set up SPF/DKIM/DMARC email records via Resend dashboard
+  □ Send your first Monday brief and collect real testimonial quotes
+
+WHEN PROFITABLE (3-6 months):
+  □ Form the LLC with ZenBusiness or a NY attorney
+  □ Open a business bank account
+  □ Switch Stripe to the LLC name and EIN
+  □ Hire a CPA for quarterly tax filings
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+DISCLAIMER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+This checklist was prepared to help you understand your compliance obligations
+and is not a substitute for legal or tax advice from a licensed professional.
+Laws change, and your specific situation may have nuances not covered here.
+For anything material (lawsuits, tax disputes, regulatory inquiries), consult a
+licensed New York attorney or CPA.
+
+Last updated: April 2026
+═══════════════════════════════════════════════════════════════════════════

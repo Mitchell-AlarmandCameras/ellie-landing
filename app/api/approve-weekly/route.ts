@@ -1,0 +1,205 @@
+import { NextRequest, NextResponse } from "next/server";
+import fs from "fs";
+import path from "path";
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GET /api/approve-weekly?secret=xxx
+   Ellie clicks this link in her Sunday preview email.
+   Reads draft from /tmp/ellie-draft.json, saves to /tmp/ellie-approved.json.
+═══════════════════════════════════════════════════════════════════════════ */
+
+export const runtime = "nodejs";
+
+export async function GET(req: NextRequest) {
+  const secret      = req.nextUrl.searchParams.get("secret") ?? "";
+  const cronSecret  = process.env.CRON_SECRET?.trim() ?? "";
+  const approveSecret = process.env.CURATOR_APPROVE_SECRET?.trim() ?? "";
+
+  if (!secret || (secret !== cronSecret && secret !== approveSecret)) {
+    return new NextResponse(
+      `<html><body style="font-family:Georgia,serif;padding:48px;background:#F5EFE4;text-align:center;">
+        <h2 style="color:#c0392b;">Invalid approval link.</h2>
+        <p style="color:#6B6560;">This link may have expired. Check your Sunday preview email for a fresh one.</p>
+      </body></html>`,
+      { status: 401, headers: { "Content-Type": "text/html" } }
+    );
+  }
+
+  const draftPath    = path.join("/tmp", "ellie-draft.json");
+  const approvedPath = path.join("/tmp", "ellie-approved.json");
+
+  if (!fs.existsSync(draftPath)) {
+    return new NextResponse(
+      `<html><body style="font-family:Georgia,serif;padding:48px;background:#F5EFE4;text-align:center;">
+        <h2 style="color:#C4956A;">No draft found.</h2>
+        <p style="color:#6B6560;">The draft may have expired from the server's memory.<br/>
+        The Sunday curator will generate a fresh one next week.</p>
+        <p style="margin-top:24px;font-size:12px;color:#B5A99A;font-family:Arial,sans-serif;">
+          To trigger immediately: Vercel → your project → Deployments → Functions →
+          run-curator manually (or contact your developer).
+        </p>
+      </body></html>`,
+      { status: 404, headers: { "Content-Type": "text/html" } }
+    );
+  }
+
+  let lookbook: Record<string, unknown>;
+  try {
+    lookbook = JSON.parse(fs.readFileSync(draftPath, "utf8")) as Record<string, unknown>;
+  } catch {
+    return new NextResponse(
+      `<html><body style="font-family:Georgia,serif;padding:48px;background:#F5EFE4;text-align:center;">
+        <h2 style="color:#c0392b;">Could not read draft.</h2>
+        <p style="color:#6B6560;">File corrupted. A fresh draft will generate next Sunday.</p>
+      </body></html>`,
+      { status: 500, headers: { "Content-Type": "text/html" } }
+    );
+  }
+
+  /* Save to approved path */
+  const approvedData = { ...lookbook, approvedAt: new Date().toISOString() };
+  try {
+    fs.writeFileSync(approvedPath, JSON.stringify(approvedData), "utf8");
+  } catch (err) {
+    console.error("[approve-weekly] Could not write approved file:", err);
+  }
+
+  /* ── Push live preview to Vercel Blob so the homepage auto-updates ──
+     Writes the public teaser (no buy links) to persistent Blob storage.
+     The homepage fetches /api/current-preview which reads from here.    */
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    try {
+      const { put } = await import("@vercel/blob");
+      const rawLooks = (lookbook.looks as Array<Record<string, unknown>>) ?? [];
+      const previewData = {
+        weekOf:        lookbook.weekOf,
+        editorialLead: lookbook.editorialLead ?? "",
+        updatedAt:     new Date().toISOString(),
+        looks: rawLooks.map((look) => ({
+          index:       look.index,
+          label:       look.label,
+          tagline:     look.tagline,
+          description: look.description,
+          /* Teaser: piece names only — buy links stay members-only */
+          teaser: ((look.items as Array<{ piece: string }>) ?? [])
+            .slice(0, 4)
+            .map((item) => item.piece),
+        })),
+      };
+      await put("ellie-preview/current.json", JSON.stringify(previewData), {
+        access:            "public",
+        contentType:       "application/json",
+        addRandomSuffix:   false,
+      });
+      console.log("[approve-weekly] Live preview written to Vercel Blob.");
+    } catch (blobErr) {
+      console.error("[approve-weekly] Blob write failed (non-fatal):", blobErr);
+    }
+  }
+
+  /* ── Publish SEO blog post to Vercel Blob ─────────────────────────────
+     Creates a public blog post at /blog/week-of-[date] so Google can index
+     the looks. The post is a teaser (no buy links) with a strong CTA to join.
+     Also maintains a blog/index.json for the /blog listing page.          */
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    try {
+      const { put, list } = await import("@vercel/blob");
+      type LookItem = { piece: string };
+      type Look     = { index: string; label: string; tagline: string; description: string; editorsNote: string; items: LookItem[] };
+      const rawLooks = (lookbook.looks as Look[]) ?? [];
+      const rawWeekOf = String(lookbook.weekOf ?? "");
+
+      /* slug: "week-of-april-14-2026" */
+      const slug = `week-of-${rawWeekOf.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "")}`;
+
+      const postData = {
+        slug,
+        weekOf:        rawWeekOf,
+        publishedAt:   new Date().toISOString(),
+        editorialLead: String(lookbook.editorialLead ?? ""),
+        looks: rawLooks.map(look => ({
+          index:       look.index,
+          label:       look.label,
+          tagline:     look.tagline,
+          description: look.description ?? "",
+          editorsNote: look.editorsNote ?? "",
+          teaser:      (look.items ?? []).slice(0, 5).map(i => i.piece),
+        })),
+      };
+
+      await put(`blog/posts/${slug}.json`, JSON.stringify(postData), {
+        access:          "public",
+        contentType:     "application/json",
+        addRandomSuffix: false,
+      });
+
+      /* Maintain the blog index */
+      const { blobs: indexBlobs } = await list({ prefix: "blog/index" });
+      let index: Array<{ slug: string; weekOf: string; publishedAt: string; editorialLead: string; lookLabels: string[] }> = [];
+      if (indexBlobs[0]) {
+        try {
+          const r = await fetch(indexBlobs[0].url);
+          if (r.ok) index = await r.json();
+        } catch { /* start fresh */ }
+      }
+
+      const entry = {
+        slug,
+        weekOf:        rawWeekOf,
+        publishedAt:   new Date().toISOString(),
+        editorialLead: String(lookbook.editorialLead ?? "").substring(0, 140),
+        lookLabels:    rawLooks.map(l => l.label),
+      };
+      const existingIdx = index.findIndex(p => p.slug === slug);
+      if (existingIdx >= 0) index[existingIdx] = entry; else index.unshift(entry);
+      if (index.length > 52) index = index.slice(0, 52);
+
+      await put("blog/index.json", JSON.stringify(index), {
+        access:          "public",
+        contentType:     "application/json",
+        addRandomSuffix: false,
+      });
+      console.log("[approve-weekly] Blog post published:", slug);
+    } catch (blogErr) {
+      console.error("[approve-weekly] Blog publish failed (non-fatal):", blogErr);
+    }
+  }
+
+  const weekOf = String(lookbook.weekOf ?? "this week");
+  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL ?? "https://stylebyellie.com").replace(/\/$/, "");
+  const sendUrl = `${baseUrl}/api/send-weekly`;
+
+  return new NextResponse(
+    `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"/><title>Approved — Ellie Style Refresh</title></head>
+<body style="margin:0;padding:0;background:#F5EFE4;font-family:Georgia,serif;
+              display:flex;align-items:center;justify-content:center;min-height:100vh;">
+  <div style="max-width:500px;width:90%;text-align:center;padding:40px 0;">
+    <p style="color:#C4956A;font-size:10px;letter-spacing:0.32em;text-transform:uppercase;
+               font-family:Arial,sans-serif;margin-bottom:10px;">
+      Ellie · The Style Refresh
+    </p>
+    <h1 style="color:#2C2C2C;font-size:28px;font-weight:400;margin:0 0 12px;">Approved. ✓</h1>
+    <p style="color:#4A4A4A;font-size:16px;line-height:1.75;margin:0 0 24px;">
+      Week of <strong>${weekOf}</strong> is approved.<br/>
+      Members will receive their Monday morning brief automatically at 7 AM ET.
+    </p>
+    <div style="background:#FDFAF5;border:1px solid #DDD4C5;padding:20px;margin-bottom:24px;">
+      <p style="margin:0 0 8px;color:#6B6560;font-size:12px;font-family:Arial,sans-serif;">
+        Need to send immediately instead?
+      </p>
+      <a href="${sendUrl}" onclick="return confirm('Send the weekly brief to all members now?')"
+         style="display:inline-block;background:#C4956A;color:#FDFAF5;padding:11px 28px;
+                 font-family:Arial,sans-serif;font-size:11px;letter-spacing:0.18em;
+                 text-transform:uppercase;text-decoration:none;">
+        Send Now →
+      </a>
+    </div>
+    <p style="color:#B5A99A;font-size:11px;font-family:Arial,sans-serif;">
+      Approved at ${new Date().toLocaleString("en-US", { timeZone: "America/New_York" })} ET
+    </p>
+  </div>
+</body></html>`,
+    { status: 200, headers: { "Content-Type": "text/html" } }
+  );
+}

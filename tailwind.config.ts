@@ -5,60 +5,62 @@ const config: Config = {
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./data/**/*.{js,ts}",
   ],
   theme: {
     extend: {
       colors: {
-        navy: {
-          DEFAULT: "#000080",
-          dark: "#000060",
-          light: "#0000aa",
+        cream: {
+          DEFAULT: "#FDFAF5",
+          dark:    "#F5EFE4",
+          deep:    "#EDE5D8",
         },
-        gold: {
-          DEFAULT: "#D4AF37",
-          light: "#e8c84d",
-          dark: "#b8952e",
-          pale: "#f5e9b8",
+        sand: {
+          DEFAULT: "#E8DFD0",
+          light:   "#F2ECE4",
+          dark:    "#C9B99A",
+          border:  "#DDD4C5",
         },
+        charcoal: {
+          DEFAULT: "#2C2C2C",
+          light:   "#4A4A4A",
+          dark:    "#1A1A1A",
+          muted:   "#6B6560",
+        },
+        blush: {
+          DEFAULT: "#C4956A",
+          light:   "#D4AB88",
+          dark:    "#A67B52",
+        },
+        taupe:    "#B5A99A",
+        warm:     "#8A8580",
       },
       fontFamily: {
-        serif: ["Playfair Display", "Georgia", "serif"],
-        sans: ["Cormorant Garamond", "Garamond", "serif"],
-        body: ["var(--font-inter)", "system-ui", "sans-serif"],
+        serif:     ["DM Serif Display", "Georgia", "serif"],
+        display:   ["DM Serif Display", "Georgia", "serif"],
+        body:      ["Inter", "system-ui", "sans-serif"],
+        editorial: ["Cormorant Garamond", "Georgia", "serif"],
       },
       letterSpacing: {
         widest: "0.25em",
-        ultra: "0.4em",
-        ultra2: "0.35em",
+        ultra:  "0.4em",
+        loose:  "0.15em",
       },
       screens: {
-        // Samsung Galaxy S26 Ultra portrait: ~412px
-        // Ensure xs breakpoint covers it
         xs: "375px",
-      },
-      backgroundImage: {
-        "gold-gradient":
-          "linear-gradient(135deg, #D4AF37 0%, #f5e9b8 50%, #D4AF37 100%)",
-        "navy-gradient":
-          "linear-gradient(135deg, #000060 0%, #000080 50%, #0000aa 100%)",
       },
       animation: {
         "fade-in": "fadeIn 1s ease-in-out forwards",
         "fade-up": "fadeUp 0.8s ease-out forwards",
-        shimmer: "shimmer 2.5s linear infinite",
       },
       keyframes: {
         fadeIn: {
-          "0%": { opacity: "0" },
+          "0%":   { opacity: "0" },
           "100%": { opacity: "1" },
         },
         fadeUp: {
-          "0%": { opacity: "0", transform: "translateY(20px)" },
-          "100%": { opacity: "1", transform: "translateY(0)" },
-        },
-        shimmer: {
-          "0%": { backgroundPosition: "-200% center" },
-          "100%": { backgroundPosition: "200% center" },
+          "0%":   { opacity: "0", transform: "translateY(20px)" },
+          "100%": { opacity: "1", transform: "translateY(0)"    },
         },
       },
     },

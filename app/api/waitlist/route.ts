@@ -15,7 +15,8 @@ const schema = z.object({
     .string()
     .min(1, "Email is required.")
     .email("Please provide a valid email address."),
-  styleInterest: z.enum(["executive", "weekender", "wildcard", "all"]),
+  /** Optional for backwards compatibility; defaults to full membership (all three looks). */
+  styleInterest: z.enum(["executive", "weekender", "wildcard", "all"]).optional(),
 });
 
 const STYLE_LABELS: Record<string, string> = {
@@ -28,6 +29,8 @@ const STYLE_LABELS: Record<string, string> = {
 /* ─── HTML email builders ─────────────────────────────────────── */
 
 /** Notification sent to your business inbox on every new application. */
+const MAILING_ADDRESS = process.env.BUSINESS_MAILING_ADDRESS ?? "The Style Refresh · [ADD MAILING ADDRESS] · New York, NY";
+
 function buildAdminEmail(
   name: string,
   email: string,
@@ -39,56 +42,46 @@ function buildAdminEmail(
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>New Inner Circle Application</title>
+<title>New Waitlist Application — Ellie</title>
 </head>
-<body style="margin:0;padding:0;background:#f9f9f7;font-family:'Georgia',serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f7;padding:40px 20px;">
+<body style="margin:0;padding:0;background:#F5EFE4;font-family:'Georgia',serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5EFE4;padding:40px 20px;">
     <tr>
       <td align="center">
-        <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;max-width:560px;width:100%;">
+        <table width="560" cellpadding="0" cellspacing="0"
+               style="background:#FDFAF5;max-width:560px;width:100%;border:1px solid #DDD4C5;">
 
-          <!-- Gold top border -->
           <tr>
-            <td style="height:3px;background:linear-gradient(90deg,#D4AF37,#f5e9b8,#D4AF37);"></td>
+            <td style="height:2px;background:linear-gradient(90deg,transparent,#C4956A,transparent);"></td>
           </tr>
 
-          <!-- Header -->
           <tr>
-            <td style="background:#000080;padding:32px 40px;text-align:center;">
-              <p style="margin:0;color:#D4AF37;font-size:11px;letter-spacing:0.35em;text-transform:uppercase;font-family:'Arial',sans-serif;">
-                The Inner Circle
+            <td style="background:#EDE5D8;padding:32px 40px;text-align:center;">
+              <p style="margin:0 0 4px;color:#C4956A;font-size:10px;letter-spacing:0.32em;
+                         text-transform:uppercase;font-family:'Arial',sans-serif;">
+                Ellie · The Style Refresh
               </p>
-              <h1 style="margin:12px 0 0;color:#ffffff;font-size:22px;font-weight:400;letter-spacing:0.05em;">
-                New Application Received
+              <h1 style="margin:8px 0 0;color:#2C2C2C;font-size:22px;font-weight:400;
+                          letter-spacing:0.02em;font-family:'Georgia',serif;">
+                New Waitlist Application
               </h1>
             </td>
           </tr>
 
-          <!-- Divider -->
           <tr>
             <td style="padding:0 40px;">
-              <table width="100%" cellpadding="0" cellspacing="0">
-                <tr>
-                  <td style="padding:28px 0 0;">
-                    <table width="100%" cellpadding="0" cellspacing="0">
-                      <tr>
-                        <td style="height:1px;background:linear-gradient(90deg,transparent,#D4AF37,transparent);"></td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-              </table>
+              <div style="height:1px;margin:28px 0 0;
+                           background:linear-gradient(90deg,transparent,#C9B99A,transparent);"></div>
             </td>
           </tr>
 
-          <!-- Body -->
           <tr>
-            <td style="padding:28px 40px 32px;">
-              <p style="margin:0 0 24px;color:#6b7280;font-size:14px;line-height:1.6;font-family:'Arial',sans-serif;">
-                Someone just applied for the Inner Circle. Here are their details:
+            <td style="padding:24px 40px 32px;">
+              <p style="margin:0 0 20px;color:#6B6560;font-size:13px;line-height:1.6;
+                         font-family:'Arial',sans-serif;">
+                Someone just joined the waitlist. Here are their details:
               </p>
 
-              <!-- Details table -->
               <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
                 ${[
                   ["Full Name",       name],
@@ -97,37 +90,40 @@ function buildAdminEmail(
                   ["Applied At",      timestamp],
                 ].map(([label, value]) => `
                 <tr>
-                  <td style="padding:12px 16px;background:#f8f7f4;border-bottom:1px solid #eee;
-                              font-size:11px;color:#000080;letter-spacing:0.18em;
+                  <td style="padding:11px 14px;background:#F5EFE4;border-bottom:1px solid #E8DDD0;
+                              font-size:10px;color:#C4956A;letter-spacing:0.18em;
                               text-transform:uppercase;font-family:'Arial',sans-serif;
                               width:38%;vertical-align:top;">
                     ${label}
                   </td>
-                  <td style="padding:12px 16px;background:#f8f7f4;border-bottom:1px solid #eee;
-                              font-size:14px;color:#111827;font-family:'Georgia',serif;
+                  <td style="padding:11px 14px;background:#F5EFE4;border-bottom:1px solid #E8DDD0;
+                              font-size:14px;color:#2C2C2C;font-family:'Georgia',serif;
                               vertical-align:top;">
                     ${value}
                   </td>
                 </tr>`).join("")}
               </table>
 
-              <p style="margin:28px 0 0;color:#9ca3af;font-size:12px;font-family:'Arial',sans-serif;line-height:1.6;">
-                You can reply directly to this email to reach the applicant.
+              <p style="margin:24px 0 0;color:#B5A99A;font-size:12px;font-family:'Arial',sans-serif;line-height:1.6;">
+                Reply to this email to reach the applicant directly.
               </p>
             </td>
           </tr>
 
-          <!-- Gold bottom border -->
           <tr>
-            <td style="height:1px;background:linear-gradient(90deg,transparent,#D4AF37,transparent);margin:0 40px;"></td>
+            <td style="padding:0 40px 0;">
+              <div style="height:1px;background:linear-gradient(90deg,transparent,#C9B99A,transparent);"></div>
+            </td>
           </tr>
 
-          <!-- Footer -->
           <tr>
-            <td style="padding:20px 40px;text-align:center;">
-              <p style="margin:0;color:#d1d5db;font-size:11px;letter-spacing:0.15em;
+            <td style="padding:18px 40px;text-align:center;background:#F5EFE4;">
+              <p style="margin:0;color:#8A8580;font-size:10px;letter-spacing:0.18em;
                          text-transform:uppercase;font-family:'Arial',sans-serif;">
-                Ellie · The Inner Circle
+                ELLIE · The Style Refresh · Private Membership
+              </p>
+              <p style="margin:6px 0 0;color:#B5A99A;font-size:10px;font-family:'Arial',sans-serif;">
+                ${MAILING_ADDRESS}
               </p>
             </td>
           </tr>
@@ -148,109 +144,93 @@ function buildApplicantEmail(name: string, styleLabel: string): string {
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Your Application — The Inner Circle</title>
+<title>You&rsquo;re on the List — Ellie</title>
 </head>
-<body style="margin:0;padding:0;background:#f9f9f7;font-family:'Georgia',serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f7;padding:40px 20px;">
+<body style="margin:0;padding:0;background:#F5EFE4;font-family:'Georgia',serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5EFE4;padding:40px 20px;">
     <tr>
       <td align="center">
-        <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;max-width:560px;width:100%;">
+        <table width="560" cellpadding="0" cellspacing="0"
+               style="background:#FDFAF5;max-width:560px;width:100%;border:1px solid #DDD4C5;">
 
-          <!-- Gold top border -->
           <tr>
-            <td style="height:3px;background:linear-gradient(90deg,#D4AF37,#f5e9b8,#D4AF37);"></td>
+            <td style="height:2px;background:linear-gradient(90deg,transparent,#C4956A,transparent);"></td>
           </tr>
 
-          <!-- Header -->
           <tr>
-            <td style="background:#000080;padding:36px 40px;text-align:center;">
-              <p style="margin:0;color:#D4AF37;font-size:11px;letter-spacing:0.35em;
+            <td style="background:#EDE5D8;padding:36px 40px;text-align:center;">
+              <p style="margin:0 0 4px;color:#C4956A;font-size:10px;letter-spacing:0.32em;
                          text-transform:uppercase;font-family:'Arial',sans-serif;">
-                Private Membership
+                The Style Refresh
               </p>
-              <h1 style="margin:14px 0 0;color:#ffffff;font-size:26px;font-weight:400;
-                          letter-spacing:0.04em;line-height:1.3;">
-                Welcome to the Elite Edit.
+              <h1 style="margin:8px 0 0;color:#2C2C2C;font-size:28px;font-weight:400;
+                          letter-spacing:0.02em;font-family:'Georgia',serif;">
+                You&rsquo;re on the list.
               </h1>
             </td>
           </tr>
 
-          <!-- Divider line -->
           <tr>
             <td style="padding:0 40px;">
-              <table width="100%" cellpadding="0" cellspacing="0">
-                <tr>
-                  <td style="padding:28px 0 0;">
-                    <table width="100%" cellpadding="0" cellspacing="0">
-                      <tr>
-                        <td style="height:1px;background:linear-gradient(90deg,transparent,#D4AF37,transparent);"></td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-              </table>
+              <div style="height:1px;margin:28px 0 0;
+                           background:linear-gradient(90deg,transparent,#C9B99A,transparent);"></div>
             </td>
           </tr>
 
-          <!-- Body -->
           <tr>
-            <td style="padding:28px 40px 0;">
-              <p style="margin:0 0 18px;color:#374151;font-size:16px;line-height:1.75;">
+            <td style="padding:24px 40px 0;">
+              <p style="margin:0 0 18px;color:#4A4A4A;font-size:16px;line-height:1.8;">
                 Dear ${firstName},
               </p>
-              <p style="margin:0 0 18px;color:#374151;font-size:16px;line-height:1.75;">
-                Your application for the Inner Circle has been received. I review
-                every name on this list personally — you&rsquo;ll hear from me
-                directly when the next spot opens.
+              <p style="margin:0 0 18px;color:#4A4A4A;font-size:16px;line-height:1.8;">
+                Your application has been received. I review every name personally
+                &mdash; you&rsquo;ll hear from me directly when the next spot opens.
               </p>
-              <p style="margin:0 0 18px;color:#374151;font-size:16px;line-height:1.75;">
-                In the meantime, keep an eye on your inbox. Those already inside
-                the circle will tell you — the Monday brief alone is worth the wait.
+              <p style="margin:0 0 18px;color:#4A4A4A;font-size:16px;line-height:1.8;">
+                Keep an eye on your inbox. The Style Refresh may be waiting.
               </p>
 
-              <!-- Style callout -->
               <table width="100%" cellpadding="0" cellspacing="0"
-                     style="margin:28px 0;border-left:2px solid #D4AF37;background:#f8f7f4;">
+                     style="margin:24px 0;background:#F5EFE4;border-left:2px solid #C4956A;">
                 <tr>
-                  <td style="padding:18px 20px;">
-                    <p style="margin:0 0 4px;color:#000080;font-size:11px;letter-spacing:0.22em;
+                  <td style="padding:18px 22px;">
+                    <p style="margin:0 0 4px;color:#C4956A;font-size:10px;letter-spacing:0.25em;
                                text-transform:uppercase;font-family:'Arial',sans-serif;">
                       Your selected direction
                     </p>
-                    <p style="margin:0;color:#000080;font-size:18px;font-weight:600;">
+                    <p style="margin:0;color:#2C2C2C;font-size:17px;font-family:'Georgia',serif;">
                       ${styleLabel}
                     </p>
                   </td>
                 </tr>
               </table>
 
-              <p style="margin:0 0 28px;color:#374151;font-size:16px;line-height:1.75;">
-                Warmly,
-              </p>
-              <p style="margin:0;color:#000080;font-size:17px;font-weight:600;
-                          letter-spacing:0.04em;">
+              <p style="margin:0 0 6px;color:#6B6560;font-size:15px;font-style:italic;">Warmly,</p>
+              <p style="margin:0;color:#2C2C2C;font-size:20px;font-weight:400;
+                          letter-spacing:0.06em;font-family:'Georgia',serif;">
                 Ellie
               </p>
             </td>
           </tr>
 
-          <!-- Spacer -->
           <tr><td style="height:32px;"></td></tr>
 
-          <!-- Gold bottom border -->
           <tr>
-            <td style="height:1px;background:linear-gradient(90deg,transparent,#D4AF37,transparent);"></td>
+            <td style="height:1px;background:linear-gradient(90deg,transparent,#C9B99A,transparent);"></td>
           </tr>
 
-          <!-- Footer -->
           <tr>
-            <td style="padding:20px 40px;text-align:center;">
-              <p style="margin:0;color:#d1d5db;font-size:11px;letter-spacing:0.15em;
+            <td style="padding:18px 40px;text-align:center;background:#F5EFE4;">
+              <p style="margin:0;color:#8A8580;font-size:10px;letter-spacing:0.18em;
                          text-transform:uppercase;font-family:'Arial',sans-serif;">
-                Ellie &middot; Style Intelligence &middot; Private Membership
+                ELLIE &middot; The Style Refresh &middot; Private Membership
               </p>
-              <p style="margin:6px 0 0;color:#e5e7eb;font-size:10px;font-family:'Arial',sans-serif;">
-                You received this because you applied for the Inner Circle.
+              <p style="margin:6px 0 0;color:#B5A99A;font-size:10px;font-family:'Arial',sans-serif;">
+                You received this because you requested to join our waitlist.
+                This is a one-time confirmation — we will not email you again until a spot opens.
+              </p>
+              <p style="margin:6px 0 0;color:#B5A99A;font-size:10px;font-family:'Arial',sans-serif;">
+                ${MAILING_ADDRESS}
               </p>
             </td>
           </tr>
@@ -261,6 +241,26 @@ function buildApplicantEmail(name: string, styleLabel: string): string {
   </table>
 </body>
 </html>`;
+}
+
+/* ─── GET: quick check that Production has Resend env (no secrets returned) ─── */
+export async function GET() {
+  const hasKey = Boolean(process.env.RESEND_API_KEY?.trim());
+  const hasFrom = Boolean(process.env.RESEND_FROM_EMAIL?.trim());
+  const hasNotify = Boolean(process.env.RESEND_NOTIFY_EMAIL?.trim());
+  const emailConfigured = hasKey && hasFrom && hasNotify;
+
+  return NextResponse.json({
+    emailConfigured,
+    checks: {
+      RESEND_API_KEY: hasKey,
+      RESEND_FROM_EMAIL: hasFrom,
+      RESEND_NOTIFY_EMAIL: hasNotify,
+    },
+    nextSteps: emailConfigured
+      ? "Env looks complete for this deployment. Submit a test waitlist on the live site; check both inboxes and spam."
+      : "In Vercel → Settings → Environment Variables → Production, set every missing item above, then Redeploy.",
+  });
 }
 
 /* ─── Route handler ───────────────────────────────────────────── */
@@ -277,7 +277,8 @@ export async function POST(req: NextRequest) {
     const { name, email, styleInterest } = parsed.data;
     const normalizedEmail = email.trim().toLowerCase();
     const trimmedName    = name.trim();
-    const styleLabel     = STYLE_LABELS[styleInterest] ?? styleInterest;
+    const interestKey    = styleInterest ?? "all";
+    const styleLabel     = STYLE_LABELS[interestKey] ?? interestKey;
     const timestamp      = new Date().toLocaleString("en-US", {
       dateStyle: "full",
       timeStyle: "short",
@@ -299,63 +300,68 @@ export async function POST(req: NextRequest) {
       console.warn("Waitlist file write failed (non-fatal):", fsErr);
     }
 
-    /* ── 2. Send emails via Resend (skipped if key not set) ───── */
-    const resendKey    = process.env.RESEND_API_KEY;
-    const fromEmail    = process.env.RESEND_FROM_EMAIL;   // e.g. notifications@yourdomain.com
-    const notifyEmail  = process.env.RESEND_NOTIFY_EMAIL; // your business inbox
+    /* ── 2. Send emails via Resend (skipped if env incomplete) ──
+          Resend returns { data, error } — it does NOT throw on API errors,
+          so we must check .error on each result.                          */
+    const resendKey   = process.env.RESEND_API_KEY?.trim();
+    const fromEmail   = process.env.RESEND_FROM_EMAIL?.trim();
+    const notifyEmail = process.env.RESEND_NOTIFY_EMAIL?.trim();
+
+    let confirmationEmailSent = false;
+    let adminNotificationSent = false;
 
     if (resendKey && fromEmail && notifyEmail) {
       const resend = new Resend(resendKey);
 
-      const [adminResult, applicantResult] = await Promise.allSettled([
-        /* Admin notification → your business inbox */
+      const [adminOut, applicantOut] = await Promise.all([
         resend.emails.send({
           from: `Ellie <${fromEmail}>`,
-          to:   notifyEmail,
+          to: notifyEmail,
           replyTo: normalizedEmail,
-          subject: `New Inner Circle Application — ${trimmedName}`,
+          subject: `New Waitlist Application — ${trimmedName}`,
           html: buildAdminEmail(trimmedName, normalizedEmail, styleLabel, timestamp),
         }),
-
-        /* Confirmation → the applicant */
         resend.emails.send({
           from: `Ellie <${fromEmail}>`,
-          to:   normalizedEmail,
-          subject: "Welcome to the Elite Edit — Your Application is In",
+          to: normalizedEmail,
+          subject: "You're on the Waitlist — The Style Refresh",
           html: buildApplicantEmail(trimmedName, styleLabel),
         }),
       ]);
 
-      // Log any Resend errors server-side but don't fail the request —
-      // the waitlist.txt entry already captured the lead.
-      if (adminResult.status === "rejected") {
-        console.error("Resend admin email failed:", adminResult.reason);
-      }
-      if (applicantResult.status === "rejected") {
-        console.error("Resend applicant email failed:", applicantResult.reason);
+      if (adminOut.error) {
+        console.error("[waitlist] Admin notify failed (Resend):", adminOut.error);
+      } else {
+        adminNotificationSent = true;
       }
 
-      // If BOTH emails failed (e.g. invalid API key), surface the error to the user.
-      if (
-        adminResult.status === "rejected" &&
-        applicantResult.status === "rejected"
-      ) {
+      if (applicantOut.error) {
+        console.error("[waitlist] Applicant confirmation failed (Resend):", applicantOut.error);
+      } else {
+        confirmationEmailSent = true;
+      }
+
+      if (!adminNotificationSent && !confirmationEmailSent) {
         return NextResponse.json(
-          { error: "We couldn't send your confirmation email. Please try again." },
+          {
+            error:
+              "We couldn't send email right now. Please try again in a few minutes or email us directly.",
+          },
           { status: 500 }
         );
       }
     } else {
-      // Warn in dev if Resend env vars are missing, but still succeed.
-      if (process.env.NODE_ENV !== "production") {
-        console.warn(
-          "[waitlist] Resend env vars not set — emails skipped. " +
-          "Set RESEND_API_KEY, RESEND_FROM_EMAIL, and RESEND_NOTIFY_EMAIL in .env.local"
-        );
-      }
+      const msg =
+        "[waitlist] CRITICAL: Resend env incomplete — no emails sent (submitter sees success but you get nothing). " +
+        "Set RESEND_API_KEY, RESEND_FROM_EMAIL, and RESEND_NOTIFY_EMAIL in Vercel → Production → Environment Variables, then redeploy.";
+      console.error(msg);
     }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      success: true,
+      /** False when Resend env missing, or confirmation email failed (friend may not get inbox mail). */
+      confirmationEmailSent,
+    });
   } catch (err) {
     console.error("Waitlist error:", err);
     return NextResponse.json(

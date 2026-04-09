@@ -1,0 +1,21 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "installCommand": "npm install",
+  "regions": ["iad1"],
+  "crons": [
+    {
+      "path": "/api/run-curator",
+      "schedule": "0 22 * * 0"
+    },
+    {
+      "path": "/api/send-weekly",
+      "schedule": "0 11 * * 1"
+    },
+    {
+      "path": "/api/waitlist-drip",
+      "schedule": "0 13 * * *"
+    }
+  ]
+}

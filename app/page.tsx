@@ -1,146 +1,252 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
 import WaitlistModal from "@/components/WaitlistModal";
 import ScrollReveal from "@/components/ScrollReveal";
 
-/* ─── Style Grid data ─────────────────────────────────────────── */
-const styleCards = [
+/* ─── Look preview data (teaser only — full sourcing in VIP Room) */
+const previews = [
   {
     index: "01",
     label: "The Executive",
-    tagline: "Command any room.",
+    tagline: "Walk in and own the room.",
+    image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=600&h=300&q=80",
     description:
-      "Precision tailoring, authoritative colour blocking, and the accessories that signal you before you speak. Power is dressed, not declared.",
-    items: [
-      "Double-breasted navy blazer",
-      "Slim charcoal trousers",
-      "White point-collar shirt",
-      "Cognac Oxford brogues",
-      "Slim leather portfolio",
+      "Power dressing, refined. Structured pieces that command attention without trying — the kind of outfit that closes deals before you speak.",
+    teaser: [
+      "Tailored blazer in ivory bouclé",
+      "Wide-leg trousers in camel",
+      "Silk blouse in champagne",
+      "Block-heel pointed-toe pump",
     ],
-    accentBorder: "#000080",
-    accentLabel: "#000080",
-    icon: (
-      <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
-        <rect x="2" y="7" width="20" height="14" rx="1" />
-        <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" />
-        <line x1="12" y1="12" x2="12" y2="16" />
-        <line x1="10" y1="14" x2="14" y2="14" />
-      </svg>
-    ),
   },
   {
     index: "02",
     label: "The Weekender",
-    tagline: "Effortless. Never casual.",
+    tagline: "Effortless. On purpose.",
+    image: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=600&h=300&q=80",
     description:
-      "The art of looking undone while remaining impeccably considered. Relaxed silhouettes with refined texture — weekend dressing for those who know better.",
-    items: [
-      "Linen trousers in stone",
-      "Oversized merino crewneck",
-      "White leather low-top sneakers",
-      "Minimal field watch",
-      "Canvas tote — structured, not slouchy",
+      "Weekend dressing for women who never actually switch off. Polished enough to be seen, comfortable enough to mean it.",
+    teaser: [
+      "Oversized linen shirt in ecru",
+      "Straight-leg denim in mid-wash",
+      "Leather tote in cognac",
+      "White sneaker, low profile",
     ],
-    accentBorder: "#D4AF37",
-    accentLabel: "#b8952e",
-    icon: (
-      <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
-        <circle cx="12" cy="12" r="5" />
-        <line x1="12" y1="1"    x2="12" y2="3"    />
-        <line x1="12" y1="21"   x2="12" y2="23"   />
-        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-        <line x1="1" y1="12"    x2="3" y2="12"    />
-        <line x1="21" y1="12"   x2="23" y2="12"   />
-        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-      </svg>
-    ),
   },
   {
     index: "03",
     label: "The Wildcard",
-    tagline: "Wear the conversation.",
+    tagline: "This is the one they ask about.",
+    image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=600&h=300&q=80",
     description:
-      "One deliberate risk, executed with precision. The piece that makes an outfit a statement — for those confident enough to stand apart.",
-    items: [
-      "Velvet blazer in midnight plum",
-      "Tonal pleated trousers",
-      "Statement signet ring",
-      "Unlined suede loafers",
-      "Pocket square: tied, never folded",
+      "One deliberate statement, executed with precision. Not for everyone — but then, nothing worth wearing ever is.",
+    teaser: [
+      "Slip dress in chocolate satin",
+      "Cropped leather jacket in black",
+      "Gold chain mules",
+      "Sculptural gold cuff",
     ],
-    accentBorder: "#9ca3af",
-    accentLabel: "#6b7280",
-    icon: (
-      <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
-        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-      </svg>
-    ),
   },
 ];
 
 /* ─── Page ────────────────────────────────────────────────────── */
-export default function Home() {
-  const [modalOpen, setModalOpen] = useState(false);
-  const [scrolled, setScrolled]   = useState(false);
+// IMPORTANT: Replace these with real member quotes before going live.
+// Using invented testimonials violates FTC guidelines.
+// Collect real feedback by email after your first members receive their Monday brief.
+const testimonials = [
+  {
+    quote: "YOUR FIRST REAL MEMBER QUOTE GOES HERE. Ask members for feedback after their first Monday brief.",
+    name:  "Member Name",
+    city:  "City, State",
+  },
+  {
+    quote: "YOUR SECOND REAL MEMBER QUOTE GOES HERE. Even a short honest reaction is powerful.",
+    name:  "Member Name",
+    city:  "City, State",
+  },
+  {
+    quote: "YOUR THIRD REAL MEMBER QUOTE GOES HERE. One sentence from a real person beats any invented paragraph.",
+    name:  "Member Name",
+    city:  "City, State",
+  },
+];
 
-  /* Scroll listener — drives nav glassmorphism state */
+const faqs = [
+  {
+    q: "When do I get my first email?",
+    a: "Your first Monday brief arrives within days of subscribing. If you join mid-week, you'll get the current week's edit on the very next Monday morning.",
+  },
+  {
+    q: "Can I cancel before my next billing date?",
+    a: "Yes — cancel anytime from the member dashboard or by emailing Ellie directly. No questions, no penalties, no 30-day notice required.",
+  },
+  {
+    q: "What's in the VIP Room?",
+    a: "The full archive of every Monday brief ever published — all looks, all buy links, active and searchable. New members get access the moment they subscribe.",
+  },
+  {
+    q: "What if I don't love the picks one week?",
+    a: "You won't love every single one — that's honest. But three looks means three chances, and the majority of members order from at least one look every week. Weeks you don't, you've still lost nothing.",
+  },
+  {
+    q: "Is this real human curation or AI?",
+    a: "Both, done right. AI researches current trends and sources options. Ellie reviews, edits, and approves every single brief before it reaches your inbox. You get the speed of technology and the judgment of twenty years' experience.",
+  },
+];
+
+export default function Home() {
+  const [modalOpen,       setModalOpen]       = useState(false);
+  const [scrolled,        setScrolled]        = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [checkoutError,   setCheckoutError]   = useState<string | null>(null);
+  const [openFaq,         setOpenFaq]         = useState<number | null>(null);
+
+  /* Live preview — replaces hardcoded cards once Blob is configured */
+  const [activePreviews,  setActivePreviews]  = useState(previews);
+  const [liveWeekOf,      setLiveWeekOf]      = useState<string | null>(null);
+  const [editorialLead,   setEditorialLead]   = useState<string | null>(null);
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  /* Fetch live curated preview from Vercel Blob (auto-updates every Monday) */
+  useEffect(() => {
+    fetch("/api/current-preview")
+      .then(r => r.ok ? r.json() : null)
+      .then((data: {
+        looks?: Array<{
+          index: string; label: string; tagline: string;
+          description: string; teaser: string[];
+        }>;
+        weekOf?: string;
+        editorialLead?: string;
+      } | null) => {
+        if (data?.looks?.length === 3) {
+          setActivePreviews(
+            data.looks.map((look, i) => ({
+              ...previews[i % previews.length],
+              index:       look.index,
+              label:       look.label,
+              tagline:     look.tagline,
+              description: look.description,
+              teaser:      Array.isArray(look.teaser) ? look.teaser : previews[i % previews.length].teaser,
+            }))
+          );
+        }
+        if (data?.weekOf) setLiveWeekOf(data.weekOf);
+        if (data?.editorialLead) setEditorialLead(data.editorialLead);
+      })
+      .catch(() => { /* network error — silently keep hardcoded fallback */ });
+  }, []);
+
+  const handleCheckout = async () => {
+    setCheckoutError(null);
+    setCheckoutLoading(true);
+    try {
+      const res  = await fetch("/api/checkout", { method: "POST" });
+      const data = await res.json().catch(() => ({})) as { url?: string; error?: string };
+      if (data.url) {
+        window.location.href = data.url;
+        return;
+      }
+      setCheckoutLoading(false);
+      setCheckoutError(
+        data.error ??
+          "Checkout could not start. In Vercel → Production env, set STRIPE_SECRET_KEY, STRIPE_PRICE_ID, and NEXT_PUBLIC_BASE_URL, then redeploy."
+      );
+    } catch {
+      setCheckoutLoading(false);
+      setCheckoutError("Could not reach checkout. Check your connection and try again.");
+    }
+  };
+
   return (
     <>
       <WaitlistModal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
 
-      <div className="min-h-screen bg-white overflow-x-hidden">
+      {checkoutError ? (
+        <div
+          className="fixed top-20 left-1/2 z-[60] max-w-lg w-[calc(100%-2rem)] -translate-x-1/2 px-4 py-3 rounded-lg shadow-lg border text-left"
+          style={{
+            background:      "var(--cream)",
+            borderColor:     "rgba(180, 60, 60, 0.35)",
+            color:           "var(--charcoal)",
+            fontFamily:      "Inter, sans-serif",
+            fontSize:        "0.85rem",
+            lineHeight:      1.45,
+          }}
+          role="alert"
+        >
+          <div className="flex justify-between gap-3 items-start">
+            <span>{checkoutError}</span>
+            <button
+              type="button"
+              className="shrink-0 opacity-60 hover:opacity-100 text-lg leading-none"
+              onClick={() => setCheckoutError(null)}
+              aria-label="Dismiss"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      <div className="min-h-screen overflow-x-hidden pb-24 md:pb-0" style={{ background: "var(--cream)" }}>
 
         {/* ════════════════════════════════════════════════════════
-            NAVIGATION — glassmorphism, scroll-aware
+            NAVIGATION
         ════════════════════════════════════════════════════════ */}
-        <nav
-          className={`fixed top-0 left-0 right-0 z-40 ${
-            scrolled ? "nav-glass-scrolled" : "nav-glass"
-          }`}
-        >
-          <div className="max-w-6xl mx-auto px-5 sm:px-6 py-3.5 sm:py-4 flex items-center justify-between gap-4">
+        <nav className={`fixed top-0 left-0 right-0 z-50 ${scrolled ? "nav-glass-scrolled" : "nav-glass"}`}>
+          <div className="max-w-6xl mx-auto px-5 sm:px-8 py-4 flex items-center justify-between gap-4">
 
             {/* Wordmark */}
-            <span
-              className="font-bold tracking-widest uppercase shrink-0"
-              style={{
-                fontFamily: "Playfair Display, serif",
-                letterSpacing: "0.28em",
-                color: "#000080",
-                fontSize: "clamp(1rem, 4vw, 1.2rem)",
-              }}
-            >
-              Ellie
-            </span>
+            <div className="flex flex-col leading-none shrink-0">
+              <span
+                style={{
+                  fontFamily:    "DM Serif Display, serif",
+                  color:         "var(--charcoal)",
+                  fontSize:      "1.1rem",
+                  letterSpacing: "0.22em",
+                  textTransform: "uppercase",
+                }}
+              >
+                Ellie
+              </span>
+              <span
+                style={{
+                  fontFamily:    "Inter, sans-serif",
+                  color:         "var(--blush)",
+                  fontSize:      "0.68rem",
+                  letterSpacing: "0.25em",
+                  textTransform: "uppercase",
+                  marginTop:     "1px",
+                }}
+              >
+                The Style Refresh
+              </span>
+            </div>
 
             {/* Desktop links */}
-            <div className="hidden md:flex items-center gap-7">
+            <div className="hidden md:flex items-center gap-8">
               {[
-                { label: "The Lore",  href: "#the-lore"  },
-                { label: "This Week", href: "#this-week" },
-                { label: "Apply",     href: "#apply"     },
+                { label: "The Story",  href: "#the-story"  },
+                { label: "This Week",  href: "#this-week"  },
+                { label: "The Edit",   href: "/blog"       },
+                { label: "Join",       href: "#join"        },
               ].map(({ label, href }) => (
                 <a
                   key={label}
                   href={href}
-                  className="text-xs tracking-widest uppercase transition-colors duration-200"
-                  style={{
-                    letterSpacing: "0.2em",
-                    color: "#9ca3af",
-                    fontFamily: "Inter, sans-serif",
-                  }}
-                  onMouseEnter={e => (e.currentTarget.style.color = "#000080")}
-                  onMouseLeave={e => (e.currentTarget.style.color = "#9ca3af")}
+                  className="uppercase tracking-widest transition-colors duration-200"
+                  style={{ fontSize: "0.78rem", letterSpacing: "0.18em", color: "var(--warm-gray)", fontFamily: "Inter, sans-serif" }}
+                  onMouseEnter={e => (e.currentTarget.style.color = "var(--charcoal)")}
+                  onMouseLeave={e => (e.currentTarget.style.color = "var(--warm-gray)")}
                 >
                   {label}
                 </a>
@@ -149,11 +255,14 @@ export default function Home() {
 
             {/* Nav CTA */}
             <button
-              onClick={() => setModalOpen(true)}
-              className="btn-gold shrink-0"
-              style={{ padding: "0.55rem 1.1rem", fontSize: "0.68rem", minHeight: "38px" }}
+              type="button"
+              onClick={handleCheckout}
+              disabled={checkoutLoading}
+              className="btn-primary shrink-0"
+              style={{ padding: "0.55rem 1.25rem", fontSize: "0.67rem", minHeight: "38px" }}
+              aria-label="Join Style Refresh for 19 dollars per month"
             >
-              <span className="hidden sm:inline">Apply for the&nbsp;</span>Inner Circle
+              {checkoutLoading ? "Loading…" : "Join $19/mo"}
             </button>
           </div>
         </nav>
@@ -161,354 +270,486 @@ export default function Home() {
         {/* ════════════════════════════════════════════════════════
             HERO
         ════════════════════════════════════════════════════════ */}
-        <section className="relative min-h-screen flex flex-col items-center justify-center px-5 sm:px-6 pt-24 pb-20 text-center">
-
-          {/* Decorative background */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
-            {/* Top gold hairline */}
-            <div
-              className="absolute top-0 left-0 right-0 h-px"
-              style={{ background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.25), transparent)" }}
-            />
-            {/* Radial glows */}
-            <div
-              className="absolute -top-52 -right-52 rounded-full"
-              style={{
-                width: "min(36rem, 90vw)",
-                height: "min(36rem, 90vw)",
-                background: "radial-gradient(circle, rgba(0,0,128,0.055), transparent 70%)",
-              }}
-            />
-            <div
-              className="absolute -bottom-52 -left-52 rounded-full"
-              style={{
-                width: "min(36rem, 90vw)",
-                height: "min(36rem, 90vw)",
-                background: "radial-gradient(circle, rgba(212,175,55,0.045), transparent 70%)",
-              }}
-            />
-            {/* Subtle grid */}
-            <div
-              className="absolute inset-0"
-              style={{
-                backgroundImage: `
-                  linear-gradient(rgba(0,0,128,0.018) 1px, transparent 1px),
-                  linear-gradient(90deg, rgba(0,0,128,0.018) 1px, transparent 1px)
-                `,
-                backgroundSize: "72px 72px",
-              }}
-            />
-          </div>
-
-          {/* Hero content — no scroll reveal on hero itself (it's the LCP) */}
-          <div className="relative z-10 max-w-2xl mx-auto w-full">
-
-            {/* Eyebrow */}
-            <div className="flex items-center justify-center gap-3 sm:gap-4 mb-7 sm:mb-9">
-              <div
-                className="h-px"
-                style={{
-                  width: "clamp(24px, 5vw, 48px)",
-                  background: "linear-gradient(90deg, transparent, #D4AF37)",
-                  opacity: 0.7,
-                }}
-              />
-              <span
-                className="text-xs font-semibold uppercase tracking-widest shrink-0"
-                style={{ color: "#D4AF37", letterSpacing: "0.35em", fontFamily: "Inter, sans-serif" }}
-              >
-                Private Membership
-              </span>
-              <div
-                className="h-px"
-                style={{
-                  width: "clamp(24px, 5vw, 48px)",
-                  background: "linear-gradient(90deg, #D4AF37, transparent)",
-                  opacity: 0.7,
-                }}
-              />
-            </div>
-
-            {/* Headline
-                ─ clamp tuned for iPhone SE (320px) → Galaxy S26 Ultra (412px) → desktop
-                ─ 320px: clamp(1.65rem, 8.5vw, 4.25rem) → 8.5*3.2 = 27.2px, floor = 1.65rem = 26.4px → ~26px ✓
-                ─ 390px: 8.5*3.9 = 33.15px → fits 3 lines cleanly
-                ─ 412px: 8.5*4.12 = 35px → ideal Galaxy S26 size
-                ─ 768px+: capped at 4.25rem = 68px                            */}
-            <h1
-              className="font-bold leading-tight mb-5 sm:mb-6"
-              style={{
-                fontFamily: "Playfair Display, serif",
-                color: "#000080",
-                fontSize: "clamp(1.65rem, 8.5vw, 4.25rem)",
-                lineHeight: 1.17,
-                letterSpacing: "-0.01em",
-              }}
-            >
-              Ellie: The Industry&apos;s
-              <br />
-              Best-Kept Secret,
-              {/* Gold shimmer on the payoff line */}
-              <em
-                className="not-italic block mt-1 text-gold-metallic"
-                style={{ fontStyle: "normal" }}
-              >
-                Now Opening Her Private Lookbook.
-              </em>
-            </h1>
-
-            {/* Gold rule */}
-            <div className="gold-divider" />
-
-            {/* Sub-headline */}
-            <p
-              className="text-gray-500 mt-5 mb-10 sm:mb-12 max-w-lg mx-auto leading-relaxed"
-              style={{
-                fontFamily: "Cormorant Garamond, serif",
-                fontSize: "clamp(1rem, 4vw, 1.2rem)",
-                lineHeight: "1.82",
-              }}
-            >
-              A weekly style intelligence briefing from a 20-year veteran
-              consultant. Three curated looks. Considered guidance. Zero noise.
-              Delivered every Monday morning.
-            </p>
-
-            {/* CTA cluster */}
-            <div className="flex flex-col items-center gap-3">
-              <button
-                onClick={() => setModalOpen(true)}
-                className="btn-gold w-full sm:w-auto"
-                style={{ minHeight: "52px", fontSize: "0.73rem" }}
-              >
-                Apply for the Inner Circle
-              </button>
-              <span
-                className="text-gray-400 text-xs uppercase tracking-widest"
-                style={{ letterSpacing: "0.2em", fontFamily: "Inter, sans-serif" }}
-              >
-                Membership is limited · Applications reviewed personally
-              </span>
-            </div>
-          </div>
-
-          {/* Scroll indicator */}
+        <section
+          className="relative min-h-screen flex items-center justify-center px-5 sm:px-8 pt-24 pb-16"
+          style={{ background: "linear-gradient(175deg, var(--cream) 0%, var(--cream-dark) 100%)" }}
+        >
+          {/* Subtle texture grid */}
           <div
-            className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-scroll-pulse"
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              backgroundImage: `linear-gradient(rgba(201,185,154,0.07) 1px, transparent 1px),
+                                linear-gradient(90deg, rgba(201,185,154,0.07) 1px, transparent 1px)`,
+              backgroundSize: "64px 64px",
+            }}
             aria-hidden="true"
-          >
-            <span
-              className="text-xs uppercase tracking-widest text-gray-400"
-              style={{ letterSpacing: "0.22em", fontFamily: "Inter, sans-serif" }}
-            >
-              Scroll
-            </span>
-            <div
-              className="w-px h-10"
-              style={{ background: "linear-gradient(to bottom, #D4AF37, transparent)" }}
-            />
+          />
+          {/* Top sand hairline */}
+          <div
+            className="absolute top-0 left-0 right-0 h-px"
+            style={{ background: "linear-gradient(90deg, transparent, rgba(196,149,106,0.2), transparent)" }}
+          />
+
+          <div className="relative z-10 w-full max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-20 items-center">
+
+              {/* ── Left: Text content ── */}
+              <div className="flex flex-col items-center lg:items-start text-center lg:text-left py-8">
+
+                {/* Eyebrow */}
+                <ScrollReveal direction="up" delay={0}>
+                  <div className="flex items-center justify-center lg:justify-start gap-3 mb-7">
+                    <div className="h-px w-8" style={{ background: "linear-gradient(90deg, transparent, var(--sand-dark))" }} />
+                    <span className="section-label" style={{ fontSize: "0.75rem", letterSpacing: "0.3em" }}>
+                      Private Style Membership
+                    </span>
+                    <div className="h-px w-8" style={{ background: "linear-gradient(90deg, var(--sand-dark), transparent)" }} />
+                  </div>
+                </ScrollReveal>
+
+                {/* Main headline */}
+                <ScrollReveal direction="up" delay={80}>
+                  <h1
+                    className="font-bold leading-tight mb-6"
+                    style={{
+                      fontFamily: "DM Serif Display, serif",
+                      color:      "var(--charcoal)",
+                      fontSize:   "clamp(2.4rem, 8vw, 5rem)",
+                      lineHeight: "1.08",
+                    }}
+                  >
+                    Three looks.
+                    <br />
+                    <em className="not-italic" style={{ color: "var(--blush)" }}>Every Monday.</em>
+                    <br />
+                    Ready to buy.
+                  </h1>
+                </ScrollReveal>
+
+                {/* Divider */}
+                <ScrollReveal direction="up" delay={140}>
+                  <div className="sand-divider lg:mx-0" />
+                </ScrollReveal>
+
+                {/* Sub-headline */}
+                <ScrollReveal direction="up" delay={200}>
+                  <p
+                    className="mb-10 mx-auto lg:mx-0 leading-relaxed"
+                    style={{
+                      fontFamily: "Cormorant Garamond, serif",
+                      color:      "var(--charcoal-muted)",
+                      fontSize:   "clamp(1.1rem, 3.5vw, 1.35rem)",
+                      lineHeight: "1.85",
+                      maxWidth:   "34rem",
+                    }}
+                  >
+                    Three complete looks — sourced, styled, and ready to shop —
+                    delivered to your inbox every Monday morning. Women&apos;s fashion,
+                    curated personally by Ellie. Direct buy links to every single item.
+                  </p>
+                </ScrollReveal>
+
+                {/* Trust line */}
+                <div className="flex flex-col items-center lg:items-start">
+                  <p
+                    className="uppercase tracking-widest text-center lg:text-left"
+                    style={{
+                      fontSize:      "0.8rem",
+                      fontWeight:    600,
+                      color:         "var(--charcoal-muted)",
+                      letterSpacing: "0.14em",
+                      fontFamily:    "Inter, sans-serif",
+                      lineHeight:    1.5,
+                    }}
+                  >
+                    Secure checkout via Stripe
+                    <br />
+                    <span style={{ fontWeight: 700, color: "var(--charcoal)" }}>Cancel anytime</span>
+                  </p>
+                </div>
+              </div>
+
+              {/* ── Right: Editorial photo (desktop only) ── */}
+              <div className="hidden lg:block">
+                <ScrollReveal direction="right" delay={160} threshold={0.05}>
+                  <div className="relative" style={{ paddingBottom: "128%" }}>
+
+                    {/* Decorative offset frame */}
+                    <div
+                      className="absolute pointer-events-none"
+                      style={{
+                        top: -16, left: -16, right: 16, bottom: 16,
+                        border: "1px solid rgba(196,149,106,0.40)",
+                        zIndex: 0,
+                      }}
+                      aria-hidden="true"
+                    />
+
+                    {/* Photo */}
+                    <Image
+                      src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=900&q=85"
+                      alt="Sophisticated women's fashion editorial — The Style Refresh"
+                      fill
+                      sizes="(min-width: 1024px) 44vw, 0px"
+                      style={{ objectFit: "cover", objectPosition: "center top", zIndex: 1 }}
+                      priority
+                    />
+
+                    {/* Caption overlay */}
+                    <div
+                      className="absolute bottom-0 left-0 right-0"
+                      style={{
+                        background: "linear-gradient(transparent, rgba(44,44,44,0.58))",
+                        padding:    "36px 18px 14px",
+                        zIndex:     2,
+                      }}
+                    >
+                      <p style={{
+                        margin:        0,
+                        color:         "rgba(253,250,245,0.7)",
+                        fontSize:      "9px",
+                        letterSpacing: "0.26em",
+                        textTransform: "uppercase",
+                        fontFamily:    "Inter, sans-serif",
+                      }}>
+                        Photo: Unsplash
+                      </p>
+                    </div>
+                  </div>
+                </ScrollReveal>
+              </div>
+
+            </div>
+
+            {/* Scroll indicator */}
+            <div className="flex justify-center mt-12 lg:mt-16 opacity-40">
+              <div className="w-px animate-scroll-pulse" style={{ height: "32px", background: "var(--sand-dark)" }} />
+            </div>
           </div>
         </section>
 
         {/* ════════════════════════════════════════════════════════
-            THE LORE
+            THE STORY
         ════════════════════════════════════════════════════════ */}
-        <section id="the-lore" className="py-20 sm:py-28 px-5 sm:px-6" style={{ backgroundColor: "#000080" }}>
+        <section id="the-story" className="py-20 sm:py-28 px-5 sm:px-8 bg-white">
           <div className="max-w-4xl mx-auto">
 
-            {/* Section header */}
-            <ScrollReveal direction="up" threshold={0.2}>
-              <div className="text-center mb-12 sm:mb-16">
-                <span
-                  className="text-xs font-semibold uppercase tracking-widest block mb-4"
-                  style={{ color: "#D4AF37", letterSpacing: "0.35em", fontFamily: "Inter, sans-serif" }}
-                >
-                  The Lore
-                </span>
-                <div className="gold-divider" />
+            <ScrollReveal direction="up" threshold={0.15}>
+              <div className="text-center mb-14">
+                <span className="section-label block mb-4">The Story</span>
+                <div className="sand-divider" />
               </div>
             </ScrollReveal>
 
-            <div className="grid md:grid-cols-2 gap-10 sm:gap-16 items-start">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-start">
 
-              {/* Quote — enters from left */}
-              <ScrollReveal direction="left" threshold={0.15}>
-                <div className="relative">
-                  <div
-                    className="absolute -top-6 -left-2 select-none opacity-10 leading-none"
+              <ScrollReveal direction="left" delay={0} threshold={0.12}>
+                <div>
+                  <h2
+                    className="font-bold leading-tight mb-6"
                     style={{
-                      fontFamily: "Playfair Display, serif",
-                      color: "#D4AF37",
-                      fontSize: "clamp(5rem, 18vw, 9rem)",
-                      lineHeight: 1,
+                      fontFamily: "DM Serif Display, serif",
+                      color:      "var(--charcoal)",
+                      fontSize:   "clamp(1.7rem, 5vw, 2.5rem)",
+                      lineHeight: "1.2",
                     }}
-                    aria-hidden="true"
                   >
-                    &ldquo;
-                  </div>
-                  <blockquote className="relative z-10">
-                    <p
-                      className="text-white leading-relaxed"
-                      style={{
-                        fontFamily: "Playfair Display, serif",
-                        fontSize: "clamp(1.05rem, 4vw, 1.4rem)",
-                        lineHeight: "1.78",
-                      }}
-                    >
-                      For two decades, I&apos;ve stayed behind the scenes
-                      dressing the elite. Now, I&apos;m opening my private
-                      lookbook to you.{" "}
-                      <em>No algorithms. Just style.</em>
-                    </p>
-                    <footer className="mt-7 flex items-center gap-4">
-                      <div
-                        className="h-px flex-1"
-                        style={{ background: "linear-gradient(90deg, #D4AF37, transparent)" }}
-                      />
-                      <cite
-                        className="not-italic text-sm tracking-widest uppercase"
-                        style={{ color: "#D4AF37", letterSpacing: "0.2em", fontFamily: "Inter, sans-serif" }}
-                      >
-                        — Ellie
-                      </cite>
-                    </footer>
-                  </blockquote>
+                    Twenty years behind the scenes.
+                    <br />
+                    <em style={{ color: "var(--blush)" }}>Now open to you.</em>
+                  </h2>
+                  <div
+                    className="h-px mb-7"
+                    style={{ background: "linear-gradient(90deg, var(--sand-dark), transparent)", width: "72px" }}
+                  />
                 </div>
               </ScrollReveal>
 
-              {/* Credentials — each stat staggers right */}
-              <div className="space-y-7 sm:space-y-8">
+              <ScrollReveal direction="right" delay={100} threshold={0.12}>
+                <div className="space-y-5">
+                  <p
+                  style={{
+                    fontFamily: "Cormorant Garamond, serif",
+                    color:      "var(--charcoal-muted)",
+                    fontSize:   "clamp(1.1rem, 3.5vw, 1.2rem)",
+                    lineHeight: "1.9",
+                  }}
+                >
+                  For two decades, I dressed the executives, the editors, and the
+                    quietly powerful women who ran the room. The looks they wore
+                    didn&apos;t come from scrolling feeds — they came from knowing
+                    exactly where to look, what to buy, and how to wear it.
+                  </p>
+                  <p
+                  style={{
+                    fontFamily: "Cormorant Garamond, serif",
+                    color:      "var(--charcoal-muted)",
+                    fontSize:   "clamp(1.1rem, 3.5vw, 1.2rem)",
+                    lineHeight: "1.9",
+                  }}
+                >
+                  Now I&apos;m opening the private lookbook.
+                  </p>
+                  <p
+                  style={{
+                    fontFamily: "Cormorant Garamond, serif",
+                    color:      "var(--charcoal-muted)",
+                    fontSize:   "clamp(1.1rem, 3.5vw, 1.2rem)",
+                    lineHeight: "1.9",
+                  }}
+                >
+                  Not to the masses. To a small group of people who understand that
+                    getting dressed well isn&apos;t about spending more — it&apos;s about
+                    knowing <em>exactly</em> what to buy.
+                  </p>
+                  <p
+                    style={{
+                      fontFamily:    "DM Serif Display, serif",
+                      color:         "var(--blush)",
+                      fontSize:      "clamp(1.4rem, 4vw, 1.75rem)",
+                      lineHeight:    "1",
+                      marginTop:     "28px",
+                      fontStyle:     "italic",
+                      letterSpacing: "0.02em",
+                    }}
+                  >
+                    — Ellie
+                  </p>
+                </div>
+              </ScrollReveal>
+            </div>
+
+            {/* Three pillars */}
+            <ScrollReveal direction="up" delay={150} threshold={0.1}>
+              <div
+                className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-px"
+                style={{ background: "var(--sand-border)" }}
+              >
                 {[
-                  {
-                    number: "20",
-                    unit: "Years",
-                    desc: "Dressing executives, founders, and creative leaders across three continents.",
-                    delay: 0,
-                  },
-                  {
-                    number: "1,200+",
-                    unit: "Clients",
-                    desc: "From first-time CEOs to quiet old money — all with different bodies, the same desire to be remembered.",
-                    delay: 120,
-                  },
-                  {
-                    number: "0",
-                    unit: "Algorithms",
-                    desc: "Every recommendation is handpicked. No feeds. No trending. Just considered, lasting taste.",
-                    delay: 240,
-                  },
-                ].map((stat) => (
-                  <ScrollReveal key={stat.unit} direction="right" delay={stat.delay} threshold={0.1}>
-                    <div className="flex items-start gap-4 sm:gap-5">
-                      <div className="shrink-0 w-16 sm:w-20 text-right">
-                        <span
-                          className="block font-bold leading-none"
-                          style={{
-                            fontFamily: "Playfair Display, serif",
-                            color: "#D4AF37",
-                            fontSize: "clamp(1.75rem, 6vw, 2.5rem)",
-                          }}
-                        >
-                          {stat.number}
-                        </span>
-                        <span
-                          className="text-xs uppercase tracking-widest opacity-70"
-                          style={{ color: "#D4AF37", letterSpacing: "0.2em", fontFamily: "Inter, sans-serif" }}
-                        >
-                          {stat.unit}
-                        </span>
-                      </div>
-                      <div
-                        className="self-stretch w-px mt-1 shrink-0"
-                        style={{ background: "rgba(212,175,55,0.2)" }}
-                      />
-                      <p
-                        className="text-gray-300 leading-relaxed"
-                        style={{
-                          fontFamily: "Cormorant Garamond, serif",
-                          fontSize: "clamp(0.95rem, 3.5vw, 1.05rem)",
-                          lineHeight: "1.72",
-                        }}
-                      >
-                        {stat.desc}
-                      </p>
-                    </div>
-                  </ScrollReveal>
+                  { num: "3",   label: "Complete looks",   sub: "per Monday brief"         },
+                  { num: "52",  label: "Briefs per year",  sub: "never a missed Monday"     },
+                  { num: "∞",   label: "Buy links",        sub: "every item, fully sourced" },
+                ].map((item) => (
+                  <div
+                    key={item.label}
+                    className="bg-white py-9 px-7 text-center"
+                  >
+                    <span
+                      style={{
+                        fontFamily: "DM Serif Display, serif",
+                        color:      "var(--blush)",
+                        fontSize:   "2.5rem",
+                        lineHeight: "1",
+                        display:    "block",
+                        marginBottom: "8px",
+                      }}
+                    >
+                      {item.num}
+                    </span>
+                    <span
+                      style={{
+                        fontFamily:    "Inter, sans-serif",
+                        color:         "var(--charcoal)",
+                    fontSize:      "0.8rem",
+                    fontWeight:    500,
+                    letterSpacing: "0.18em",
+                    textTransform: "uppercase",
+                    display:       "block",
+                  }}
+                >
+                  {item.label}
+                    </span>
+                    <span
+                      style={{
+                    fontFamily: "Inter, sans-serif",
+                    color:      "var(--warm-gray)",
+                    fontSize:   "0.76rem",
+                    display:    "block",
+                    marginTop:  "4px",
+                      }}
+                    >
+                      {item.sub}
+                    </span>
+                  </div>
                 ))}
               </div>
-            </div>
+            </ScrollReveal>
           </div>
         </section>
 
         {/* ════════════════════════════════════════════════════════
-            STYLE GRID
+            TESTIMONIALS
+            HIDDEN UNTIL REAL MEMBER QUOTES ARE COLLECTED.
+            Set SHOW_TESTIMONIALS=true in page.tsx to enable.
+            Replace placeholder quotes above before going live.
         ════════════════════════════════════════════════════════ */}
-        <section id="this-week" className="py-20 sm:py-28 px-5 sm:px-6 bg-white">
-          <div className="max-w-6xl mx-auto">
-
-            {/* Section header */}
-            <ScrollReveal direction="up" threshold={0.2}>
-              <div className="text-center mb-12 sm:mb-16">
-                <span
-                  className="text-xs font-semibold uppercase tracking-widest block mb-3"
-                  style={{ color: "#D4AF37", letterSpacing: "0.35em", fontFamily: "Inter, sans-serif" }}
-                >
-                  This Week&apos;s Blueprint
-                </span>
-                <h2
-                  className="font-bold mb-4"
-                  style={{
-                    fontFamily: "Playfair Display, serif",
-                    color: "#000080",
-                    fontSize: "clamp(1.55rem, 5vw, 2.5rem)",
-                  }}
-                >
-                  The Style Grid
-                </h2>
-                <div className="gold-divider" />
-                <p
-                  className="mt-5 text-gray-500 max-w-md mx-auto leading-relaxed"
-                  style={{
-                    fontFamily: "Cormorant Garamond, serif",
-                    fontSize: "clamp(0.95rem, 3.5vw, 1.1rem)",
-                    lineHeight: "1.75",
-                  }}
-                >
-                  Three distinct directions. One for every occasion this week.
-                  Members receive the full sourced edition every Monday.
-                </p>
+        {false && <section className="py-20 sm:py-24 px-5 sm:px-8" style={{ background: "var(--cream)" }}>
+          <div className="max-w-5xl mx-auto">
+            <ScrollReveal direction="up" threshold={0.12}>
+              <div className="text-center mb-12">
+                <span className="section-label block mb-3">Member Stories</span>
+                <div className="sand-divider" />
               </div>
             </ScrollReveal>
 
-            {/* Cards — staggered */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-7">
-              {styleCards.map((card, i) => (
-                <ScrollReveal key={card.label} direction="up" delay={i * 130} threshold={0.1}>
-                  <article
-                    className="group relative bg-white border border-gray-100 p-6 sm:p-8 hover:shadow-xl transition-shadow duration-500 hover:-translate-y-1 transition-transform h-full"
-                    style={{ borderTop: `2px solid ${card.accentBorder}` }}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {testimonials.map((t, i) => (
+                <ScrollReveal key={t.name} direction="up" delay={i * 80} threshold={0.1}>
+                  <div
+                    className="flex flex-col justify-between h-full p-8"
+                    style={{
+                      background:   "var(--cream-dark)",
+                      borderLeft:   "2px solid var(--blush)",
+                    }}
                   >
+                    <p
+                      style={{
+                        fontFamily: "Cormorant Garamond, serif",
+                        color:      "var(--charcoal-muted)",
+                        fontSize:   "1.05rem",
+                        lineHeight: "1.85",
+                        fontStyle:  "italic",
+                      }}
+                    >
+                      &ldquo;{t.quote}&rdquo;
+                    </p>
+                    <div className="mt-6">
+                      <div
+                        className="h-px mb-4"
+                        style={{ background: "var(--sand-border)", width: "40px" }}
+                      />
+                      <p
+                        style={{
+                          fontFamily:    "Inter, sans-serif",
+                          color:         "var(--charcoal)",
+                          fontSize:      "0.8rem",
+                          fontWeight:    600,
+                          letterSpacing: "0.1em",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        {t.name}
+                      </p>
+                      <p
+                        style={{
+                          fontFamily: "Inter, sans-serif",
+                          color:      "var(--warm-gray)",
+                          fontSize:   "0.74rem",
+                          marginTop:  "2px",
+                        }}
+                      >
+                        {t.city}
+                      </p>
+                    </div>
+                  </div>
+                </ScrollReveal>
+              ))}
+            </div>
+          </div>
+        </section>}
+
+        {/* ════════════════════════════════════════════════════════
+            THIS WEEK'S PREVIEW
+        ════════════════════════════════════════════════════════ */}
+        <section
+          id="this-week"
+          className="py-20 sm:py-28 px-5 sm:px-8"
+          style={{ background: "var(--cream-dark)" }}
+        >
+          <div className="max-w-6xl mx-auto">
+
+            <ScrollReveal direction="up" threshold={0.12}>
+              <div className="text-center mb-14">
+                <span className="section-label block mb-2">
+                  {liveWeekOf ? `Week of ${liveWeekOf}` : "This Week's Edit"}
+                </span>
+                <h2
+                  className="font-bold"
+                  style={{
+                    fontFamily: "DM Serif Display, serif",
+                    color:      "var(--charcoal)",
+                    fontSize:   "clamp(1.6rem, 5vw, 2.4rem)",
+                  }}
+                >
+                  Three looks. All sourced.
+                </h2>
+
+                {/* Live editorial lead from Claude — updates every Monday */}
+                {editorialLead && (
+                  <p
+                    className="mt-5 mx-auto leading-relaxed"
+                    style={{
+                      fontFamily: "Cormorant Garamond, serif",
+                      color:      "var(--charcoal-muted)",
+                      fontSize:   "clamp(1.05rem, 3vw, 1.2rem)",
+                      lineHeight: "1.85",
+                      maxWidth:   "36rem",
+                      fontStyle:  "italic",
+                    }}
+                  >
+                    &ldquo;{editorialLead}&rdquo;
+                  </p>
+                )}
+
+                <p
+                  className="mt-4 mx-auto"
+                  style={{
+                    fontFamily:    "Inter, sans-serif",
+                    color:         "var(--warm-gray)",
+                    fontSize:      "0.8rem",
+                    letterSpacing: "0.06em",
+                    maxWidth:      "28rem",
+                  }}
+                >
+                  Full buy links for every item are exclusive to VIP Room members.
+                </p>
+                <div className="sand-divider mt-6" />
+              </div>
+            </ScrollReveal>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
+              {activePreviews.map((card, i) => (
+                <ScrollReveal key={card.label} direction="up" delay={i * 80} threshold={0.1}>
+                  <article
+                    className="bg-white relative group"
+                    style={{ borderTop: "2px solid var(--sand-border)" }}
+                  >
+                    {/* Editorial photo at top of card */}
+                    <div className="relative overflow-hidden" style={{ height: "200px" }}>
+                      <Image
+                        src={card.image}
+                        alt={`${card.label} — The Style Refresh`}
+                        fill
+                        sizes="(min-width: 1024px) 30vw, 90vw"
+                        style={{ objectFit: "cover", objectPosition: "center top", transition: "transform 0.5s ease" }}
+                        className="group-hover:scale-105"
+                      />
+                      {/* Blush gradient overlay */}
+                      <div
+                        className="absolute inset-0 pointer-events-none"
+                        style={{ background: "linear-gradient(transparent 50%, rgba(44,44,44,0.35))" }}
+                        aria-hidden="true"
+                      />
+                    </div>
+
+                    <div className="p-7 sm:p-8">
                     {/* Ghost index */}
                     <span
-                      className="absolute top-5 right-5 select-none font-bold leading-none"
+                      className="absolute top-[216px] right-5 select-none font-bold leading-none"
                       style={{
-                        fontFamily: "Playfair Display, serif",
-                        fontSize: "clamp(2.5rem, 8vw, 4rem)",
-                        color: "#000080",
-                        opacity: 0.055,
+                        fontFamily: "DM Serif Display, serif",
+                        fontSize:   "4rem",
+                        color:      "var(--cream-deep)",
+                        lineHeight: "1",
                       }}
                       aria-hidden="true"
                     >
                       {card.index}
                     </span>
 
-                    <div className="mb-4" style={{ color: card.accentBorder }}>
-                      {card.icon}
-                    </div>
-
                     <span
-                      className="text-xs font-semibold uppercase tracking-widest block mb-1"
-                      style={{ color: card.accentLabel, letterSpacing: "0.25em", fontFamily: "Inter, sans-serif" }}
+                    className="section-label block mb-2"
+                    style={{ fontSize: "0.74rem" }}
                     >
                       {card.label}
                     </span>
@@ -516,44 +757,46 @@ export default function Home() {
                     <h3
                       className="font-bold mb-4"
                       style={{
-                        fontFamily: "Playfair Display, serif",
-                        color: "#000080",
-                        fontSize: "clamp(1.05rem, 4vw, 1.2rem)",
+                        fontFamily: "DM Serif Display, serif",
+                        color:      "var(--charcoal)",
+                        fontSize:   "1.1rem",
+                        lineHeight: "1.3",
                       }}
                     >
                       {card.tagline}
                     </h3>
 
-                    {/* Gold accent rule */}
                     <div
                       className="h-px w-7 mb-5"
-                      style={{ background: "linear-gradient(90deg, #b8952e, #D4AF37, #b8952e)" }}
+                      style={{ background: "linear-gradient(90deg, var(--blush), var(--sand-dark))" }}
                     />
 
                     <p
-                      className="text-gray-500 mb-6 leading-relaxed"
-                      style={{
-                        fontFamily: "Cormorant Garamond, serif",
-                        fontSize: "clamp(0.9rem, 3.5vw, 1rem)",
-                        lineHeight: "1.82",
-                      }}
-                    >
-                      {card.description}
+                      className="mb-6 leading-relaxed"
+                style={{
+                  fontFamily: "Cormorant Garamond, serif",
+                  color:      "var(--charcoal-muted)",
+                  fontSize:   "1.05rem",
+                  lineHeight: "1.8",
+                }}
+              >
+                {card.description}
                     </p>
 
-                    <ul className="space-y-2.5">
-                      {card.items.map((item) => (
-                        <li key={item} className="flex items-start gap-3">
+                    {/* Teaser item list */}
+                    <ul className="space-y-2.5 mb-6">
+                      {card.teaser.map((item) => (
+                        <li key={item} className="flex items-start gap-2.5">
                           <span
                             className="mt-[7px] shrink-0 rounded-full"
-                            style={{ width: "4px", height: "4px", background: "#D4AF37", opacity: 0.85, flexShrink: 0 }}
+                            style={{ width: "3px", height: "3px", background: "var(--blush)", flexShrink: 0 }}
                           />
                           <span
-                            className="text-gray-600"
                             style={{
-                              fontFamily: "Cormorant Garamond, serif",
-                              fontSize: "clamp(0.88rem, 3.2vw, 0.96rem)",
-                              lineHeight: "1.62",
+                          fontFamily: "Inter, sans-serif",
+                          color:      "var(--charcoal-light)",
+                          fontSize:   "0.88rem",
+                          lineHeight: "1.6",
                             }}
                           >
                             {item}
@@ -562,163 +805,401 @@ export default function Home() {
                       ))}
                     </ul>
 
-                    <div className="mt-7 pt-5 border-t border-gray-100 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    {/* Lock indicator — decorative only (not a control) */}
+                    <div
+                      className="flex items-center gap-2 pt-4 pointer-events-none select-none"
+                      style={{ borderTop: "1px solid var(--sand-light)" }}
+                    >
+                      <svg width="11" height="13" viewBox="0 0 11 13" fill="none" aria-hidden="true">
+                        <rect x="1" y="5.5" width="9" height="7" rx="1" stroke="var(--taupe)" strokeWidth="1.1" />
+                        <path d="M3.5 5.5V3.5a2 2 0 014 0v2" stroke="var(--taupe)" strokeWidth="1.1" strokeLinecap="round" />
+                        <circle cx="5.5" cy="9" r="1" fill="var(--blush)" />
+                      </svg>
                       <span
-                        className="text-xs uppercase tracking-widest"
-                        style={{ color: "#D4AF37", letterSpacing: "0.2em", fontFamily: "Inter, sans-serif" }}
+                        style={{
+                          fontFamily:    "Inter, sans-serif",
+                          color:         "var(--taupe)",
+                          fontSize:      "0.75rem",
+                          letterSpacing: "0.14em",
+                          textTransform: "uppercase",
+                        }}
                       >
-                        Full sourcing for members →
+                        Buy links for members
                       </span>
                     </div>
+                    </div>{/* end inner content div */}
                   </article>
                 </ScrollReveal>
               ))}
             </div>
 
-            {/* CTA below grid */}
+            {/* Cadence callout */}
             <ScrollReveal direction="up" delay={200} threshold={0.2}>
-              <div className="text-center mt-14 sm:mt-16">
+              <div className="text-center mt-12 flex flex-col items-center gap-2">
                 <p
-                  className="text-gray-400 text-xs uppercase tracking-widest mb-5"
-                  style={{ letterSpacing: "0.2em", fontFamily: "Inter, sans-serif" }}
+                  className="text-xs uppercase tracking-widest"
+                  style={{
+                    color:         "var(--charcoal)",
+                    letterSpacing: "0.2em",
+                    fontFamily:    "Inter, sans-serif",
+                    fontWeight:    700,
+                  }}
                 >
-                  New blueprint drops every Monday
+                  New edit drops every Monday
                 </p>
-                <button
-                  onClick={() => setModalOpen(true)}
-                  className="btn-gold w-full sm:w-auto"
-                  style={{ minHeight: "52px" }}
-                >
-                  Apply for the Inner Circle
-                </button>
+                {liveWeekOf && (
+                  <p style={{
+                    fontFamily:    "Inter, sans-serif",
+                    color:         "var(--blush)",
+                    fontSize:      "0.72rem",
+                    letterSpacing: "0.14em",
+                    textTransform: "uppercase",
+                  }}>
+                    Currently showing: Week of {liveWeekOf}
+                  </p>
+                )}
               </div>
             </ScrollReveal>
           </div>
         </section>
 
         {/* ════════════════════════════════════════════════════════
-            APPLY CTA BANNER
+            JOIN SECTION
         ════════════════════════════════════════════════════════ */}
         <section
-          id="apply"
-          className="py-20 sm:py-24 px-5 sm:px-6 relative overflow-hidden"
-          style={{ backgroundColor: "#000080" }}
+          id="join"
+          className="py-20 sm:py-28 px-5 sm:px-8 relative overflow-hidden"
+          style={{ background: "var(--charcoal)" }}
         >
-          {/* Texture grid */}
+          {/* Subtle grid */}
           <div
-            className="absolute inset-0"
+            className="absolute inset-0 pointer-events-none"
             style={{
-              backgroundImage: `
-                linear-gradient(rgba(212,175,55,0.04) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(212,175,55,0.04) 1px, transparent 1px)
-              `,
-              backgroundSize: "56px 56px",
+              backgroundImage: `linear-gradient(rgba(232,223,208,0.04) 1px, transparent 1px),
+                                linear-gradient(90deg, rgba(232,223,208,0.04) 1px, transparent 1px)`,
+              backgroundSize: "64px 64px",
             }}
-            aria-hidden="true"
-          />
-          {/* Corner glows */}
-          <div
-            className="absolute top-0 left-0 w-64 h-64 rounded-full pointer-events-none"
-            style={{ background: "radial-gradient(circle, rgba(212,175,55,0.06), transparent 70%)", transform: "translate(-40%, -40%)" }}
-            aria-hidden="true"
-          />
-          <div
-            className="absolute bottom-0 right-0 w-64 h-64 rounded-full pointer-events-none"
-            style={{ background: "radial-gradient(circle, rgba(212,175,55,0.06), transparent 70%)", transform: "translate(40%, 40%)" }}
             aria-hidden="true"
           />
 
           <div className="relative z-10 max-w-xl mx-auto text-center">
-            <ScrollReveal direction="up" threshold={0.18}>
-              <span
-                className="text-xs font-semibold uppercase tracking-widest block mb-5"
-                style={{ color: "#D4AF37", letterSpacing: "0.35em", fontFamily: "Inter, sans-serif" }}
-              >
-                Join the Waitlist
+            <ScrollReveal direction="up" threshold={0.15}>
+
+              <span className="section-label block mb-5" style={{ color: "var(--blush-light)" }}>
+                The Membership
               </span>
+
               <h2
-                className="font-bold text-white mb-5 leading-tight"
+                className="font-bold leading-tight mb-5"
                 style={{
-                  fontFamily: "Playfair Display, serif",
-                  fontSize: "clamp(1.7rem, 6vw, 3rem)",
+                  fontFamily: "DM Serif Display, serif",
+                  color:      "var(--cream)",
+                  fontSize:   "clamp(1.8rem, 6vw, 3.2rem)",
                 }}
               >
-                A limited number of spots.
+                One brief.
                 <br />
-                <span style={{ color: "#D4AF37" }}>Every one considered.</span>
+                <em className="not-italic" style={{ color: "var(--blush-light)" }}>
+                  Completely worth it.
+                </em>
               </h2>
-              <div className="gold-divider mb-7" />
+
+              <div className="sand-divider mb-8" style={{ opacity: 0.4 }} />
+
               <p
-                className="text-gray-300 mb-10 leading-relaxed"
+                className="mb-10 leading-relaxed"
                 style={{
                   fontFamily: "Cormorant Garamond, serif",
-                  fontSize: "clamp(1rem, 4vw, 1.2rem)",
-                  lineHeight: "1.82",
+                  color:      "rgba(253,250,245,0.65)",
+                  fontSize:   "clamp(1.1rem, 4vw, 1.25rem)",
+                  lineHeight: "1.85",
                 }}
               >
-                Ellie reviews every application personally. Add your name to
-                the list and you&apos;ll be first to know when the next spot opens.
+                Every Monday morning, three complete women&apos;s looks land in your inbox
+                — sourced to the exact buy link, styled so you can wear it the same week.
+                Less than a coffee a week.
               </p>
+
+              {/* Value list */}
+              <ul className="mb-10 inline-block text-left space-y-3">
+                {[
+                  "Three complete looks every Monday",
+                  "Direct buy links to every item",
+                  "Ellie&apos;s sourcing notes and recommendations",
+                  "Access to the VIP Room lookbook archive",
+                  "Cancel anytime — no contracts",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-3">
+                    <span style={{ color: "var(--blush)", marginTop: "3px" }} aria-hidden="true">✓</span>
+                    <span
+                      dangerouslySetInnerHTML={{ __html: item }}
+                      style={{
+                        fontFamily: "Inter, sans-serif",
+                          color:      "rgba(253,250,245,0.75)",
+                          fontSize:   "0.88rem",
+                          lineHeight: "1.7",
+                      }}
+                    />
+                  </li>
+                ))}
+              </ul>
+
+              <button
+                type="button"
+                onClick={handleCheckout}
+                disabled={checkoutLoading}
+                className="btn-primary w-full sm:w-auto"
+                style={{
+                  background:  "var(--cream)",
+                  color:       "var(--charcoal)",
+                  borderColor: "var(--cream)",
+                  minHeight:   "54px",
+                  fontSize:    "0.75rem",
+                  marginBottom: "16px",
+                }}
+              >
+                {checkoutLoading ? "Preparing Checkout…" : "Start My Refresh — $19/mo"}
+              </button>
+
+              <p
+                className="text-xs"
+                style={{ color: "rgba(253,250,245,0.35)", fontFamily: "Inter, sans-serif", letterSpacing: "0.1em" }}
+              >
+                Secure checkout · Billed monthly · Cancel anytime
+              </p>
+
               <button
                 onClick={() => setModalOpen(true)}
-                className="btn-gold w-full sm:w-auto"
-                style={{ minHeight: "52px" }}
+                className="block mx-auto mt-4 text-xs underline underline-offset-4"
+                style={{ color: "rgba(253,250,245,0.35)", fontFamily: "Inter, sans-serif" }}
               >
-                Apply for the Inner Circle
+                Not ready? Join the waitlist instead
               </button>
             </ScrollReveal>
           </div>
         </section>
 
         {/* ════════════════════════════════════════════════════════
+            FAQ
+        ════════════════════════════════════════════════════════ */}
+        <section className="py-20 sm:py-24 px-5 sm:px-8 bg-white">
+          <div className="max-w-2xl mx-auto">
+            <ScrollReveal direction="up" threshold={0.12}>
+              <div className="text-center mb-12">
+                <span className="section-label block mb-3">Questions</span>
+                <h2
+                  style={{
+                    fontFamily: "DM Serif Display, serif",
+                    color:      "var(--charcoal)",
+                    fontSize:   "clamp(1.6rem, 5vw, 2.2rem)",
+                  }}
+                >
+                  Everything you need to know.
+                </h2>
+                <div className="sand-divider mt-6" />
+              </div>
+            </ScrollReveal>
+
+            <div className="space-y-0">
+              {faqs.map((faq, i) => (
+                <ScrollReveal key={i} direction="up" delay={i * 50} threshold={0.05}>
+                  <div style={{ borderBottom: "1px solid var(--sand-border)" }}>
+                    <button
+                      type="button"
+                      className="w-full text-left flex items-center justify-between gap-4 py-5"
+                      onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                    >
+                      <span
+                        style={{
+                          fontFamily:    "Inter, sans-serif",
+                          color:         "var(--charcoal)",
+                          fontSize:      "0.88rem",
+                          fontWeight:    600,
+                          letterSpacing: "0.04em",
+                          lineHeight:    "1.5",
+                        }}
+                      >
+                        {faq.q}
+                      </span>
+                      <span
+                        style={{
+                          color:      "var(--blush)",
+                          fontSize:   "1.25rem",
+                          lineHeight: "1",
+                          flexShrink: 0,
+                          transition: "transform 0.25s ease",
+                          transform:  openFaq === i ? "rotate(45deg)" : "rotate(0deg)",
+                          display:    "inline-block",
+                        }}
+                        aria-hidden="true"
+                      >
+                        +
+                      </span>
+                    </button>
+
+                    <div
+                      style={{
+                        maxHeight:  openFaq === i ? "300px" : "0px",
+                        overflow:   "hidden",
+                        transition: "max-height 0.35s cubic-bezier(0.16,1,0.3,1)",
+                      }}
+                    >
+                      <p
+                        className="pb-5"
+                        style={{
+                          fontFamily: "Cormorant Garamond, serif",
+                          color:      "var(--charcoal-muted)",
+                          fontSize:   "1.05rem",
+                          lineHeight: "1.85",
+                        }}
+                      >
+                        {faq.a}
+                      </p>
+                    </div>
+                  </div>
+                </ScrollReveal>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ════════════════════════════════════════════════════════
             FOOTER
         ════════════════════════════════════════════════════════ */}
-        <footer className="bg-white border-t border-gray-100 py-10 sm:py-12 px-5 sm:px-6">
-          <div className="max-w-6xl mx-auto">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-5 sm:gap-6">
-              <span
-                className="font-bold tracking-widest uppercase"
-                style={{
-                  fontFamily: "Playfair Display, serif",
-                  letterSpacing: "0.25em",
-                  color: "#000080",
-                  fontSize: "clamp(1rem, 4vw, 1.15rem)",
-                }}
-              >
-                Ellie
-              </span>
+        <footer
+          className="py-10 px-5 sm:px-8 border-t"
+          style={{ background: "var(--cream)", borderColor: "var(--sand-border)" }}
+        >
+          <div className="max-w-6xl mx-auto flex flex-col gap-6">
+
+            {/* Top row */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-5">
+              {/* Wordmark */}
+              <div className="flex flex-col items-center sm:items-start leading-none">
+                <span
+                  style={{
+                    fontFamily:    "DM Serif Display, serif",
+                    color:         "var(--charcoal)",
+                    fontSize:      "1rem",
+                    letterSpacing: "0.22em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Ellie
+                </span>
+                <span
+                  style={{
+                    fontFamily:    "Inter, sans-serif",
+                    color:         "var(--blush)",
+                    fontSize:      "0.58rem",
+                    letterSpacing: "0.22em",
+                    textTransform: "uppercase",
+                    marginTop:     "2px",
+                  }}
+                >
+                  The Style Refresh
+                </span>
+              </div>
+
               <p
-                className="text-gray-400 text-sm text-center"
-                style={{ fontFamily: "Cormorant Garamond, serif", fontSize: "0.95rem" }}
+                className="text-center"
+                style={{ fontFamily: "Inter, sans-serif", color: "var(--warm-gray)", fontSize: "0.82rem" }}
               >
-                Style intelligence for the considered few.
+                Private style membership · Three looks every Monday
               </p>
-              <div className="flex items-center gap-5 sm:gap-6">
-                {["Privacy", "Terms", "Contact"].map((link) => (
+
+              <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+                {["The Story", "This Week", "Join"].map((link) => (
                   <a
                     key={link}
-                    href="#"
-                    className="text-xs uppercase tracking-widest transition-colors duration-200"
-                    style={{ letterSpacing: "0.15em", fontFamily: "Inter, sans-serif", color: "#9ca3af" }}
-                    onMouseEnter={e => (e.currentTarget.style.color = "#000080")}
-                    onMouseLeave={e => (e.currentTarget.style.color = "#9ca3af")}
+                    href={`#${link.toLowerCase().replace(" ", "-")}`}
+                    style={{
+                      fontFamily:     "Inter, sans-serif",
+                      color:          "var(--warm-gray)",
+                      fontSize:       "0.78rem",
+                      letterSpacing:  "0.15em",
+                      textTransform:  "uppercase",
+                      textDecoration: "none",
+                      transition:     "color 0.2s",
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.color = "var(--charcoal)")}
+                    onMouseLeave={e => (e.currentTarget.style.color = "var(--warm-gray)")}
                   >
                     {link}
                   </a>
                 ))}
+                <Link
+                  href="/membership"
+                  className="uppercase tracking-widest transition-colors"
+                  style={{
+                    fontFamily:     "Inter, sans-serif",
+                    color:          "var(--warm-gray)",
+                    fontSize:       "0.78rem",
+                    letterSpacing:  "0.15em",
+                    textDecoration: "none",
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.color = "var(--charcoal)")}
+                  onMouseLeave={e => (e.currentTarget.style.color = "var(--warm-gray)")}
+                >
+                  Membership
+                </Link>
               </div>
             </div>
 
-            <div className="mt-7 pt-7 border-t border-gray-50 text-center">
-              <p
-                className="text-xs text-gray-300 tracking-widest"
-                style={{ letterSpacing: "0.15em", fontFamily: "Inter, sans-serif" }}
-              >
-                © {new Date().getFullYear()} Ellie. All rights reserved.
+            {/* Legal row */}
+            <div
+              className="flex flex-wrap items-center justify-center gap-x-6 gap-y-1 pt-3"
+              style={{ borderTop: "1px solid var(--sand-border)" }}
+            >
+              <p style={{ fontFamily: "Inter, sans-serif", color: "var(--warm-gray)", fontSize: "0.74rem" }}>
+                © {new Date().getFullYear()} The Style Refresh. All rights reserved.
               </p>
+              {[
+                { label: "The Edit", href: "/blog" },
+                { label: "Privacy Policy", href: "/privacy" },
+                { label: "Terms of Service", href: "/terms" },
+              ].map(({ label, href }) => (
+                <Link
+                  key={label}
+                  href={href}
+                  style={{
+                    fontFamily:     "Inter, sans-serif",
+                    color:          "var(--warm-gray)",
+                    fontSize:       "0.74rem",
+                    textDecoration: "none",
+                    transition:     "color 0.2s",
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.color = "var(--charcoal)")}
+                  onMouseLeave={e => (e.currentTarget.style.color = "var(--warm-gray)")}
+                >
+                  {label}
+                </Link>
+              ))}
             </div>
           </div>
         </footer>
+
+        {/* Mobile: checkout always visible (some browsers failed ScrollReveal; nav can feel cramped) */}
+        <div
+          className="fixed bottom-0 left-0 right-0 z-50 md:hidden border-t flex justify-center px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+          style={{
+            background: "rgba(253,250,245,0.96)",
+            backdropFilter: "blur(12px)",
+            borderColor: "var(--sand-border)",
+            boxShadow: "0 -8px 32px rgba(44,44,44,0.06)",
+          }}
+        >
+          <button
+            type="button"
+            onClick={handleCheckout}
+            disabled={checkoutLoading}
+            className="btn-primary w-full max-w-md"
+            style={{ minHeight: "48px", fontSize: "0.72rem" }}
+            aria-label="Join Style Refresh for 19 dollars per month"
+          >
+            {checkoutLoading ? "Loading…" : "Join — $19/mo"}
+          </button>
+        </div>
 
       </div>
     </>

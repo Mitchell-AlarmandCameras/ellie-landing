@@ -1,0 +1,474 @@
+═══════════════════════════════════════════════════════════════════════════════
+  THE STYLE REFRESH — COMPLETE LAUNCH GUIDE
+  Everything to do, in order, with exact links.
+  Read top to bottom. Do each section before opening the site to the public.
+═══════════════════════════════════════════════════════════════════════════════
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 1 — GET A MAILING ADDRESS (P.O. Box)
+  TIME: 20 minutes   COST: ~$10-$20/month   REQUIRED BY: Federal CAN-SPAM law
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Every commercial email must include a physical mailing address. This protects
+your home address. A P.O. Box is perfectly legal.
+
+OPTION A — USPS P.O. Box (cheapest):
+  1. Go to: https://poboxes.usps.com/poBoxRequest/main.do
+  2. Enter your ZIP code → choose a small box ($10-$30/6 months)
+  3. Complete online, then pick up key at your local post office
+  Your address will be: PO Box XXXX, [City], NY [ZIP]
+
+OPTION B — Virtual Mailbox (no driving, digital scans):
+  1. Go to: https://www.anytimemailbox.com
+  2. Choose a New York address location
+  3. Sign up (~$10-$15/month) — they scan all mail to your email
+
+AFTER YOU GET THE ADDRESS:
+  1. Go to: https://vercel.com/dashboard
+  2. Click your project (ellie-landing or similar)
+  3. Click "Settings" → "Environment Variables"
+  4. Click "Add New" under PRODUCTION
+  5. Name:  BUSINESS_MAILING_ADDRESS
+     Value: The Style Refresh · PO Box XXXX · New York, NY XXXXX
+  6. Click "Save"
+  7. Go to "Deployments" tab → click "..." on the latest deployment → "Redeploy"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 2 — SECURE ALL YOUR ACCOUNTS (2-Factor Authentication)
+  TIME: 15 minutes   COST: Free   REQUIRED BY: NY SHIELD Act + common sense
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Anyone who gets your Stripe account can steal your money. Do this today.
+Use the Google Authenticator or Authy app on your phone for all of these.
+
+Download Authy (free):
+  iPhone: https://apps.apple.com/app/authy/id494168017
+  Android: https://play.google.com/store/apps/details?id=com.authy.authy
+
+Then enable 2FA on each account:
+
+STRIPE:
+  1. Go to: https://dashboard.stripe.com/settings/user
+  2. Scroll to "Two-step authentication"
+  3. Click "Enable" → scan QR code with Authy → save backup codes
+
+VERCEL:
+  1. Go to: https://vercel.com/account/security
+  2. Click "Enable Two-Factor Authentication"
+  3. Scan QR code with Authy → save backup codes
+
+GITHUB:
+  1. Go to: https://github.com/settings/security
+  2. Click "Enable two-factor authentication"
+  3. Choose "Authenticator app" → scan with Authy
+
+RESEND:
+  1. Go to: https://resend.com/settings/security
+  2. Enable 2FA if available → scan with Authy
+
+IMPORTANT: Save your backup codes in a safe place (not just your phone).
+If you lose your phone and have no backup codes, you lose access.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 3 — SET UP STRIPE TO RECEIVE MONEY
+  TIME: 30 minutes   COST: Free (Stripe takes 2.9% + $0.30 per transaction)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+A) CREATE YOUR STRIPE ACCOUNT (if not already done):
+  1. Go to: https://dashboard.stripe.com/register
+  2. Enter email, name, and create a password
+  3. Verify your email address
+
+B) COMPLETE STRIPE IDENTITY VERIFICATION:
+  1. Go to: https://dashboard.stripe.com/settings/account
+  2. Under "Business details" → fill in:
+     - Business type: Individual / Sole Proprietor (for now, before LLC)
+     - Industry: Other / Subscription Services
+     - Website: https://[your domain]
+     - Business address: Use your P.O. Box from Step 1
+  3. Under "Personal details" → fill in:
+     - Legal name (your real name)
+     - Date of birth
+     - Last 4 of SSN (Stripe uses this for tax reporting, not stored insecurely)
+  4. Click "Save"
+
+C) LINK YOUR PERSONAL BANK ACCOUNT:
+  1. Go to: https://dashboard.stripe.com/settings/payouts
+  2. Click "Add bank account"
+  3. Choose "US bank account" → enter your personal checking account:
+     - Routing number (9 digits, bottom-left of check)
+     - Account number
+  4. Stripe sends two micro-deposits (under $1) within 1-3 business days
+  5. Return to the same page and verify those two amounts
+  6. Your bank account is now linked — Stripe pays out every 2 business days
+
+D) CREATE YOUR SUBSCRIPTION PRODUCT:
+  1. Go to: https://dashboard.stripe.com/products/create
+  2. Product name: "The Style Refresh — Monthly Membership"
+  3. Description: "Three complete women's fashion looks with buy links, delivered every Monday"
+  4. Click "Add a price":
+     - Recurring: Monthly
+     - Amount: $19.00 USD
+  5. Click "Save product"
+  6. Copy the "Price ID" (starts with price_...) — you'll need this next
+
+E) ADD STRIPE KEYS TO VERCEL:
+  1. Get your Secret Key: https://dashboard.stripe.com/apikeys
+     Copy the key that starts with sk_live_...
+     (NOTE: Use sk_live_ for production, sk_test_ for testing first)
+  2. Get your Price ID from the product you just created
+  3. Go to Vercel → Your project → Settings → Environment Variables → Production
+  4. Add these (click "Add New" for each):
+
+     STRIPE_SECRET_KEY = sk_live_XXXXXXXXXXXXXXXXXXXX
+     STRIPE_PRICE_ID   = price_XXXXXXXXXXXXXXXXXXXX
+     NEXT_PUBLIC_BASE_URL = https://[your-domain.com]
+
+  5. Redeploy: Vercel → Deployments → "..." → Redeploy
+
+F) TEST IT (BEFORE GOING LIVE):
+  1. In Stripe dashboard, turn on "Test mode" (toggle top-left)
+  2. Get test keys (sk_test_...) and a test Price ID
+  3. Add the test keys to Vercel Preview environment (not Production)
+  4. Go to your Vercel Preview URL → click "Join $19/mo"
+  5. Use Stripe test card: 4242 4242 4242 4242 / any future date / any CVC
+  6. You should be redirected to the dashboard
+  7. When confirmed working → switch to live keys in Production
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 4 — SET UP SALES TAX (New York State + Stripe Tax)
+  TIME: 25 minutes   COST: Free registration
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+New York taxes digital subscriptions. Stripe Tax handles collection automatically.
+
+A) REGISTER FOR NY SALES TAX PERMIT (FREE):
+  1. Go to: https://www.tax.ny.gov/bus/st/stidx.htm
+  2. Click "Register for Sales Tax"
+  3. Log in or create an NY.gov account
+  4. Complete the Business Registration form:
+     - Entity type: Sole proprietor
+     - Business activity: Digital information services
+     - Address: Your P.O. Box
+  5. You'll receive your Certificate of Authority (NY vendor number) by mail
+     Keep this — you need it to file your quarterly returns
+
+B) ENABLE STRIPE TAX (AUTOMATIC COLLECTION):
+  1. Go to: https://dashboard.stripe.com/tax
+  2. Click "Get started" → "Activate Stripe Tax"
+  3. Add your NY registration number once you receive it
+  4. Stripe will automatically:
+     - Calculate the correct tax rate for each subscriber
+     - Add it to their checkout bill
+     - Track what you owe each quarter
+
+C) QUARTERLY FILING (every 3 months):
+  - Go to: https://www.tax.ny.gov → File your quarterly return
+  - Stripe Tax shows you exactly how much to remit
+  - Due dates: March 20 / June 20 / September 20 / December 20
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 4B — CONNECT VERCEL BLOB STORAGE (Makes the website auto-update)
+  TIME: 5 minutes   COST: FREE on Vercel Hobby plan
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+This is what makes the website automatically show the real curated looks every
+Monday instead of the same old cards. Once this is set up, every time you click
+Approve on Sunday, the homepage updates automatically.
+
+STEPS:
+  1. Go to: https://vercel.com → click your project
+  2. Click "Storage" tab (top menu) → click "Create Database"
+  3. Choose "Blob" → click "Continue"
+  4. Name it: ellie-preview → click "Create"
+  5. Click "Connect to project" → select your project → click "Connect"
+  6. Vercel automatically adds BLOB_READ_WRITE_TOKEN to your environment variables.
+     You do NOT need to copy or paste anything — it's automatic.
+  7. Redeploy: Go to Deployments → "..." → "Redeploy"
+
+THAT'S IT. After this:
+  - Every Sunday when you click Approve, the website homepage updates within seconds
+  - The 3 look cards show the actual curated looks from that week
+  - The section header shows "Week of [current date]"
+  - The editorial quote updates to Claude's writing for that week
+  - Everything is fully automatic — you just approve and it happens
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 5 — SET UP ALL VERCEL ENVIRONMENT VARIABLES
+  TIME: 15 minutes   COST: Free
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Go to: https://vercel.com → Your project → Settings → Environment Variables → Production
+
+Add ALL of these (you may have some already from previous setup):
+
+  STRIPE_SECRET_KEY         = sk_live_XXXX          (from Step 3E)
+  STRIPE_PRICE_ID           = price_XXXX            (from Step 3E)
+  NEXT_PUBLIC_BASE_URL      = https://[yourdomain.com]
+  RESEND_API_KEY            = re_XXXX               (from Resend dashboard)
+  RESEND_FROM_EMAIL         = hello@[yourdomain.com]
+  RESEND_NOTIFY_EMAIL       = [your personal email where you want alerts]
+  RESEND_AUDIENCE_ID        = [optional — from Resend Audiences]
+  ANTHROPIC_API_KEY         = sk-ant-XXXX           (from console.anthropic.com)
+  CRON_SECRET               = [any long random string, e.g. make one at passwordsgenerator.net]
+  CURATOR_APPROVE_SECRET    = [another long random string]
+  BUSINESS_MAILING_ADDRESS  = The Style Refresh · PO Box XXXX · New York, NY XXXXX
+  BLOB_READ_WRITE_TOKEN     = [auto-added by Vercel when you connect Blob storage in Step 4B]
+
+After adding all variables → Redeploy your project.
+
+WHERE TO GET EACH KEY:
+  Resend API key:      https://resend.com/api-keys
+  Anthropic API key:   https://console.anthropic.com/api-keys
+  Random secrets:      https://passwordsgenerator.net (32+ characters, no symbols)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 6 — SET UP YOUR DOMAIN (if not already done)
+  TIME: 30 minutes   COST: ~$12-$20/year for domain
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+If your site is still at a Vercel URL (something.vercel.app), you need a real domain.
+
+A) BUY A DOMAIN:
+  Recommended: https://www.namecheap.com (cheapest, easiest)
+  Suggested domains (check availability):
+  - thestylerefresh.com
+  - stylebyellie.com
+  - elliestylist.com
+  - ellierefresh.com
+
+B) CONNECT DOMAIN TO VERCEL:
+  1. Vercel → Your project → Settings → Domains
+  2. Type your domain → Click "Add"
+  3. Vercel shows you DNS records to add
+  4. Go to Namecheap → Manage → Advanced DNS → Add the records Vercel shows you
+  5. Wait 10-30 minutes for DNS to propagate
+  6. Return to Vercel — it should show "Valid Configuration" with a green check
+
+C) SET UP EMAIL ON YOUR DOMAIN:
+  You need hello@[yourdomain.com] for professionalism and CAN-SPAM compliance.
+  Options:
+  - Google Workspace: https://workspace.google.com ($6/month — best option)
+  - Zoho Mail: https://www.zoho.com/mail ($1/month — budget option)
+  Set up email first, then use that address in Resend and Stripe.
+
+D) VERIFY DOMAIN IN RESEND:
+  1. Go to: https://resend.com/domains
+  2. Click "Add domain" → enter your domain
+  3. Add the DNS records Resend shows you to Namecheap
+  4. Click "Verify" — this enables professional email sending (critical for deliverability)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 7 — SET UP BOOKKEEPING (track every dollar)
+  TIME: 10 minutes   COST: Free
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  1. Go to: https://www.waveapps.com (completely free accounting software)
+  2. Create a free account
+  3. Go to "Banking" → "Connect account" → connect your bank account
+     (Wave reads transactions — read-only, cannot move money)
+  4. Alternatively: Go to "Banking" → "Add a bank account" → manually import
+  5. Connect Stripe: Wave integrates with Stripe automatically
+
+Every month, spend 20 minutes categorizing transactions in Wave.
+This makes tax time simple and keeps you IRS-compliant.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+HOW THE BUSINESS RUNS AUTOMATICALLY — YOUR WEEKLY ROUTINE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+THE SYSTEM DOES THIS WITHOUT YOU:
+  Every Sunday 6:00 PM ET  → AI scrapes fashion trends (Vogue, Net-a-Porter, etc.)
+                              Claude AI curates 3 looks (Executive / Weekender / Wildcard)
+                              Saves the draft
+                              Sends you an email with the 3 looks to review + Approve button
+
+  Every Monday 7:00 AM ET  → IF you approved: sends the brief to all paying members
+                              IF you didn't approve: sends you a warning email
+
+WHAT YOU DO EVERY WEEK (THE ONLY THING):
+  □ Sunday, anytime before midnight:
+    Open the email from Ellie Curator (subject: "Sunday Draft — Week of...")
+    Read the 3 looks. Like them? Click the BIG APPROVE BUTTON.
+    That's it. Monday morning it sends automatically.
+
+  □ If you don't like a look this week:
+    Ignore the email. No send happens. You get a warning Monday morning.
+    (In the future, we can add an "Edit" feature — let me know.)
+
+WHAT YOU CHECK WEEKLY (10 MINUTES):
+  □ Monday morning: Check that the brief sent successfully
+    Go to: https://resend.com/emails → confirm emails delivered
+  □ Monday morning: Check Stripe for new/cancelled subscribers
+    Go to: https://dashboard.stripe.com/subscriptions
+  □ Any day: Check if anyone emailed hello@[yourdomain.com] with questions
+
+THAT IS ALL. The business is otherwise fully automated.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+THE EMAILS YOU'LL RECEIVE AND WHAT THEY MEAN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+EMAIL → Subject: "Sunday Draft — Week of [date]"
+  Meaning: Your weekly brief is ready to review. Contains 3 looks + Approve button.
+  What to do: Read it. If you like it, click Approve. If not, ignore it.
+
+EMAIL → Subject: "[ACTION NEEDED] No approved draft — Monday send skipped"
+  Meaning: Monday arrived and no approval was found. Members did NOT receive a brief.
+  What to do: Either approve manually (click the link in the email) or skip this week.
+  Prevention: Always approve by Sunday 11:59 PM ET.
+
+EMAIL → Subject: "New Waitlist Application — [Name]"
+  Meaning: Someone joined the waitlist. 
+  What to do: Nothing required now. When you're ready, email them to subscribe.
+
+EMAIL → Subject: "New Style Refresh Member — [Name]"
+  Meaning: Someone just paid $19 and subscribed!
+  What to do: Nothing — they get a welcome email automatically. Check Stripe to see revenue.
+
+EMAIL → Subject: "Your Monday Style Brief — Week of [date]"
+  Meaning: This is a COPY of what your members received. It goes to RESEND_NOTIFY_EMAIL.
+  What to do: Read it to make sure it looks right. Archive it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+YOUR KEY DASHBOARD LINKS (BOOKMARK THESE)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Stripe (money + subscribers):   https://dashboard.stripe.com
+  Resend (emails sent):           https://resend.com/emails
+  Vercel (site hosting):          https://vercel.com/dashboard
+  GitHub (code):                  https://github.com
+  Wave (bookkeeping):             https://www.waveapps.com
+  NY Tax portal:                  https://www.tax.ny.gov
+  Anthropic (AI usage):           https://console.anthropic.com/usage
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+QUARTERLY CALENDAR (DON'T MISS THESE)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  APRIL 15   — Federal estimated income tax Q1 (IRS Form 1040-ES)
+               NY Sales Tax Q1 due (file at tax.ny.gov — March 20 deadline for Dec-Feb)
+  JUNE 15    — Federal estimated income tax Q2
+  SEPTEMBER 15 — Federal estimated income tax Q3
+               NY Sales Tax Q2 due (June 20 deadline for Mar-May)
+  DECEMBER 20  — NY Sales Tax Q3 due
+  JANUARY 15   — Federal estimated income tax Q4
+  MARCH 20     — NY Sales Tax Q4 due
+
+  TIP: Set phone calendar reminders 1 week before each date.
+  IRS Form 1040-ES: https://www.irs.gov/forms-pubs/about-form-1040-es
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+WHAT HAPPENS WHEN YOU GET YOUR FIRST SUBSCRIBER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  1. You receive an email: "New Style Refresh Member — [Name]"
+  2. They receive a welcome email automatically
+  3. They get a Monday brief the next Monday morning (automatically)
+  4. Stripe collects $19 from them monthly
+  5. Stripe pays out to your bank account every 2 business days
+  6. First payout appears in your bank account within 5 business days of first charge
+
+  Revenue calculation:
+  - 10 subscribers = $190/month ($157 after Stripe fees)
+  - 50 subscribers = $950/month ($784 after Stripe fees)
+  - 100 subscribers = $1,900/month ($1,568 after Stripe fees)
+  - 500 subscribers = $9,500/month ($7,840 after Stripe fees)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 8 — SET UP AFFILIATE COMMISSIONS (Earn on every purchase your members make)
+  TIME: 30 minutes   COST: Free to join   EARNS: 5–12% on every click that buys
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Every time a member clicks "Shop now →" in the Monday brief, you have a chance
+to earn a commission on what they buy. The system is already built — you just
+need to sign up and add one environment variable.
+
+HOW IT WORKS:
+  - Every buy link in the member email goes through your site (/api/go)
+  - That route redirects through Sovrn Commerce (formerly VigLink)
+  - Sovrn automatically recognizes 50,000+ retailers including Net-a-Porter,
+    Nordstrom, Farfetch, SSENSE, Revolve, Shopbop, Saks, Bloomingdale's, etc.
+  - If a member buys anything within 30 days, you earn 5–12% commission
+  - Sovrn pays out monthly via PayPal or ACH once you reach $10
+
+PART A — Sign up for Sovrn Commerce:
+  1. Go to: https://www.sovrncommerce.com
+  2. Click "Get Started" → choose "Publisher" (that's you)
+  3. Enter your site URL: https://stylebyellie.com
+  4. Apply — approval is usually instant or within 24 hours
+  5. After approval: click your name (top right) → "Account Settings"
+  6. Copy your "Publisher Key" (a long string of letters/numbers)
+
+PART B — Add your key to Vercel:
+  1. Go to: https://vercel.com/dashboard → your project → Settings → Env Variables
+  2. Add new variable (PRODUCTION only):
+       Name:  SOVRN_PUBLISHER_KEY
+       Value: [paste your Publisher Key from step 6 above]
+  3. Save, then Redeploy
+  That's it. Every email link now earns you commission automatically.
+
+PART C — Set up Skimlinks for the website (optional but adds more revenue):
+  Skimlinks monetizes every retail link on your website (the blog pages, etc.)
+  1. Go to: https://skimlinks.com → Apply as a publisher
+  2. Enter your site URL and wait for approval (usually 1–2 business days)
+  3. After approval: Dashboard → "Tools" → find your Publisher ID (a number)
+  4. Go to Vercel → Settings → Env Variables → Add:
+       Name:  SKIMLINKS_PUBLISHER_ID
+       Value: [your Publisher ID number]
+  5. Redeploy — every outbound retail link on the site is now monetized
+
+WHAT TO EXPECT:
+  - You won't get rich from this immediately — at 20 members, maybe $5–$40/month
+  - At 200 members who actually click and buy: $500–$1,500/month in commissions
+  - It costs you nothing and requires zero ongoing work — it's fully automated
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 9 — UNDERSTAND YOUR NEW AUTOMATED DRIP SEQUENCE
+  (No setup needed — it's already running)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Every person who joins your waitlist now enters a 3-email conversion sequence
+automatically. No work from you. Here's what they receive:
+
+  Day 0   → "You're on the waitlist" (existing confirmation email)
+  Day 3   → "Still thinking about The Style Refresh?" (soft reminder)
+  Day 7   → "This is what members received this Monday" (show the live brief teaser)
+  Day 12  → "A last note from Ellie" (personal final note — then silence)
+
+This runs every day at 9 AM ET. You do not need to do anything.
+Check Resend dashboard for delivery stats: https://resend.com/emails
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+STEP 10 — YOUR SEO BLOG (The Edit) — Already Fully Automated
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Every time you click "Approve" on your Sunday brief, the system:
+  1. Schedules Monday's email to members
+  2. Updates the homepage preview
+  3. Publishes a new SEO blog post at: https://stylebyellie.com/blog/week-of-[date]
+
+This blog post is public, indexed by Google, and shows the teaser version of
+the looks (no buy links — those are members-only). It drives organic search
+traffic from people searching for fashion looks. Over time, 52 posts/year
+means 52 pages Google can rank for fashion keywords.
+
+You can view all posts at: https://stylebyellie.com/blog
+It is linked in the site navigation and footer automatically.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+GROWTH CHECKLIST — HOW TO GET YOUR FIRST 50 SUBSCRIBERS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  □ Convert your waitlist: Every waitlist member now gets a 3-email drip automatically
+  □ Instagram: Post a screenshot of the Monday brief every week (no prices, just the looks)
+  □ TikTok/Reels: "This is what my members got this Monday" — 30 second video
+  □ Tell 10 friends/family first — they become your first social proof
+  □ Pinterest: Pin the look outfits (Pinterest drives significant fashion traffic)
+  □ Reply to every comment, email, and DM personally in the first 3 months
+  □ Set up Sovrn Commerce (Step 8) to earn commission on top of subscriptions
+  □ Share your blog posts (/blog) on social — the looks are already written up for you
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Last updated: April 2026 — Best, Claude
+═══════════════════════════════════════════════════════════════════════════════

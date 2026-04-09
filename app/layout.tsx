@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import CookieBanner from "@/components/CookieBanner";
 
 /* ─── Replace with your live domain before deploying ─────────── */
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? "https://ellie.style";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? "https://stylebyellie.com";
 
 /* ═══════════════════════════════════════════════════════════════
    METADATA
@@ -13,44 +14,45 @@ export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
 
   title: {
-    default:  "Ellie | The Elite Edit",
-    template: "%s | Ellie",
+    default:  "ELLIE | The Style Refresh",
+    template: "%s | ELLIE",
   },
 
   description:
-    "Ellie is a private style membership for discerning professionals. " +
-    "A 20-year veteran consultant curates three complete looks each week — " +
-    "sourced, considered, and delivered to your inbox every Monday. " +
-    "No noise. No feeds. Just the edit that matters.",
+    "The Style Refresh is a private $19/month membership delivering three complete, " +
+    "sourced looks to your inbox every Monday — with direct buy links to every item. " +
+    "A 20-year veteran consultant. No algorithms. No feeds. Just the edit that matters.",
 
   keywords: [
     "personal stylist",
     "private style membership",
-    "men's fashion consultant",
-    "curated menswear",
-    "luxury style guide",
-    "weekly style briefing",
-    "executive style",
-    "premium fashion subscription",
-    "style intelligence",
-    "the elite edit",
+    "women's fashion subscription",
+    "curated fashion buy links",
+    "Hamptons style",
+    "weekly lookbook",
+    "executive style consultant",
+    "the style refresh",
+    "fashion subscription newsletter",
+    "direct buy links clothing",
+    "women's fashion curation",
+    "Monday style brief",
   ],
 
   /* ── Open Graph ── */
   openGraph: {
     type:        "website",
     url:         BASE_URL,
-    siteName:    "Ellie",
-    title:       "Ellie | The Elite Edit",
+    siteName:    "ELLIE",
+    title:       "ELLIE | The Style Refresh",
     description:
-      "Three curated looks. One veteran consultant. Delivered every Monday. " +
-      "Apply for private membership — spots are limited.",
+      "Three complete looks. Direct buy links. Every Monday. " +
+      "Private $19/month membership — cancel anytime.",
     images: [
       {
-        url:    "/opengraph-image",   // resolved by app/opengraph-image.tsx
+        url:    "/opengraph-image",
         width:  1200,
         height: 630,
-        alt:    "Ellie — The Elite Edit. Navy and gold style intelligence.",
+        alt:    "Ellie — The Style Refresh. Curated looks with direct buy links.",
       },
     ],
   },
@@ -58,10 +60,10 @@ export const metadata: Metadata = {
   /* ── Twitter / X card ── */
   twitter: {
     card:        "summary_large_image",
-    title:       "Ellie | The Elite Edit",
+    title:       "ELLIE | The Style Refresh",
     description:
-      "Three curated looks. One veteran consultant. Delivered every Monday. " +
-      "Apply for private membership.",
+      "Three complete looks. Direct buy links. Every Monday. " +
+      "Private $19/month membership.",
     images: ["/opengraph-image"],
   },
 
@@ -93,7 +95,7 @@ export const viewport: Viewport = {
   initialScale:   1,
   maximumScale:   1,
   userScalable:   false,
-  themeColor:     "#000080",
+  themeColor:     "#EDE5D8",
 };
 
 /* ═══════════════════════════════════════════════════════════════
@@ -103,7 +105,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" data-ellie-build="style-refresh">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
@@ -112,7 +114,19 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <CookieBanner />
+        {/* Skimlinks auto-monetises every outbound retail link on the site.
+            Sign up at skimlinks.com → get your Publisher ID → add SKIMLINKS_PUBLISHER_ID to Vercel env vars.
+            Zero configuration after that — it handles 50,000+ retailers automatically. */}
+        {process.env.SKIMLINKS_PUBLISHER_ID && (
+          <script
+            async
+            src={`https://s.skimresources.com/js/${process.env.SKIMLINKS_PUBLISHER_ID}X.skimlinks.js`}
+          />
+        )}
+      </body>
     </html>
   );
 }

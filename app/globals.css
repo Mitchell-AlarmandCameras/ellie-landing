@@ -1,38 +1,27 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap');
+/* DM Serif Display (display/headings) + Cormorant Garamond (editorial body) + Inter (UI) */
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* ═══════════════════════════════════════════════════════════════
-   DESIGN TOKENS
+   DESIGN TOKENS  — Warm Minimalism / Hamptons
 ═══════════════════════════════════════════════════════════════ */
 :root {
-  --navy:            #000080;
-  --gold:            #D4AF37;
-  --gold-light:      #f5e9b8;
-  --gold-dark:       #b8952e;
-  --gold-mid:        #c9a227;
-
-  /* 5-stop metallic gold — used for buttons and key accents */
-  --gold-gradient: linear-gradient(
-    135deg,
-    #b8952e  0%,
-    #D4AF37  25%,
-    #f5e9b8  50%,
-    #D4AF37  75%,
-    #b8952e  100%
-  );
-
-  /* Shimmer variant for text */
-  --gold-text-gradient: linear-gradient(
-    105deg,
-    #b8952e  0%,
-    #D4AF37  30%,
-    #f7ebb5  50%,
-    #D4AF37  70%,
-    #b8952e  100%
-  );
+  --cream:          #FDFAF5;
+  --cream-dark:     #F5EFE4;
+  --cream-deep:     #EDE5D8;
+  --sand:           #E8DFD0;
+  --sand-dark:      #C9B99A;
+  --sand-border:    #DDD4C5;
+  --charcoal:       #2C2C2C;
+  --charcoal-light: #4A4A4A;
+  --charcoal-muted: #6B6560;
+  --blush:          #C4956A;
+  --blush-light:    #D4AB88;
+  --warm-gray:      #8A8580;
+  --taupe:          #B5A99A;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -44,40 +33,33 @@
   }
 
   body {
-    @apply bg-white text-gray-900 antialiased;
+    background-color: var(--cream);
+    color: var(--charcoal);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     font-family: 'Inter', system-ui, sans-serif;
   }
 
   h1, h2, h3, h4 {
-    font-family: 'Playfair Display', Georgia, serif;
+    font-family: 'DM Serif Display', Georgia, serif;
   }
 }
 
 /* ═══════════════════════════════════════════════════════════════
    KEYFRAMES
 ═══════════════════════════════════════════════════════════════ */
-
-/* Gold shimmer sweeps left→right across text / buttons */
-@keyframes shimmer {
-  0%   { background-position: -200% center; }
-  100% { background-position:  200% center; }
-}
-
-/* Modal entry: slides up from below */
 @keyframes slideUp {
   from { transform: translateY(44px); opacity: 0; }
   to   { transform: translateY(0);    opacity: 1; }
 }
 
-/* Success state: scales in */
 @keyframes fadeInScale {
-  from { transform: scale(0.95); opacity: 0; }
+  from { transform: scale(0.96); opacity: 0; }
   to   { transform: scale(1);    opacity: 1; }
 }
 
-/* Scroll-line pulse in hero */
 @keyframes scrollPulse {
-  0%, 100% { opacity: 0.25; transform: scaleY(1);   }
+  0%, 100% { opacity: 0.25; transform: scaleY(1);    }
   50%       { opacity: 0.55; transform: scaleY(1.15); }
 }
 
@@ -86,111 +68,144 @@
 ═══════════════════════════════════════════════════════════════ */
 @layer components {
 
-  /* ── CTA Button — 5-stop metallic gold ─────────────────────── */
-  .btn-gold {
+  /* ── Primary CTA — charcoal fill, cream text ────────────────── */
+  .btn-primary {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     padding: 1rem 2.5rem;
-    color: #000080;
-    font-weight: 600;
-    font-size: 0.75rem;
-    letter-spacing: 0.2em;
+    background: var(--charcoal);
+    color: var(--cream);
+    font-weight: 500;
+    font-size: 0.82rem;
+    letter-spacing: 0.15em;
     text-transform: uppercase;
     font-family: 'Inter', sans-serif;
     cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
+    border: 1px solid var(--charcoal);
     position: relative;
     overflow: hidden;
-    border: 1px solid #D4AF37;
-
-    /* 5-stop gradient, double-width for shimmer sweep */
-    background: linear-gradient(
-      135deg,
-      #b8952e  0%,
-      #D4AF37  20%,
-      #f5e9b8  50%,
-      #D4AF37  80%,
-      #b8952e  100%
-    );
-    background-size: 200% auto;
-    transition: background-position 0.55s ease, box-shadow 0.3s ease,
-                transform 0.25s ease;
+    transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.25s ease;
+    -webkit-tap-highlight-color: transparent;
   }
 
-  .btn-gold:hover:not(:disabled) {
-    background-position: right center;
-    box-shadow: 0 6px 28px rgba(212, 175, 55, 0.40),
-                0 2px  8px rgba(212, 175, 55, 0.20);
+  .btn-primary:hover:not(:disabled) {
+    background: var(--charcoal-dark, #1A1A1A);
+    box-shadow: 0 8px 32px rgba(44, 44, 44, 0.22),
+                0 2px  8px rgba(44, 44, 44, 0.12);
     transform: translateY(-2px);
   }
 
-  .btn-gold:active:not(:disabled) {
+  .btn-primary:active:not(:disabled) {
     transform: translateY(0);
-    box-shadow: 0 2px 8px rgba(212, 175, 55, 0.25);
+    box-shadow: none;
   }
 
-  .btn-gold:disabled {
-    opacity: 0.5;
+  .btn-primary:disabled {
+    opacity: 0.45;
     cursor: not-allowed;
   }
 
+  /* ── Secondary / outline ────────────────────────────────────── */
+  .btn-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem 2.5rem;
+    background: transparent;
+    color: var(--charcoal);
+    font-weight: 500;
+    font-size: 0.82rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    border: 1px solid var(--sand-dark);
+    transition: background 0.3s ease, border-color 0.3s ease, transform 0.25s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .btn-outline:hover:not(:disabled) {
+    background: var(--cream-dark);
+    border-color: var(--taupe);
+    transform: translateY(-1px);
+  }
+
+  /* ── Small buy link button ──────────────────────────────────── */
+  .btn-buy {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0.45rem 1rem;
+    background: transparent;
+    color: var(--charcoal);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.76rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border: 1px solid var(--sand-border);
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  }
+
+  .btn-buy:hover {
+    background: var(--charcoal);
+    border-color: var(--charcoal);
+    color: var(--cream);
+  }
+
   /* ── Dividers ───────────────────────────────────────────────── */
-  .gold-divider {
+  .sand-divider {
     @apply mx-auto my-6;
     width: 56px;
     height: 1px;
-    background: linear-gradient(90deg, transparent 0%, #b8952e 20%, #D4AF37 50%, #b8952e 80%, transparent 100%);
+    background: linear-gradient(90deg, transparent 0%, var(--sand-dark) 40%, var(--blush) 50%, var(--sand-dark) 60%, transparent 100%);
   }
 
-  .gold-divider-wide {
+  .sand-divider-wide {
     @apply mx-auto my-8;
     width: 110px;
     height: 1px;
-    background: linear-gradient(90deg, transparent 0%, #b8952e 20%, #D4AF37 50%, #b8952e 80%, transparent 100%);
+    background: linear-gradient(90deg, transparent 0%, var(--sand-dark) 40%, var(--blush) 50%, var(--sand-dark) 60%, transparent 100%);
   }
 
-  /* ── Eyebrow label ──────────────────────────────────────────── */
+  /* ── Section eyebrow label ──────────────────────────────────── */
   .section-label {
-    @apply text-xs font-semibold uppercase;
+    @apply font-medium uppercase;
     font-family: 'Inter', sans-serif;
-    color: #D4AF37;
-    letter-spacing: 0.35em;
+    font-size: 0.75rem;
+    color: var(--blush);
+    letter-spacing: 0.28em;
   }
 
-  /* ── Glassmorphism nav ──────────────────────────────────────── */
-  /* Base state — at top of page */
+  /* ── Glassmorphism nav — cream glass ────────────────────────── */
   .nav-glass {
-    background: rgba(255, 255, 255, 0.78);
-    backdrop-filter: blur(14px) saturate(180%);
-    -webkit-backdrop-filter: blur(14px) saturate(180%);
-    border-bottom: 1px solid rgba(212, 175, 55, 0.10);
-    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);
+    background: rgba(253, 250, 245, 0.82);
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    border-bottom: 1px solid rgba(232, 223, 208, 0.20);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
     transition: background 0.4s ease, backdrop-filter 0.4s ease,
                 border-color 0.4s ease, box-shadow 0.4s ease;
   }
 
-  /* Elevated state — once user scrolls */
   .nav-glass-scrolled {
-    background: rgba(255, 255, 255, 0.94);
+    background: rgba(253, 250, 245, 0.97);
     backdrop-filter: blur(24px) saturate(200%);
     -webkit-backdrop-filter: blur(24px) saturate(200%);
-    border-bottom: 1px solid rgba(212, 175, 55, 0.22);
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07),
-                0 1px  0  rgba(212, 175, 55, 0.12);
+    border-bottom: 1px solid rgba(201, 185, 154, 0.30);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06),
+                0 1px  0  rgba(201, 185, 154, 0.15);
   }
 }
 
 /* ═══════════════════════════════════════════════════════════════
    MODAL
 ═══════════════════════════════════════════════════════════════ */
-.modal-slide-up {
-  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.modal-fade-in {
-  animation: fadeInScale 0.42s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
+.modal-slide-up  { animation: slideUp    0.4s  cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.modal-fade-in   { animation: fadeInScale 0.42s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
 /* ═══════════════════════════════════════════════════════════════
    FORM FIELDS
@@ -199,8 +214,8 @@
   width: 100%;
   padding: 0.875rem 1.1rem;
   background: #fff;
-  border: 1px solid #e5e7eb;
-  color: #111827;
+  border: 1px solid var(--sand-border);
+  color: var(--charcoal);
   font-family: 'Inter', sans-serif;
   font-size: 0.875rem;
   outline: none;
@@ -209,11 +224,11 @@
   appearance: none;
 }
 
-.field-input::placeholder { color: #9ca3af; }
+.field-input::placeholder { color: var(--warm-gray); }
 
 .field-input:focus {
-  border-color: #000080;
-  box-shadow: 0 0 0 2px rgba(0, 0, 128, 0.08);
+  border-color: var(--blush);
+  box-shadow: 0 0 0 2px rgba(196, 149, 106, 0.12);
 }
 
 .field-input.field-error {
@@ -224,9 +239,10 @@
 .field-input:disabled {
   opacity: 0.55;
   cursor: not-allowed;
+  background: var(--cream-dark);
 }
 
-/* Native select — custom navy chevron */
+/* Native select — custom charcoal chevron */
 .field-select-wrap { position: relative; }
 
 .field-select-wrap::after {
@@ -240,7 +256,7 @@
   height: 0;
   border-left:  5px solid transparent;
   border-right: 5px solid transparent;
-  border-top:   5px solid #000080;
+  border-top:   5px solid var(--charcoal-muted);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -248,38 +264,10 @@
 ═══════════════════════════════════════════════════════════════ */
 @layer utilities {
 
-  /* Metallic shimmer text  — use with .animate-gold-shimmer */
-  .text-gold-metallic {
-    background: linear-gradient(
-      105deg,
-      #b8952e  0%,
-      #D4AF37  25%,
-      #f7ebb5  50%,
-      #D4AF37  75%,
-      #b8952e  100%
-    );
-    background-size: 250% auto;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: shimmer 4s linear infinite;
-  }
-
-  /* Static gold gradient text (no animation) */
-  .text-gradient-gold {
-    background: linear-gradient(135deg, #b8952e 0%, #D4AF37 40%, #f5e9b8 60%, #D4AF37 80%, #b8952e 100%);
-    background-size: 200% auto;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-  /* Scroll-line pulse */
   .animate-scroll-pulse {
     animation: scrollPulse 2.2s ease-in-out infinite;
   }
 
-  /* Animation delays for staggered reveals */
   .delay-0   { animation-delay:   0ms; }
   .delay-100 { animation-delay: 100ms; }
   .delay-150 { animation-delay: 150ms; }

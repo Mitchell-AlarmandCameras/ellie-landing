@@ -36,6 +36,12 @@ export default function ScrollReveal({
     const el = ref.current;
     if (!el) return;
 
+    const reveal = () => {
+      el.style.transition = `opacity 0.75s cubic-bezier(0.16,1,0.3,1) ${delay}ms, transform 0.75s cubic-bezier(0.16,1,0.3,1) ${delay}ms`;
+      el.style.opacity = "1";
+      el.style.transform = "translateY(0) translateX(0)";
+    };
+
     // Respect prefers-reduced-motion
     const prefersReduced =
       typeof window !== "undefined" &&
@@ -47,22 +53,45 @@ export default function ScrollReveal({
       return;
     }
 
+    // If already in viewport on mount, show immediately (avoids invisible hero CTAs
+    // when IntersectionObserver is slow or threshold never hits in edge browsers).
+    const rect = el.getBoundingClientRect();
+    const vh = typeof window !== "undefined" ? window.innerHeight : 0;
+    const inView = rect.top < vh && rect.bottom > 0 && rect.width > 0 && rect.height > 0;
+    if (inView) {
+      reveal();
+      return;
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            el.style.transition = `opacity 0.75s cubic-bezier(0.16,1,0.3,1) ${delay}ms, transform 0.75s cubic-bezier(0.16,1,0.3,1) ${delay}ms`;
-            el.style.opacity = "1";
-            el.style.transform = "translateY(0) translateX(0)";
+            reveal();
             observer.unobserve(el);
           }
         });
       },
-      { threshold }
+      { threshold: Math.min(threshold, 0.05), rootMargin: "80px 0px 80px 0px" }
     );
 
     observer.observe(el);
-    return () => observer.disconnect();
+
+    // Safety: never leave content invisible if observer never fired (embedded browsers, etc.)
+    const safety = window.setTimeout(() => {
+      const op = Number.parseFloat(window.getComputedStyle(el).opacity || "0");
+      if (op < 0.99) {
+        el.style.transition = "opacity 0.4s ease";
+        el.style.opacity = "1";
+        el.style.transform = "translateY(0) translateX(0)";
+      }
+      observer.disconnect();
+    }, 2500);
+
+    return () => {
+      window.clearTimeout(safety);
+      observer.disconnect();
+    };
   }, [delay, threshold]);
 
   const initialStyle: CSSProperties = {
