@@ -315,7 +315,7 @@ export default function DashboardPage() {
                             {item.piece}
                           </span>
                           <a
-                            href={item.buyLink}
+                            href={`/api/go?to=${encodeURIComponent(item.buyLink)}&src=dashboard&q=${encodeURIComponent(item.piece + " " + item.brand)}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="btn-buy shrink-0"
