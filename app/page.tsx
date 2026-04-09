@@ -161,6 +161,13 @@ export default function Home() {
       .catch(() => { /* network error — silently keep hardcoded fallback */ });
   }, []);
 
+  /* Reset loading if user navigates back from Stripe checkout */
+  useEffect(() => {
+    const handler = () => setCheckoutLoading(false);
+    window.addEventListener("pageshow", handler);
+    return () => window.removeEventListener("pageshow", handler);
+  }, []);
+
   const handleCheckout = async (plan: "monthly" | "annual" = "monthly") => {
     setCheckoutError(null);
     setCheckoutLoading(true);

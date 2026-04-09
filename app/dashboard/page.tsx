@@ -92,7 +92,7 @@ export default function DashboardPage() {
           {/* Links */}
           <div className="flex items-center gap-4 sm:gap-6">
             <a
-              href="https://billing.stripe.com/p/login"
+              href={`/api/billing-portal?cid=${customerId}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-xs uppercase tracking-widest transition-colors hidden sm:block hover:text-charcoal"
@@ -656,7 +656,7 @@ export default function DashboardPage() {
               Membership terms
             </Link>
             <a
-              href="https://billing.stripe.com/p/login"
+              href={`/api/billing-portal?cid=${customerId}`}
               target="_blank"
               rel="noopener noreferrer"
               style={{
