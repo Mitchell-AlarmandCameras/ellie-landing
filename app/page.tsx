@@ -293,7 +293,6 @@ export default function Home() {
                 { label: "The Story",  href: "#the-story"  },
                 { label: "This Week",  href: "#this-week"  },
                 { label: "The Edit",   href: "/blog"       },
-                { label: "Join",       href: "#join"       },
               ].map(({ label, href }) => (
                 <a
                   key={label}
@@ -307,17 +306,18 @@ export default function Home() {
                 </a>
               ))}
 
-              {/* Member Login — subtle bordered button, distinct from Join */}
+              {/* Member Login — blush bordered, bold, right beside the Join button */}
               <a
                 href="/login"
                 className="uppercase tracking-widest transition-all duration-200"
                 style={{
-                  fontSize:      "0.72rem",
+                  fontSize:      "0.74rem",
                   letterSpacing: "0.18em",
                   fontFamily:    "Inter, sans-serif",
+                  fontWeight:    600,
                   color:         "var(--blush)",
-                  border:        "1px solid var(--blush)",
-                  padding:       "0.35rem 0.85rem",
+                  border:        "1.5px solid var(--blush)",
+                  padding:       "0.4rem 1rem",
                   whiteSpace:    "nowrap",
                 }}
               >
@@ -1301,26 +1301,49 @@ export default function Home() {
           </div>
         </footer>
 
-        {/* Mobile: checkout always visible (some browsers failed ScrollReveal; nav can feel cramped) */}
+        {/* Mobile: fixed bottom bar with Join + Member Login */}
         <div
-          className="fixed bottom-0 left-0 right-0 z-50 md:hidden border-t flex justify-center px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+          className="fixed bottom-0 left-0 right-0 z-50 md:hidden border-t px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
           style={{
-            background: "rgba(253,250,245,0.96)",
+            background:     "rgba(253,250,245,0.96)",
             backdropFilter: "blur(12px)",
-            borderColor: "var(--sand-border)",
-            boxShadow: "0 -8px 32px rgba(44,44,44,0.06)",
+            borderColor:    "var(--sand-border)",
+            boxShadow:      "0 -8px 32px rgba(44,44,44,0.06)",
           }}
         >
-          <button
-            type="button"
-            onClick={() => handleCheckout("monthly")}
-            disabled={checkoutLoading}
-            className="btn-primary w-full max-w-md"
-            style={{ minHeight: "48px", fontSize: "0.72rem" }}
-            aria-label="Join Style Refresh for 19 dollars per month"
-          >
-            {checkoutLoading ? "Loading…" : "Join — $19/mo"}
-          </button>
+          <div className="flex items-center gap-3 max-w-md mx-auto">
+            <button
+              type="button"
+              onClick={() => handleCheckout("monthly")}
+              disabled={checkoutLoading}
+              className="btn-primary flex-1"
+              style={{ minHeight: "48px", fontSize: "0.72rem" }}
+              aria-label="Join Style Refresh for 19 dollars per month"
+            >
+              {checkoutLoading ? "Loading…" : "Join — $19/mo"}
+            </button>
+            <a
+              href="/login"
+              style={{
+                display:       "flex",
+                alignItems:    "center",
+                justifyContent:"center",
+                minHeight:     "48px",
+                padding:       "0 1.1rem",
+                border:        "1.5px solid var(--blush)",
+                color:         "var(--blush)",
+                fontFamily:    "Inter, sans-serif",
+                fontSize:      "0.68rem",
+                fontWeight:    600,
+                letterSpacing: "0.16em",
+                textTransform: "uppercase",
+                whiteSpace:    "nowrap",
+                textDecoration:"none",
+              }}
+            >
+              Member Login
+            </a>
+          </div>
         </div>
 
       </div>
