@@ -313,48 +313,76 @@ export async function POST(req: NextRequest) {
     if (resendKey && fromEmail && notifyEmail) {
       const resend = new Resend(resendKey);
 
+      /* Send both emails in parallel */
       const [adminOut, applicantOut] = await Promise.all([
         resend.emails.send({
-          from: `Ellie <${fromEmail}>`,
-          to: notifyEmail,
+          from:     `Ellie <${fromEmail}>`,
+          to:       notifyEmail,
           reply_to: normalizedEmail,
-          subject: `New Waitlist Application — ${trimmedName}`,
-          html: buildAdminEmail(trimmedName, normalizedEmail, styleLabel, timestamp),
+          subject:  `New Waitlist Application — ${trimmedName}`,
+          html:     buildAdminEmail(trimmedName, normalizedEmail, styleLabel, timestamp),
         }),
         resend.emails.send({
-          from: `Ellie <${fromEmail}>`,
-          to: normalizedEmail,
+          from:    `Ellie <${fromEmail}>`,
+          to:      normalizedEmail,
           subject: "You're on the Waitlist — The Style Refresh",
-          html: buildApplicantEmail(trimmedName, styleLabel),
+          html:    buildApplicantEmail(trimmedName, styleLabel),
         }),
       ]);
 
       if (adminOut.error) {
-        console.error("[waitlist] Admin notify failed (Resend):", adminOut.error);
+        /* Primary admin notification failed — log clearly and attempt fallback
+           to fromEmail so Ellie always gets notified even if notifyEmail has
+           a typo, delivery block, or domain issue.                           */
+        console.error("[waitlist] ADMIN NOTIFY FAILED — primary:", JSON.stringify(adminOut.error));
+
+        /* Only attempt fallback if notifyEmail differs from fromEmail */
+        if (notifyEmail !== fromEmail) {
+          const fallback = await resend.emails.send({
+            from:     `Ellie <${fromEmail}>`,
+            to:       fromEmail,
+            reply_to: normalizedEmail,
+            subject:  `[FALLBACK] New Waitlist Application — ${trimmedName}`,
+            html:     buildAdminEmail(trimmedName, normalizedEmail, styleLabel, timestamp),
+          });
+          if (fallback.error) {
+            console.error("[waitlist] ADMIN NOTIFY FAILED — fallback also failed:", JSON.stringify(fallback.error));
+          } else {
+            adminNotificationSent = true;
+            console.log("[waitlist] Admin notify delivered via fallback to fromEmail.");
+          }
+        }
       } else {
         adminNotificationSent = true;
       }
 
       if (applicantOut.error) {
-        console.error("[waitlist] Applicant confirmation failed (Resend):", applicantOut.error);
+        console.error("[waitlist] Applicant confirmation failed:", JSON.stringify(applicantOut.error));
       } else {
         confirmationEmailSent = true;
       }
 
-      if (!adminNotificationSent && !confirmationEmailSent) {
+      /* If applicant email failed that is serious — surface it to the user */
+      if (!confirmationEmailSent) {
         return NextResponse.json(
-          {
-            error:
-              "We couldn't send email right now. Please try again in a few minutes or email us directly.",
-          },
+          { error: "We couldn't send your confirmation email right now. Please try again in a few minutes." },
           { status: 500 }
         );
       }
+
+      /* Admin email failed both attempts — log loudly but don't block the user */
+      if (!adminNotificationSent) {
+        console.error(
+          `[waitlist] CRITICAL: Admin notification failed for ${trimmedName} <${normalizedEmail}>. ` +
+          `Check RESEND_NOTIFY_EMAIL value and domain verification in Resend dashboard.`
+        );
+      }
+
     } else {
-      const msg =
-        "[waitlist] CRITICAL: Resend env incomplete — no emails sent (submitter sees success but you get nothing). " +
-        "Set RESEND_API_KEY, RESEND_FROM_EMAIL, and RESEND_NOTIFY_EMAIL in Vercel → Production → Environment Variables, then redeploy.";
-      console.error(msg);
+      console.error(
+        "[waitlist] CRITICAL: Resend env incomplete — no emails sent. " +
+        "Set RESEND_API_KEY, RESEND_FROM_EMAIL, and RESEND_NOTIFY_EMAIL in Vercel → Production → Environment Variables, then redeploy."
+      );
     }
 
     return NextResponse.json({
