@@ -97,12 +97,32 @@ export async function GET(req: NextRequest) {
   const brokenLinks  = linkResults.filter(r => !r.ok);
   const workingLinks = linkResults.filter(r => r.ok);
 
-  /* Save to approved path */
+  /* Save to approved path (local /tmp) */
   const approvedData = { ...lookbook, approvedAt: new Date().toISOString(), linkCheckResults: linkResults };
   try {
     fs.writeFileSync(approvedPath, JSON.stringify(approvedData), "utf8");
   } catch (err) {
     console.error("[approve-weekly] Could not write approved file:", err);
+  }
+
+  /* ── Persist full approved brief to Vercel Blob ─────────────────────
+     Saves the complete lookbook (including buy links) so the dashboard
+     always shows the same looks that went out in Monday's email.
+     Members can return any day of the week and see identical content.  */
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    try {
+      const { put } = await import("@vercel/blob");
+      const slug = String(lookbook.weekOf ?? "")
+        .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+      await put(
+        `ellie-approved/${slug}.json`,
+        JSON.stringify(approvedData),
+        { access: "public", contentType: "application/json", addRandomSuffix: false }
+      );
+      console.log("[approve-weekly] Full approved brief saved to Blob for dashboard sync.");
+    } catch (blobErr) {
+      console.error("[approve-weekly] Blob approved brief save failed (non-fatal):", blobErr);
+    }
   }
 
   /* ── Push live preview to Vercel Blob so the homepage auto-updates ──

@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { currentWeek, archiveWeeks } from "@/data/lookbook";
+import { currentWeek, archiveWeeks, type WeeklyLookbook } from "@/data/lookbook";
 import ReferralButton from "@/components/ReferralButton";
 import ContactForm from "@/components/ContactForm";
 
@@ -11,17 +11,48 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+/* Always server-render so the latest approved brief is always shown */
+export const dynamic = "force-dynamic";
+
+/* ── Fetch the latest approved brief from Vercel Blob ──────────────
+   Falls back to the static lookbook.ts if no approved brief exists yet.
+   This ensures the dashboard always matches what went out in Monday's email. */
+async function getLiveWeek(): Promise<WeeklyLookbook> {
+  try {
+    const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
+    if (!blobToken) return currentWeek;
+
+    const { list } = await import("@vercel/blob");
+    const { blobs } = await list({ prefix: "ellie-approved/" });
+    const approvedBlob = blobs
+      .filter(b => b.pathname.endsWith(".json"))
+      .sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime())[0];
+
+    if (!approvedBlob) return currentWeek;
+
+    const res  = await fetch(approvedBlob.url, { cache: "no-store" });
+    if (!res.ok) return currentWeek;
+    const data = await res.json() as WeeklyLookbook & { approvedAt?: string };
+
+    /* Only use the Blob version if it's newer than the static lookbook */
+    if (data?.looks?.length) return data as WeeklyLookbook;
+  } catch {
+    /* silently fall back */
+  }
+  return currentWeek;
+}
+
 /* ═══════════════════════════════════════════════════════════════
    VIP ROOM — Server Component (cookie-gated)
 ═══════════════════════════════════════════════════════════════ */
-export default function DashboardPage() {
+export default async function DashboardPage() {
   const cookieStore  = cookies();
   const hasAccess    = cookieStore.get("ellie_access")?.value === "true";
   const customerId   = cookieStore.get("ellie_customer")?.value ?? "";
 
   if (!hasAccess) redirect("/login");
 
-  const week       = currentWeek;
+  const week       = await getLiveWeek();
   const hasArchive = archiveWeeks.length > 0;
 
   return (
