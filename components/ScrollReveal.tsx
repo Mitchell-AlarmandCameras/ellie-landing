@@ -5,30 +5,27 @@ import { useEffect, useRef, ReactNode, CSSProperties } from "react";
 type Direction = "up" | "left" | "right" | "none";
 
 interface ScrollRevealProps {
-  children: ReactNode;
-  /** Delay before the animation starts (ms) */
-  delay?: number;
-  /** Direction the element enters from */
+  children:   ReactNode;
+  delay?:     number;
   direction?: Direction;
-  /** Extra Tailwind / CSS classes on the wrapper */
   className?: string;
-  /** How much of the element must be visible before triggering (0–1) */
   threshold?: number;
 }
 
+/* ── Upgraded offsets — more travel distance = more cinematic reveal ── */
 const OFFSETS: Record<Direction, string> = {
-  up:    "translateY(32px)",
-  left:  "translateX(-28px)",
-  right: "translateX(28px)",
-  none:  "translateY(0)",
+  up:    "translateY(60px) scale(0.97)",
+  left:  "translateX(-56px) scale(0.97)",
+  right: "translateX(56px) scale(0.97)",
+  none:  "translateY(0) scale(1)",
 };
 
 export default function ScrollReveal({
   children,
-  delay = 0,
+  delay     = 0,
   direction = "up",
   className = "",
-  threshold = 0.14,
+  threshold = 0.1,
 }: ScrollRevealProps) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -37,31 +34,31 @@ export default function ScrollReveal({
     if (!el) return;
 
     const reveal = () => {
-      el.style.transition = `opacity 0.75s cubic-bezier(0.16,1,0.3,1) ${delay}ms, transform 0.75s cubic-bezier(0.16,1,0.3,1) ${delay}ms`;
-      el.style.opacity = "1";
-      el.style.transform = "translateY(0) translateX(0)";
+      /* Longer duration + spring easing = premium, intentional feel */
+      el.style.transition = [
+        `opacity  0.85s cubic-bezier(0.22,1,0.36,1) ${delay}ms`,
+        `transform 0.85s cubic-bezier(0.22,1,0.36,1) ${delay}ms`,
+      ].join(", ");
+      el.style.opacity   = "1";
+      el.style.transform = "translateY(0) translateX(0) scale(1)";
     };
 
-    // Respect prefers-reduced-motion
+    /* Respect prefers-reduced-motion */
     const prefersReduced =
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     if (prefersReduced) {
-      el.style.opacity = "1";
+      el.style.opacity   = "1";
       el.style.transform = "none";
       return;
     }
 
-    // If already in viewport on mount, show immediately (avoids invisible hero CTAs
-    // when IntersectionObserver is slow or threshold never hits in edge browsers).
-    const rect = el.getBoundingClientRect();
-    const vh = typeof window !== "undefined" ? window.innerHeight : 0;
-    const inView = rect.top < vh && rect.bottom > 0 && rect.width > 0 && rect.height > 0;
-    if (inView) {
-      reveal();
-      return;
-    }
+    /* Already in viewport on mount — reveal immediately */
+    const rect   = el.getBoundingClientRect();
+    const vh     = typeof window !== "undefined" ? window.innerHeight : 0;
+    const inView = rect.top < vh && rect.bottom > 0 && rect.width > 0;
+    if (inView) { reveal(); return; }
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -72,18 +69,19 @@ export default function ScrollReveal({
           }
         });
       },
-      { threshold: Math.min(threshold, 0.05), rootMargin: "80px 0px 80px 0px" }
+      /* rootMargin: trigger slightly before fully in view for a smoother feel */
+      { threshold: Math.min(threshold, 0.05), rootMargin: "0px 0px -40px 0px" }
     );
 
     observer.observe(el);
 
-    // Safety: never leave content invisible if observer never fired (embedded browsers, etc.)
+    /* Safety fallback — never leave content invisible */
     const safety = window.setTimeout(() => {
       const op = Number.parseFloat(window.getComputedStyle(el).opacity || "0");
       if (op < 0.99) {
         el.style.transition = "opacity 0.4s ease";
-        el.style.opacity = "1";
-        el.style.transform = "translateY(0) translateX(0)";
+        el.style.opacity    = "1";
+        el.style.transform  = "translateY(0) translateX(0) scale(1)";
       }
       observer.disconnect();
     }, 2500);
@@ -95,8 +93,8 @@ export default function ScrollReveal({
   }, [delay, threshold]);
 
   const initialStyle: CSSProperties = {
-    opacity: 0,
-    transform: OFFSETS[direction],
+    opacity:    0,
+    transform:  OFFSETS[direction],
     willChange: "opacity, transform",
   };
 
