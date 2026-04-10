@@ -1031,24 +1031,31 @@ export default function Home() {
               </p>
 
               {/* Annual plan option */}
-              <div
-                style={{
-                  marginTop:    "20px",
-                  padding:      "14px 18px",
-                  border:       "1px solid rgba(196,149,106,0.4)",
-                  background:   "rgba(196,149,106,0.08)",
-                  textAlign:    "center",
-                }}
-              >
+              <div style={{ marginTop: "32px" }}>
+                <div style={{
+                  width: "100%",
+                  height: "1px",
+                  background: "linear-gradient(90deg, transparent, rgba(196,149,106,0.4), transparent)",
+                  marginBottom: "24px",
+                }} />
                 <p style={{
-                  margin: "0 0 8px",
-                  color: "rgba(253,250,245,0.7)",
-                  fontSize: "11px",
-                  fontFamily: "Arial, sans-serif",
-                  letterSpacing: "0.18em",
+                  margin: "0 0 4px",
+                  color: "rgba(196,149,106,0.7)",
+                  fontSize: "0.68rem",
+                  fontFamily: "Inter, sans-serif",
+                  letterSpacing: "0.28em",
                   textTransform: "uppercase",
                 }}>
-                  Best value
+                  Prefer to commit annually?
+                </p>
+                <p style={{
+                  margin: "0 0 16px",
+                  color: "rgba(253,250,245,0.5)",
+                  fontSize: "0.78rem",
+                  fontFamily: "Cormorant Garamond, serif",
+                  lineHeight: 1.6,
+                }}>
+                  $180/year — save $48, equivalent to two months free
                 </p>
                 <button
                   type="button"
@@ -1056,27 +1063,27 @@ export default function Home() {
                   disabled={checkoutLoading}
                   style={{
                     background:    "transparent",
-                    border:        "1px solid rgba(196,149,106,0.6)",
-                    color:         "#C4956A",
-                    padding:       "10px 28px",
-                    fontFamily:    "Arial, sans-serif",
-                    fontSize:      "11px",
+                    border:        "1px solid rgba(196,149,106,0.5)",
+                    color:         "rgba(196,149,106,0.9)",
+                    padding:       "12px 32px",
+                    fontFamily:    "Inter, sans-serif",
+                    fontSize:      "0.72rem",
                     letterSpacing: "0.2em",
                     textTransform: "uppercase",
                     cursor:        checkoutLoading ? "default" : "pointer",
-                    width:         "100%",
+                    transition:    "all 0.2s ease",
+                  }}
+                  onMouseEnter={e => {
+                    (e.currentTarget as HTMLButtonElement).style.background = "rgba(196,149,106,0.12)";
+                    (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(196,149,106,0.8)";
+                  }}
+                  onMouseLeave={e => {
+                    (e.currentTarget as HTMLButtonElement).style.background = "transparent";
+                    (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(196,149,106,0.5)";
                   }}
                 >
-                  Annual Plan — $180/year
+                  Join Annual — $180 / year
                 </button>
-                <p style={{
-                  margin: "6px 0 0",
-                  color:  "rgba(196,149,106,0.7)",
-                  fontSize: "10px",
-                  fontFamily: "Arial, sans-serif",
-                }}>
-                  Save $48 — equivalent to 2 months free
-                </p>
               </div>
 
               <button
@@ -1093,7 +1100,7 @@ export default function Home() {
         {/* ════════════════════════════════════════════════════════
             FAQ
         ════════════════════════════════════════════════════════ */}
-        <section className="py-20 sm:py-24 px-5 sm:px-8 bg-white">
+        <section className="py-20 sm:py-24 px-5 sm:px-8" style={{ background: "var(--cream-dark)" }}>
           <div className="max-w-2xl mx-auto">
             <ScrollReveal direction="up" threshold={0.12}>
               <div className="text-center mb-12">
