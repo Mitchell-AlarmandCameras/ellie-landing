@@ -15,6 +15,26 @@ export const metadata: Metadata = {
 /* Always server-render so the latest approved brief is always shown */
 export const dynamic = "force-dynamic";
 
+/* ── Fetch current hero image for VIP Room background ─────────────
+   Uses the same weekly image approved on Sunday. Falls back to a
+   curated editorial photo if no Blob data exists yet. */
+async function getHeroBgImage(): Promise<string> {
+  const FALLBACK = "https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=1600&q=80";
+  try {
+    if (!process.env.BLOB_READ_WRITE_TOKEN) return FALLBACK;
+    const { list } = await import("@vercel/blob");
+    const { blobs } = await list({ prefix: "ellie-hero/" });
+    const current = blobs.find(b => b.pathname === "ellie-hero/current.json");
+    if (!current) return FALLBACK;
+    const res = await fetch(current.url, { cache: "no-store" });
+    if (!res.ok) return FALLBACK;
+    const data = await res.json() as { images?: Array<{ url: string }> };
+    return data?.images?.[0]?.url ?? FALLBACK;
+  } catch {
+    return FALLBACK;
+  }
+}
+
 /* ── Fetch the latest approved brief from Vercel Blob ──────────────
    Falls back to the static lookbook.ts if no approved brief exists yet.
    This ensures the dashboard always matches what went out in Monday's email. */
@@ -62,6 +82,7 @@ export default async function DashboardPage() {
   if (!hasAccess) redirect("/login");
 
   const week       = await getLiveWeek();
+  const heroBg     = await getHeroBgImage();
   const hasArchive = archiveWeeks.length > 0;
 
   return (
@@ -165,12 +186,23 @@ export default async function DashboardPage() {
         className="py-16 sm:py-24 px-5 sm:px-8 text-center relative overflow-hidden"
         style={{ background: "#1A1714", borderBottom: "1px solid rgba(196,149,106,0.12)" }}
       >
-        {/* Radial gold glow from top center */}
+        {/* Weekly editorial background photo — very darkened */}
         <div
           className="absolute inset-0 pointer-events-none"
           aria-hidden="true"
           style={{
-            background: "radial-gradient(ellipse 80% 50% at 50% -10%, rgba(196,149,106,0.14) 0%, transparent 70%)",
+            backgroundImage:    `url(${heroBg})`,
+            backgroundSize:     "cover",
+            backgroundPosition: "center 30%",
+            opacity:            0.18,
+          }}
+        />
+        {/* Dark vignette over the photo */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          aria-hidden="true"
+          style={{
+            background: "radial-gradient(ellipse 100% 100% at 50% 50%, rgba(20,18,14,0.4) 0%, rgba(20,18,14,0.92) 100%)",
           }}
         />
 
@@ -187,7 +219,7 @@ export default async function DashboardPage() {
                 fontWeight:    500,
               }}
             >
-              Week of {week.weekOf}
+              Current Edition
             </span>
             <div className="h-px w-10" style={{ background: "linear-gradient(90deg, rgba(196,149,106,0.5), transparent)" }} />
           </div>

@@ -305,13 +305,15 @@ export default function Home() {
             {/* Desktop links */}
             <div className="hidden md:flex items-center gap-8">
               {[
-                { label: "The Story",  href: "#the-story"  },
-                { label: "This Week",  href: "#this-week"  },
-                { label: "The Edit",   href: "/blog"       },
-              ].map(({ label, href }) => (
+                { label: "The Story",  href: "#the-story", newTab: false },
+                { label: "This Week",  href: "#this-week", newTab: false },
+                { label: "The Edit",   href: "/blog",      newTab: true  },
+              ].map(({ label, href, newTab }) => (
                 <a
                   key={label}
                   href={href}
+                  target={newTab ? "_blank" : undefined}
+                  rel={newTab ? "noopener noreferrer" : undefined}
                   className="uppercase tracking-widest transition-colors duration-200"
                   style={{ fontSize: "0.78rem", letterSpacing: "0.18em", color: "var(--warm-gray)", fontFamily: "Inter, sans-serif" }}
                   onMouseEnter={e => (e.currentTarget.style.color = "var(--charcoal)")}
@@ -1407,14 +1409,16 @@ export default function Home() {
                 © {new Date().getFullYear()} The Style Refresh. All rights reserved.
               </p>
               {[
-                { label: "The Edit",       href: "/blog"    },
-                { label: "Contact",        href: "/contact" },
-                { label: "Privacy Policy", href: "/privacy" },
-                { label: "Terms of Service", href: "/terms" },
-              ].map(({ label, href }) => (
+                { label: "The Edit",         href: "/blog",    newTab: true  },
+                { label: "Contact",          href: "/contact", newTab: false },
+                { label: "Privacy Policy",   href: "/privacy", newTab: false },
+                { label: "Terms of Service", href: "/terms",   newTab: false },
+              ].map(({ label, href, newTab }) => (
                 <Link
                   key={label}
                   href={href}
+                  target={newTab ? "_blank" : undefined}
+                  rel={newTab ? "noopener noreferrer" : undefined}
                   style={{
                     fontFamily:     "Inter, sans-serif",
                     color:          "var(--warm-gray)",
