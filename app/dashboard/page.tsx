@@ -81,8 +81,9 @@ export default async function DashboardPage() {
 
           {/* Brand — clicking takes you home */}
           <div className="flex items-center gap-3">
-            <Link href="/" className="flex flex-col leading-none" style={{ textDecoration: "none" }}>
+            <Link href="/" className="flex flex-col leading-none group" style={{ textDecoration: "none" }} title="Back to homepage">
               <span
+                className="transition-opacity group-hover:opacity-70"
                 style={{
                   fontFamily:    "DM Serif Display, serif",
                   color:         "var(--charcoal)",
@@ -94,6 +95,7 @@ export default async function DashboardPage() {
                 Ellie
               </span>
               <span
+                className="transition-opacity group-hover:opacity-70"
                 style={{
                   fontFamily:    "Inter, sans-serif",
                   color:         "var(--blush)",

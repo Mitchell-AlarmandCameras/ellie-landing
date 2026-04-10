@@ -265,9 +265,16 @@ export default function Home() {
         <nav className={`fixed top-0 left-0 right-0 z-50 ${scrolled ? "nav-glass-scrolled" : "nav-glass"}`}>
           <div className="max-w-6xl mx-auto px-5 sm:px-8 py-4 flex items-center justify-between gap-4">
 
-            {/* Wordmark */}
-            <div className="flex flex-col leading-none shrink-0">
+            {/* Wordmark — clicks scroll to top */}
+            <button
+              type="button"
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              className="flex flex-col leading-none shrink-0 group"
+              style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}
+              aria-label="Back to top"
+            >
               <span
+                className="transition-opacity group-hover:opacity-70"
                 style={{
                   fontFamily:    "DM Serif Display, serif",
                   color:         "var(--charcoal)",
@@ -279,6 +286,7 @@ export default function Home() {
                 Ellie
               </span>
               <span
+                className="transition-opacity group-hover:opacity-70"
                 style={{
                   fontFamily:    "Inter, sans-serif",
                   color:         "var(--blush)",
@@ -290,7 +298,7 @@ export default function Home() {
               >
                 The Style Refresh
               </span>
-            </div>
+            </button>
 
             {/* Desktop links */}
             <div className="hidden md:flex items-center gap-8">
