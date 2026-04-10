@@ -201,12 +201,14 @@ export default function Home() {
       {/* ── Referral banner (shown when ?ref=CODE in URL) ─────────── */}
       {referralBanner && (
         <div style={{
-          background:  "#C4956A",
-          color:       "#FDFAF5",
-          padding:     "10px 20px",
+          background:  "var(--charcoal)",
+          borderBottom: "1px solid rgba(196,149,106,0.3)",
+          color:       "rgba(253,250,245,0.9)",
+          padding:     "10px 24px",
           textAlign:   "center",
-          fontFamily:  "Arial, sans-serif",
-          fontSize:    "13px",
+          fontFamily:  "Inter, sans-serif",
+          fontSize:    "0.76rem",
+          letterSpacing: "0.06em",
           lineHeight:  1.5,
           position:    "relative",
         }}>
@@ -475,7 +477,7 @@ export default function Home() {
         {/* ════════════════════════════════════════════════════════
             THE STORY
         ════════════════════════════════════════════════════════ */}
-        <section id="the-story" className="py-20 sm:py-28 px-5 sm:px-8 bg-white">
+        <section id="the-story" className="py-20 sm:py-28 px-5 sm:px-8" style={{ background: "var(--cream)" }}>
           <div className="max-w-4xl mx-auto">
 
             <ScrollReveal direction="up" threshold={0.15}>
@@ -565,10 +567,7 @@ export default function Home() {
 
             {/* Three pillars */}
             <ScrollReveal direction="up" delay={150} threshold={0.1}>
-              <div
-                className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-px"
-                style={{ background: "var(--sand-border)" }}
-              >
+              <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-px" style={{ background: "var(--sand-border)" }}>
                 {[
                   { num: "3",   label: "Complete looks",   sub: "per Monday brief"         },
                   { num: "52",  label: "Briefs per year",  sub: "never a missed Monday"     },
@@ -576,16 +575,18 @@ export default function Home() {
                 ].map((item) => (
                   <div
                     key={item.label}
-                    className="bg-white py-9 px-7 text-center"
+                    className="py-10 px-7 text-center"
+                    style={{ background: "var(--cream-dark)" }}
                   >
                     <span
                       style={{
-                        fontFamily: "DM Serif Display, serif",
-                        color:      "var(--blush)",
-                        fontSize:   "2.5rem",
-                        lineHeight: "1",
-                        display:    "block",
-                        marginBottom: "8px",
+                        fontFamily:   "DM Serif Display, serif",
+                        color:        "var(--blush)",
+                        fontSize:     "3.2rem",
+                        lineHeight:   "1",
+                        display:      "block",
+                        marginBottom: "10px",
+                        letterSpacing: "0.01em",
                       }}
                     >
                       {item.num}
@@ -594,22 +595,23 @@ export default function Home() {
                       style={{
                         fontFamily:    "Inter, sans-serif",
                         color:         "var(--charcoal)",
-                    fontSize:      "0.8rem",
-                    fontWeight:    500,
-                    letterSpacing: "0.18em",
-                    textTransform: "uppercase",
-                    display:       "block",
-                  }}
-                >
-                  {item.label}
+                        fontSize:      "0.72rem",
+                        fontWeight:    600,
+                        letterSpacing: "0.22em",
+                        textTransform: "uppercase",
+                        display:       "block",
+                      }}
+                    >
+                      {item.label}
                     </span>
                     <span
                       style={{
-                    fontFamily: "Inter, sans-serif",
-                    color:      "var(--warm-gray)",
-                    fontSize:   "0.76rem",
-                    display:    "block",
-                    marginTop:  "4px",
+                        fontFamily: "Inter, sans-serif",
+                        color:      "var(--warm-gray)",
+                        fontSize:   "0.74rem",
+                        display:    "block",
+                        marginTop:  "5px",
+                        lineHeight: "1.5",
                       }}
                     >
                       {item.sub}
@@ -624,7 +626,7 @@ export default function Home() {
         {/* ════════════════════════════════════════════════════════
             WHAT THE MEMBERSHIP DELIVERS
         ════════════════════════════════════════════════════════ */}
-        {true && <section className="py-20 sm:py-24 px-5 sm:px-8" style={{ background: "var(--cream)" }}>
+        {true && <section className="py-20 sm:py-24 px-5 sm:px-8" style={{ background: "var(--cream-dark)" }}>
           <div className="max-w-5xl mx-auto">
             <ScrollReveal direction="up" threshold={0.12}>
               <div className="text-center mb-12">
@@ -648,35 +650,51 @@ export default function Home() {
               {testimonials.map((t, i) => (
                 <ScrollReveal key={t.name} direction="up" delay={i * 80} threshold={0.1}>
                   <div
-                    className="flex flex-col justify-between h-full p-8"
+                    className="flex flex-col justify-between h-full p-9"
                     style={{
-                      background:   "var(--cream-dark)",
-                      borderLeft:   "2px solid var(--blush)",
+                      background:  "var(--cream)",
+                      borderBottom: "2px solid var(--blush)",
+                      boxShadow:   "0 4px 24px rgba(44,44,44,0.06)",
                     }}
                   >
-                    <p
-                      style={{
-                        fontFamily: "Cormorant Garamond, serif",
-                        color:      "var(--charcoal-muted)",
-                        fontSize:   "1.05rem",
-                        lineHeight: "1.85",
-                        fontStyle:  "italic",
-                      }}
-                    >
-                      &ldquo;{t.quote}&rdquo;
-                    </p>
-                    <div className="mt-6">
+                    {/* Opening quote mark */}
+                    <div>
+                      <span
+                        aria-hidden="true"
+                        style={{
+                          fontFamily:  "DM Serif Display, serif",
+                          color:       "var(--blush)",
+                          fontSize:    "3rem",
+                          lineHeight:  "1",
+                          display:     "block",
+                          marginBottom: "12px",
+                          opacity:     0.6,
+                        }}
+                      >&ldquo;</span>
+                      <p
+                        style={{
+                          fontFamily: "Cormorant Garamond, serif",
+                          color:      "var(--charcoal-muted)",
+                          fontSize:   "1.1rem",
+                          lineHeight: "1.85",
+                          fontStyle:  "italic",
+                        }}
+                      >
+                        {t.quote}
+                      </p>
+                    </div>
+                    <div className="mt-8">
                       <div
                         className="h-px mb-4"
-                        style={{ background: "var(--sand-border)", width: "40px" }}
+                        style={{ background: "linear-gradient(90deg, var(--blush), transparent)", width: "40px" }}
                       />
                       <p
                         style={{
                           fontFamily:    "Inter, sans-serif",
                           color:         "var(--charcoal)",
-                          fontSize:      "0.8rem",
+                          fontSize:      "0.76rem",
                           fontWeight:    600,
-                          letterSpacing: "0.1em",
+                          letterSpacing: "0.14em",
                           textTransform: "uppercase",
                         }}
                       >
@@ -686,8 +704,9 @@ export default function Home() {
                         style={{
                           fontFamily: "Inter, sans-serif",
                           color:      "var(--warm-gray)",
-                          fontSize:   "0.74rem",
-                          marginTop:  "2px",
+                          fontSize:   "0.72rem",
+                          marginTop:  "3px",
+                          letterSpacing: "0.04em",
                         }}
                       >
                         {t.city}
@@ -768,11 +787,23 @@ export default function Home() {
                   threshold={0.1}
                 >
                   <article
-                    className="bg-white relative group"
-                    style={{ borderTop: "2px solid var(--sand-border)" }}
+                    className="relative group"
+                    style={{
+                      background: "#FFFFFF",
+                      boxShadow:  "0 2px 20px rgba(44,44,44,0.07), 0 1px 4px rgba(44,44,44,0.04)",
+                      transition: "box-shadow 0.35s ease, transform 0.35s ease",
+                    }}
+                    onMouseEnter={e => {
+                      (e.currentTarget as HTMLElement).style.boxShadow = "0 12px 48px rgba(44,44,44,0.12), 0 2px 8px rgba(44,44,44,0.06)";
+                      (e.currentTarget as HTMLElement).style.transform = "translateY(-4px)";
+                    }}
+                    onMouseLeave={e => {
+                      (e.currentTarget as HTMLElement).style.boxShadow = "0 2px 20px rgba(44,44,44,0.07), 0 1px 4px rgba(44,44,44,0.04)";
+                      (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
+                    }}
                   >
                     {/* Editorial photo at top of card */}
-                    <div className="relative overflow-hidden" style={{ height: "200px" }}>
+                    <div className="relative overflow-hidden" style={{ height: "240px" }}>
                       <Image
                         src={card.image}
                         alt={`${card.label} — The Style Refresh`}
@@ -867,23 +898,24 @@ export default function Home() {
                     {/* Lock indicator — decorative only (not a control) */}
                     <div
                       className="flex items-center gap-2 pt-4 pointer-events-none select-none"
-                      style={{ borderTop: "1px solid var(--sand-light)" }}
+                      style={{ borderTop: "1px solid var(--sand-border)" }}
                     >
                       <svg width="11" height="13" viewBox="0 0 11 13" fill="none" aria-hidden="true">
-                        <rect x="1" y="5.5" width="9" height="7" rx="1" stroke="var(--taupe)" strokeWidth="1.1" />
-                        <path d="M3.5 5.5V3.5a2 2 0 014 0v2" stroke="var(--taupe)" strokeWidth="1.1" strokeLinecap="round" />
+                        <rect x="1" y="5.5" width="9" height="7" rx="1" stroke="var(--blush)" strokeWidth="1.1" />
+                        <path d="M3.5 5.5V3.5a2 2 0 014 0v2" stroke="var(--blush)" strokeWidth="1.1" strokeLinecap="round" />
                         <circle cx="5.5" cy="9" r="1" fill="var(--blush)" />
                       </svg>
                       <span
                         style={{
                           fontFamily:    "Inter, sans-serif",
-                          color:         "var(--taupe)",
-                          fontSize:      "0.75rem",
-                          letterSpacing: "0.14em",
+                          color:         "var(--blush)",
+                          fontSize:      "0.7rem",
+                          letterSpacing: "0.18em",
                           textTransform: "uppercase",
+                          fontWeight:    500,
                         }}
                       >
-                        Buy links for members
+                        Members only
                       </span>
                     </div>
                     </div>{/* end inner content div */}
@@ -930,13 +962,11 @@ export default function Home() {
           className="py-20 sm:py-28 px-5 sm:px-8 relative overflow-hidden"
           style={{ background: "var(--charcoal)" }}
         >
-          {/* Subtle grid */}
+          {/* Subtle radial glow */}
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
-              backgroundImage: `linear-gradient(rgba(232,223,208,0.04) 1px, transparent 1px),
-                                linear-gradient(90deg, rgba(232,223,208,0.04) 1px, transparent 1px)`,
-              backgroundSize: "64px 64px",
+              background: "radial-gradient(ellipse 80% 60% at 50% 100%, rgba(196,149,106,0.07) 0%, transparent 70%)",
             }}
             aria-hidden="true"
           />
@@ -1178,6 +1208,101 @@ export default function Home() {
                 </ScrollReveal>
               ))}
             </div>
+          </div>
+        </section>
+
+        {/* ════════════════════════════════════════════════════════
+            CLOSING CTA
+        ════════════════════════════════════════════════════════ */}
+        <section
+          className="py-24 sm:py-32 px-5 sm:px-8 relative overflow-hidden"
+          style={{ background: "var(--charcoal)" }}
+        >
+          {/* Soft radial warmth from center */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            aria-hidden="true"
+            style={{
+              background: "radial-gradient(ellipse 70% 50% at 50% 50%, rgba(196,149,106,0.10) 0%, transparent 70%)",
+            }}
+          />
+          <div className="relative z-10 max-w-2xl mx-auto text-center">
+            <ScrollReveal direction="up" threshold={0.15}>
+              <span className="section-label block mb-5" style={{ color: "var(--blush-light)" }}>
+                Begin
+              </span>
+              <h2
+                style={{
+                  fontFamily: "DM Serif Display, serif",
+                  color:      "var(--cream)",
+                  fontSize:   "clamp(2rem, 6vw, 3.4rem)",
+                  lineHeight: "1.12",
+                  marginBottom: "20px",
+                }}
+              >
+                Monday mornings just got{" "}
+                <em style={{ color: "var(--blush-light)", fontStyle: "normal" }}>better.</em>
+              </h2>
+              <div
+                style={{
+                  width: "48px", height: "1px",
+                  background: "rgba(196,149,106,0.5)",
+                  margin: "0 auto 28px",
+                }}
+              />
+              <p
+                style={{
+                  fontFamily: "Cormorant Garamond, serif",
+                  color:      "rgba(253,250,245,0.6)",
+                  fontSize:   "clamp(1.05rem, 3vw, 1.2rem)",
+                  lineHeight: "1.85",
+                  marginBottom: "36px",
+                }}
+              >
+                Three complete looks. Every single Monday. Direct buy links to every item.
+                Less than a coffee a week — and the best-dressed inbox on the internet.
+              </p>
+              <button
+                type="button"
+                onClick={() => handleCheckout("monthly")}
+                disabled={checkoutLoading}
+                style={{
+                  background:    "var(--blush)",
+                  color:         "var(--cream)",
+                  border:        "none",
+                  padding:       "18px 44px",
+                  fontFamily:    "Inter, sans-serif",
+                  fontSize:      "0.76rem",
+                  letterSpacing: "0.22em",
+                  textTransform: "uppercase",
+                  cursor:        checkoutLoading ? "default" : "pointer",
+                  opacity:       checkoutLoading ? 0.7 : 1,
+                  transition:    "background 0.25s ease, transform 0.25s ease",
+                }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLButtonElement).style.background = "#B5825A";
+                  (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-2px)";
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLButtonElement).style.background = "var(--blush)";
+                  (e.currentTarget as HTMLButtonElement).style.transform = "translateY(0)";
+                }}
+              >
+                {checkoutLoading ? "Preparing…" : "Start My Refresh — $19/mo"}
+              </button>
+              <p
+                style={{
+                  fontFamily:    "Inter, sans-serif",
+                  color:         "rgba(253,250,245,0.35)",
+                  fontSize:      "0.7rem",
+                  letterSpacing: "0.06em",
+                  marginTop:     "16px",
+                  lineHeight:    1.6,
+                }}
+              >
+                7-day money-back guarantee · Cancel anytime · Secure checkout via Stripe
+              </p>
+            </ScrollReveal>
           </div>
         </section>
 
