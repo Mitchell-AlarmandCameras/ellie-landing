@@ -353,140 +353,121 @@ export default function Home() {
         </nav>
 
         {/* ════════════════════════════════════════════════════════
-            HERO
+            HERO — full-screen background carousel
         ════════════════════════════════════════════════════════ */}
-        <section
-          className="relative min-h-screen flex items-center justify-center px-5 sm:px-8 pt-24 pb-16"
-          style={{ background: "linear-gradient(175deg, var(--cream) 0%, var(--cream-dark) 100%)" }}
-        >
-          {/* Subtle texture grid */}
+        <section className="relative min-h-screen flex items-center">
+
+          {/* Full-screen carousel background */}
+          <HeroCarousel />
+
+          {/* Dark gradient overlay — left heavy for text readability */}
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
-              backgroundImage: `linear-gradient(rgba(201,185,154,0.07) 1px, transparent 1px),
-                                linear-gradient(90deg, rgba(201,185,154,0.07) 1px, transparent 1px)`,
-              backgroundSize: "64px 64px",
+              background: "linear-gradient(105deg, rgba(18,14,10,0.78) 0%, rgba(18,14,10,0.52) 50%, rgba(18,14,10,0.18) 100%)",
+              zIndex: 2,
             }}
             aria-hidden="true"
           />
-          {/* Top sand hairline */}
-          <div
-            className="absolute top-0 left-0 right-0 h-px"
-            style={{ background: "linear-gradient(90deg, transparent, rgba(196,149,106,0.2), transparent)" }}
-          />
 
-          <div className="relative z-10 w-full max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-20 items-center">
+          {/* Content — sits above overlay */}
+          <div className="relative w-full max-w-6xl mx-auto px-6 sm:px-10 pt-28 pb-20" style={{ zIndex: 3 }}>
+            <div className="max-w-xl">
 
-              {/* ── Left: Text content ── */}
-              <div className="flex flex-col items-center lg:items-start text-center lg:text-left py-8">
+              {/* Eyebrow */}
+              <ScrollReveal direction="up" delay={0}>
+                <div className="flex items-center gap-3 mb-7">
+                  <div className="h-px w-8" style={{ background: "rgba(196,149,106,0.7)" }} />
+                  <span style={{
+                    fontSize: "0.72rem", letterSpacing: "0.34em", textTransform: "uppercase",
+                    fontFamily: "Inter, sans-serif", color: "rgba(196,149,106,0.9)",
+                  }}>
+                    Private Style Membership
+                  </span>
+                </div>
+              </ScrollReveal>
 
-                {/* Eyebrow */}
-                <ScrollReveal direction="up" delay={0}>
-                  <div className="flex items-center justify-center lg:justify-start gap-3 mb-7">
-                    <div className="h-px w-8" style={{ background: "linear-gradient(90deg, transparent, var(--sand-dark))" }} />
-                    <span className="section-label" style={{ fontSize: "0.75rem", letterSpacing: "0.3em" }}>
-                      Private Style Membership
-                    </span>
-                    <div className="h-px w-8" style={{ background: "linear-gradient(90deg, var(--sand-dark), transparent)" }} />
-                  </div>
-                </ScrollReveal>
+              {/* Headline */}
+              <ScrollReveal direction="up" delay={80}>
+                <h1
+                  className="font-bold leading-tight mb-6"
+                  style={{
+                    fontFamily: "DM Serif Display, serif",
+                    color:      "#FDFAF5",
+                    fontSize:   "clamp(2.6rem, 8vw, 5.2rem)",
+                    lineHeight: "1.06",
+                    textShadow: "0 2px 24px rgba(0,0,0,0.4)",
+                  }}
+                >
+                  Three looks.
+                  <br />
+                  <em className="not-italic" style={{ color: "#C4956A" }}>Every Monday.</em>
+                  <br />
+                  Ready to buy.
+                </h1>
+              </ScrollReveal>
 
-                {/* Main headline */}
-                <ScrollReveal direction="up" delay={80}>
-                  <h1
-                    className="font-bold leading-tight mb-6"
-                    style={{
-                      fontFamily: "DM Serif Display, serif",
-                      color:      "var(--charcoal)",
-                      fontSize:   "clamp(2.4rem, 8vw, 5rem)",
-                      lineHeight: "1.08",
-                    }}
-                  >
-                    Three looks.
-                    <br />
-                    <em className="not-italic" style={{ color: "var(--blush)" }}>Every Monday.</em>
-                    <br />
-                    Ready to buy.
-                  </h1>
-                </ScrollReveal>
+              {/* Divider */}
+              <ScrollReveal direction="up" delay={140}>
+                <div style={{ width: "48px", height: "1px", background: "rgba(196,149,106,0.6)", margin: "0 0 28px" }} />
+              </ScrollReveal>
 
-                {/* Divider */}
-                <ScrollReveal direction="up" delay={140}>
-                  <div className="sand-divider lg:mx-0" />
-                </ScrollReveal>
+              {/* Sub-headline */}
+              <ScrollReveal direction="up" delay={200}>
+                <p
+                  className="mb-10 leading-relaxed"
+                  style={{
+                    fontFamily: "Cormorant Garamond, serif",
+                    color:      "rgba(253,250,245,0.85)",
+                    fontSize:   "clamp(1.1rem, 3vw, 1.3rem)",
+                    lineHeight: "1.85",
+                    textShadow: "0 1px 8px rgba(0,0,0,0.3)",
+                  }}
+                >
+                  Three complete looks — sourced, styled, and ready to shop —
+                  delivered to your inbox every Monday morning. Women&apos;s fashion,
+                  curated personally by Ellie. Direct buy links to every single item.
+                </p>
+              </ScrollReveal>
 
-                {/* Sub-headline */}
-                <ScrollReveal direction="up" delay={200}>
-                  <p
-                    className="mb-10 mx-auto lg:mx-0 leading-relaxed"
-                    style={{
-                      fontFamily: "Cormorant Garamond, serif",
-                      color:      "var(--charcoal-muted)",
-                      fontSize:   "clamp(1.1rem, 3.5vw, 1.35rem)",
-                      lineHeight: "1.85",
-                      maxWidth:   "34rem",
-                    }}
-                  >
-                    Three complete looks — sourced, styled, and ready to shop —
-                    delivered to your inbox every Monday morning. Women&apos;s fashion,
-                    curated personally by Ellie. Direct buy links to every single item.
-                  </p>
-                </ScrollReveal>
-
-                {/* Hero CTA */}
-                <div className="flex flex-col items-center lg:items-start gap-4 w-full">
+              {/* CTA */}
+              <ScrollReveal direction="up" delay={260}>
+                <div className="flex flex-col items-start gap-4">
                   <button
                     type="button"
                     onClick={() => handleCheckout("monthly")}
                     disabled={checkoutLoading}
-                    className="btn-primary"
-                    style={{ minHeight: "54px", fontSize: "0.78rem", padding: "0 2.2rem" }}
+                    style={{
+                      background:    "#C4956A",
+                      color:         "#FDFAF5",
+                      border:        "none",
+                      padding:       "16px 36px",
+                      fontFamily:    "Inter, sans-serif",
+                      fontSize:      "0.75rem",
+                      letterSpacing: "0.22em",
+                      textTransform: "uppercase",
+                      cursor:        checkoutLoading ? "default" : "pointer",
+                      opacity:       checkoutLoading ? 0.7 : 1,
+                      minHeight:     "54px",
+                    }}
                     aria-label="Join Style Refresh for 19 dollars per month"
                   >
                     {checkoutLoading ? "Preparing…" : "Start My Refresh — $19/mo"}
                   </button>
-                  <p
-                    style={{
-                      fontSize:      "0.76rem",
-                      color:         "var(--warm-gray)",
-                      letterSpacing: "0.06em",
-                      fontFamily:    "Inter, sans-serif",
-                      lineHeight:    1.6,
-                    }}
-                  >
+                  <p style={{
+                    fontSize: "0.72rem", color: "rgba(253,250,245,0.55)",
+                    letterSpacing: "0.06em", fontFamily: "Inter, sans-serif", lineHeight: 1.6,
+                  }}>
                     7-day money-back guarantee · Cancel anytime · Secure checkout
                   </p>
                 </div>
-              </div>
-
-              {/* ── Right: Editorial photo (desktop only) ── */}
-              <div className="hidden lg:block">
-                <ScrollReveal direction="right" delay={160} threshold={0.05}>
-                  <div className="relative" style={{ paddingBottom: "128%" }}>
-
-                    {/* Decorative offset frame */}
-                    <div
-                      className="absolute pointer-events-none"
-                      style={{
-                        top: -16, left: -16, right: 16, bottom: 16,
-                        border: "1px solid rgba(196,149,106,0.40)",
-                        zIndex: 0,
-                      }}
-                      aria-hidden="true"
-                    />
-
-                    {/* Weekly hero carousel — updates every Sunday with the new drop */}
-                    <HeroCarousel />
-                  </div>
-                </ScrollReveal>
-              </div>
+              </ScrollReveal>
 
             </div>
 
             {/* Scroll indicator */}
-            <div className="flex justify-center mt-12 lg:mt-16 opacity-40">
-              <div className="w-px animate-scroll-pulse" style={{ height: "32px", background: "var(--sand-dark)" }} />
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 opacity-40">
+              <div className="w-px animate-scroll-pulse" style={{ height: "32px", background: "rgba(253,250,245,0.6)" }} />
             </div>
           </div>
         </section>
