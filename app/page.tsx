@@ -415,7 +415,7 @@ export default function Home() {
               {/* Sub-headline */}
               <ScrollReveal direction="up" delay={200}>
                 <p
-                  className="mb-10 leading-relaxed"
+                  className="mb-10 leading-relaxed hero-text"
                   style={{
                     fontFamily: "Cormorant Garamond, serif",
                     color:      "rgba(253,250,245,0.85)",
