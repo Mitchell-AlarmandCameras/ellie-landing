@@ -47,13 +47,26 @@
     font-family: 'DM Serif Display', Georgia, serif;
   }
 
-  /* Cormorant Garamond is naturally thin — force 500 weight for readability */
-  .font-cormorant, [style*="Cormorant Garamond"] {
+  /* Cormorant Garamond is naturally hairline thin — force heavier weight */
+  [style*="Cormorant Garamond"] {
     font-weight: 500 !important;
+    color: #3A3530 !important;
   }
 
+  /* All Georgia serif body text — heavier and darker */
+  [style*="Georgia"] {
+    font-weight: 500 !important;
+    color: #3A3530 !important;
+  }
+
+  /* Paragraph defaults — darker and more readable */
   p {
-    color: var(--charcoal-light); /* #4A4A4A — darker than the light muted grays */
+    color: #3A3530;
+  }
+
+  /* Make small Inter labels readable — floor at 12px */
+  [style*="Inter"] {
+    -webkit-font-smoothing: antialiased;
   }
 }
 
