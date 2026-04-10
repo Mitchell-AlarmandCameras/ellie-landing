@@ -106,24 +106,24 @@ export const currentWeek: WeeklyLookbook = {
         },
         {
           piece:   "Fitted white cotton tee",
-          brand:   "Everlane / Sunspel",
-          price:   "$35–$75",
+          brand:   "Everlane",
+          price:   "$35–$55",
           note:    "The fitted crew. The one white tee worth owning. Everything else is extra.",
-          buyLink: "https://www.everlane.com/search?q=fitted+crew+tee+white",
+          buyLink: "https://www.everlane.com/collections/womens-tshirts",
         },
         {
           piece:   "Gold hoop earrings — medium",
           brand:   "Mejuri",
-          price:   "$98",
+          price:   "$78–$128",
           note:    "The Demi-Fine Bold Hoops. The only jewelry the look needs. Wear them and stop.",
-          buyLink: "https://mejuri.com/collections/hoops",
+          buyLink: "https://www.nordstrom.com/sr?origin=keywordsearch&keyword=mejuri+gold+hoop+earrings+women",
         },
         {
           piece:   "White leather sneaker",
           brand:   "Adidas",
           price:   "$100",
           note:    "Stan Smith. The answer to every casual shoe question since 1965.",
-          buyLink: "https://www.adidas.com/us/stan_smith-shoes/WI6368.html",
+          buyLink: "https://www.nordstrom.com/sr?origin=keywordsearch&keyword=adidas+stan+smith+white+women",
         },
         {
           piece:   "Canvas market tote in natural",
@@ -169,9 +169,9 @@ export const currentWeek: WeeklyLookbook = {
         {
           piece:   "Delicate gold chain necklace",
           brand:   "Mejuri",
-          price:   "$68",
+          price:   "$68–$98",
           note:    "The fine chain necklace. One layer, mid-length. The dress asks for nothing more.",
-          buyLink: "https://mejuri.com/collections/necklaces",
+          buyLink: "https://www.nordstrom.com/sr?origin=keywordsearch&keyword=mejuri+gold+chain+necklace+women",
         },
         {
           piece:   "Mini crossbody bag in black",
