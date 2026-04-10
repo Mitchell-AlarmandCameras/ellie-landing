@@ -215,8 +215,8 @@ REQUIREMENTS:
       A.P.C.              → https://www.apc.fr/us/search/?q=blazer
       Staud               → https://www.staud.clothing/search?q=dress
       Jacquemus           → https://www.jacquemus.com/search?q=bag
-    AVOID these brands entirely — their websites block direct links: Sézane, Madewell, J.Crew, ASOS, Zara
-    Use verified alternatives instead: Anthropologie, Everlane, Reformation, Totême, Theory, Mejuri, Baggu
+    AVOID these brands entirely — their websites are broken or redirect to the same page: Sézane, Madewell, J.Crew, ASOS, Zara, Sam Edelman
+    Use verified alternatives instead: Anthropologie, Everlane, Reformation, Totême, Theory, Mejuri, Baggu, Steve Madden, Vince Camuto
     Rules:
       1. ALWAYS use /search? format with specific descriptive keywords for the item
       2. Keywords should match the PIECE name (e.g. "wide leg trouser", "structured blazer", "block heel pump")

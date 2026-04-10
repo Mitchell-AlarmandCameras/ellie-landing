@@ -72,10 +72,10 @@ export const currentWeek: WeeklyLookbook = {
         },
         {
           piece:   "Block-heel pointed pump in black",
-          brand:   "Sam Edelman",
-          price:   "$130",
-          note:    "The Hazel pump. Comfortable enough for a full day, polished enough for the boardroom.",
-          buyLink: "https://www.samedelman.com/collections/heels",
+          brand:   "Steve Madden",
+          price:   "$110",
+          note:    "Polished enough for the boardroom, comfortable enough for the full day. Steve Madden's heel section has the best selection at this price point.",
+          buyLink: "https://www.stevemadden.com/collections/pumps",
         },
         {
           piece:   "Structured leather tote in cognac",
@@ -161,10 +161,10 @@ export const currentWeek: WeeklyLookbook = {
         },
         {
           piece:   "Strappy flat sandal in tan",
-          brand:   "Sam Edelman",
-          price:   "$90",
-          note:    "The Gigi sandal. Understated, goes with everything, doesn't compete with the dress.",
-          buyLink: "https://www.samedelman.com/collections/sandals",
+          brand:   "Vince Camuto",
+          price:   "$89",
+          note:    "Understated, goes with everything, doesn't compete with the dress. Vince Camuto's sandal range is exactly right for this look.",
+          buyLink: "https://www.vincecamuto.com/sandals/",
         },
         {
           piece:   "Delicate gold chain necklace",
