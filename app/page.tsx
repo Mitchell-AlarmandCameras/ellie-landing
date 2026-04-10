@@ -66,9 +66,9 @@ const testimonials = [
     city:  "What the membership delivers",
   },
   {
-    quote: "Every buy link actually works. Every item is actually in stock. Every look is actually something I'd wear. That's rarer than it sounds.",
-    name:  "The Sourcing Standard",
-    city:  "The Ellie promise",
+    quote: "Nothing goes out on Monday that hasn't been personally reviewed, approved, and considered. Every single week. No exceptions.",
+    name:  "The Ellie Standard",
+    city:  "The promise behind every brief",
   },
 ];
 

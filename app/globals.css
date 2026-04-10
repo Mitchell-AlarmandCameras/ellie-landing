@@ -1,5 +1,5 @@
 /* DM Serif Display (display/headings) + Cormorant Garamond (editorial body) + Inter (UI) */
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -39,12 +39,21 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-family: 'Inter', system-ui, sans-serif;
-    line-height: 1.7;  /* improved readability throughout */
-    font-weight: 400;
+    line-height: 1.7;
+    font-weight: 500; /* slightly heavier default weight — thinner fonts read bolder */
   }
 
   h1, h2, h3, h4 {
     font-family: 'DM Serif Display', Georgia, serif;
+  }
+
+  /* Cormorant Garamond is naturally thin — force 500 weight for readability */
+  .font-cormorant, [style*="Cormorant Garamond"] {
+    font-weight: 500 !important;
+  }
+
+  p {
+    color: var(--charcoal-light); /* #4A4A4A — darker than the light muted grays */
   }
 }
 
