@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import CookieBanner from "@/components/CookieBanner";
-import Script from "next/script";
 
 const BASE_URL  = process.env.NEXT_PUBLIC_BASE_URL ?? "https://stylebyellie.com";
 const GA_ID     = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;   // e.g. G-XXXXXXXXXX
@@ -183,6 +182,26 @@ export default function RootLayout({
         {/* Google Search Console verification */}
         <meta name="google-site-verification" content="4gKd6v209O9t3fsyYGAmVd2-xiK99dBBUzdDonuVCUM" />
 
+        {/* Google Analytics 4 — in <head> so Google Search Console can verify via GA method */}
+        {GA_ID && (
+          <>
+            <script
+              async
+              src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+            />
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  gtag('js', new Date());
+                  gtag('config', '${GA_ID}', { anonymize_ip: true });
+                `,
+              }}
+            />
+          </>
+        )}
+
         {/* Global structured data — tells Google exactly what this site is */}
         <script
           type="application/ld+json"
@@ -201,27 +220,6 @@ export default function RootLayout({
             async
             src={`https://s.skimresources.com/js/${process.env.SKIMLINKS_PUBLISHER_ID}X.skimlinks.js`}
           />
-        )}
-
-        {/* Google Analytics 4 — add NEXT_PUBLIC_GA_MEASUREMENT_ID to Vercel env vars to activate */}
-        {GA_ID && (
-          <>
-            <Script
-              src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
-              strategy="afterInteractive"
-            />
-            <Script id="ga4-init" strategy="afterInteractive">
-              {`
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-                gtag('config', '${GA_ID}', {
-                  page_path: window.location.pathname,
-                  anonymize_ip: true
-                });
-              `}
-            </Script>
-          </>
         )}
       </body>
     </html>
