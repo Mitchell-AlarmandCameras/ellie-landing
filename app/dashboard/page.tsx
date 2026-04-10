@@ -189,7 +189,7 @@ export default async function DashboardPage() {
                 fontWeight:    500,
               }}
             >
-              Week {week.weekNumber} · {week.weekOf}
+              Week of {week.weekOf}
             </span>
             <div className="h-px w-8" style={{ background: "linear-gradient(90deg, var(--sand-dark), transparent)" }} />
           </div>
@@ -274,14 +274,16 @@ export default async function DashboardPage() {
                   background: "var(--cream)",
                 }}
               >
-                {/* Ghost index */}
+                {/* Ghost index — bottom-right so it never overlaps content */}
                 <span
-                  className="absolute top-5 right-5 select-none font-bold leading-none"
+                  className="absolute bottom-4 right-5 select-none font-bold leading-none pointer-events-none"
                   style={{
                     fontFamily: "DM Serif Display, serif",
-                    fontSize:   "4rem",
-                    color:      "var(--cream-deep)",
+                    fontSize:   "3.5rem",
+                    color:      "var(--sand)",
                     lineHeight: "1",
+                    opacity:    0.6,
+                    zIndex:     0,
                   }}
                   aria-hidden="true"
                 >
@@ -380,28 +382,17 @@ export default async function DashboardPage() {
                           </div>
                         </div>
 
-                        {/* Brand + price */}
+                        {/* Brand only — no price shown (prices vary by retailer) */}
                         <div className="flex items-center gap-2 mb-2">
                           <span
                             style={{
-                          fontFamily:    "Inter, sans-serif",
-                          color:         "var(--warm-gray)",
-                          fontSize:      "0.78rem",
-                          letterSpacing: "0.08em",
+                              fontFamily:    "Inter, sans-serif",
+                              color:         "var(--warm-gray)",
+                              fontSize:      "0.78rem",
+                              letterSpacing: "0.08em",
                             }}
                           >
                             {item.brand}
-                          </span>
-                          <span style={{ color: "var(--sand-dark)", fontSize: "0.6rem" }}>·</span>
-                          <span
-                            style={{
-                          fontFamily: "Inter, sans-serif",
-                          color:      "var(--charcoal-muted)",
-                          fontSize:   "0.78rem",
-                          fontWeight: 500,
-                            }}
-                          >
-                            {item.price}
                           </span>
                         </div>
 
@@ -517,7 +508,7 @@ export default async function DashboardPage() {
                   fontWeight:    500,
                 }}
                   >
-                    Week {aw.weekNumber}
+                    Week of
                   </span>
                   <p
                     className="mt-1 font-bold"
