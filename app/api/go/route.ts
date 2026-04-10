@@ -44,37 +44,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(home, { status: 302 });
   }
 
-  /* ── Live link check with Google Shopping fallback ─────────────────
-     Test the target URL before redirecting. If it fails, send the member
-     to Google Shopping for that item so they always land somewhere useful.
-     Timeout is kept short (4s) so the click feels instant.              */
-  try {
-    const controller = new AbortController();
-    const timer      = setTimeout(() => controller.abort(), 4000);
-    const probe      = await fetch(targetUrl, {
-      method:  "HEAD",
-      signal:  controller.signal,
-      headers: { "User-Agent": "Mozilla/5.0 (compatible; StyleRefreshBot/1.0)" },
-      redirect: "follow",
-    });
-    clearTimeout(timer);
-
-    if (!probe.ok && probe.status >= 400) {
-      /* Link is broken — fall back to Google Shopping */
-      const fallback = searchTerm
-        ? `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(searchTerm)}`
-        : home;
-      console.warn(`[go] broken link (${probe.status}) — redirecting to fallback: ${fallback}`);
-      return NextResponse.redirect(fallback, { status: 302 });
-    }
-  } catch {
-    /* Timeout or network error — fall back to Google Shopping */
-    const fallback = searchTerm
-      ? `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(searchTerm)}`
-      : home;
-    console.warn(`[go] link check failed — redirecting to fallback: ${fallback}`);
-    return NextResponse.redirect(fallback, { status: 302 });
-  }
+  /* ── Direct redirect ────────────────────────────────────────────────
+     We do NOT pre-check links server-side. Retail sites (Sam Edelman,
+     Adidas, & Other Stories, etc.) use Cloudflare bot protection that
+     blocks Vercel server requests, causing false failures on valid links.
+     Members are sent directly to the brand site. The Wednesday cron and
+     Sunday approval checker handle proactive broken-link detection.     */
 
   /* ── Write click analytics to Blob ─────────────────────────────── */
   if (process.env.BLOB_READ_WRITE_TOKEN) {

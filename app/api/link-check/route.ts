@@ -31,11 +31,14 @@ async function checkLink(url: string): Promise<{ ok: boolean; status: number | s
     const res = await fetch(url, {
       method: "GET",
       signal: controller.signal,
-      headers: { "User-Agent": "Mozilla/5.0 (compatible; StyleRefreshBot/1.0)" },
+      headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" },
       redirect: "follow",
     });
     clearTimeout(timer);
-    return { ok: res.status < 400, status: res.status };
+    /* 403 = bot protection (Cloudflare/Akamai) — link works in browser, treat as OK.
+       404/410 = genuinely missing page — flag as broken.                          */
+    const ok = res.status < 400 || res.status === 403;
+    return { ok, status: res.status };
   } catch (err) {
     return { ok: false, status: String(err).slice(0, 60) };
   }
