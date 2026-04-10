@@ -176,54 +176,40 @@ REQUIREMENTS:
 • Prices: mix $80–$500 (accessible) and $500–$2,500 (aspirational)
 • editorialLead: one sentence setting the week's mood/season
 • editorsNote per look: one insider observation — specific, not generic
-• buyLink: ALWAYS use the brand's own SEARCH URL with specific keywords for that exact item.
-    Search URLs are 100% reliable — they never 404, always return in-stock items, and always stay relevant.
-    Format: https://[brand-domain]/search?q=[item+keywords]
-    Examples by brand (copy these EXACT domain patterns):
-      Totême blazer       → https://toteme-studio.com/search?type=product&q=blazer
-      Totême trench       → https://toteme-studio.com/search?type=product&q=trench+coat
-      Theory trousers     → https://www.theory.com/search?q=wide+leg+trouser
-      Theory blazer       → https://www.theory.com/search?q=blazer
-      Vince camisole      → https://www.vince.com/search?q=silk+camisole
-      Vince pants         → https://www.vince.com/search?q=wide+leg+pants
-      Nordstrom pump      → https://www.nordstrom.com/sr?origin=keywordsearch&keyword=black+block+heel+pump
-      Nordstrom sandal    → https://www.nordstrom.com/sr?origin=keywordsearch&keyword=strappy+flat+sandal+tan
-      Tory Burch tote     → https://www.toryburch.com/en-us/search?q=leather+tote
-      Tory Burch dress    → https://www.toryburch.com/en-us/search?q=midi+dress
-      Reformation pants   → https://www.thereformation.com/search?q=linen+wide+leg+pant
-      Reformation dress   → https://www.thereformation.com/search?q=midi+dress
-      Everlane tee        → https://www.everlane.com/search?q=fitted+crew+tee
-      Everlane pants      → https://www.everlane.com/search?q=wide+leg+pants
-      Mejuri earrings     → https://mejuri.com/collections/earrings
-      Mejuri necklace     → https://mejuri.com/collections/necklaces
-      Mejuri rings        → https://mejuri.com/collections/rings
-      Mejuri bracelets    → https://mejuri.com/collections/bracelets
-      Adidas Stan Smith   → https://www.adidas.com/us/search?q=stan+smith+white
-      Baggu bags          → https://baggu.com/collections/bags
-      Anthropologie dress → https://www.anthropologie.com/search?q=slip+dress
-      Anthropologie top   → https://www.anthropologie.com/search?q=silk+blouse
-      Everlane jacket     → https://www.everlane.com/search?q=denim+jacket
-      Everlane jeans      → https://www.everlane.com/search?q=straight+leg+jeans
-      Ganni dress         → https://www.ganni.com/en-us/search?q=floral+dress
-      Frame jeans         → https://www.frame-store.com/search?q=wide+leg+jeans
-      Veronica Beard      → https://veronicabeard.com/search?q=blazer
-      J.Crew blazer       → https://www.jcrew.com/search?q=blazer
-      COS dress           → https://www.cos.com/en_usd/search.html?q=midi+dress
-      & Other Stories bag → https://www.stories.com/en_usd/search/?q=crossbody+bag
-      Banana Republic     → https://bananarepublic.gap.com/browse/search.do?searchText=blazer
-      Uniqlo              → https://www.uniqlo.com/us/en/search?q=linen+pants
-      A.P.C.              → https://www.apc.fr/us/search/?q=blazer
-      Staud               → https://www.staud.clothing/search?q=dress
-      Jacquemus           → https://www.jacquemus.com/search?q=bag
-    AVOID these brands entirely — their websites are broken or redirect to the same page: Sézane, Madewell, J.Crew, ASOS, Zara, Sam Edelman
-    Use verified alternatives instead: Anthropologie, Everlane, Reformation, Totême, Theory, Mejuri, Baggu, Steve Madden, Vince Camuto
+• buyLink: ALWAYS use Google Shopping with a hyper-specific search query.
+    This is the ONLY reliable method. Google Shopping shows photos of real products, real prices from
+    multiple retailers, and the first result will be the exact item if the query is specific enough.
+    Format: https://www.google.com/search?q=[Brand+Item+Name+Color+Gender]&tbm=shop
     Rules:
-      1. ALWAYS use /search? format with specific descriptive keywords for the item
-      2. Keywords should match the PIECE name (e.g. "wide leg trouser", "structured blazer", "block heel pump")
-      3. NEVER use a product detail URL (they expire when products sell out)
-      4. NEVER use a brand homepage
-      5. NEVER guess a /collections/ or /category/ URL — only use the search pattern above
-      6. If unsure of a brand's search URL format, use: https://[domain]/search?q=[keywords]
+      1. Include the BRAND NAME in the query — this is what makes the first result match the exact item
+      2. Include the EXACT COLOR mentioned in your piece description (ivory, champagne, cognac, etc.)
+      3. Include "women" or "men" to filter results
+      4. Be as specific as possible — more words = better first result
+      5. URL-encode spaces as + (not %20)
+      6. NEVER use a brand's own website — brand sites frequently block links, change URLs, or go 404
+      7. NEVER use a product detail URL — they expire when items sell out
+      8. NEVER use collection or category pages — they show unrelated items
+    Examples (copy this EXACT format):
+      Totême ivory blazer       → https://www.google.com/search?q=Toteme+ivory+structured+blazer+women&tbm=shop
+      Theory black trousers     → https://www.google.com/search?q=Theory+admiral+crepe+wide+leg+trouser+black+women&tbm=shop
+      Vince cream camisole      → https://www.google.com/search?q=Vince+silk+camisole+cream+women&tbm=shop
+      Reformation linen pant    → https://www.google.com/search?q=Reformation+Cleo+linen+wide+leg+pant+ecru+women&tbm=shop
+      Everlane white tee        → https://www.google.com/search?q=Everlane+fitted+crew+tee+white+women&tbm=shop
+      Mejuri gold hoops         → https://www.google.com/search?q=Mejuri+Demi+Fine+Bold+Hoops+gold+medium&tbm=shop
+      Mejuri chain necklace     → https://www.google.com/search?q=Mejuri+fine+gold+chain+necklace+women&tbm=shop
+      Tory Burch cognac tote    → https://www.google.com/search?q=Tory+Burch+Lee+Radziwill+Double+Bag+cognac&tbm=shop
+      Anthropologie slip dress  → https://www.google.com/search?q=Anthropologie+bias+cut+slip+dress+champagne+women&tbm=shop
+      Frame wide-leg jeans      → https://www.google.com/search?q=Frame+wide+leg+jeans+women+off+white&tbm=shop
+      Ganni floral dress        → https://www.google.com/search?q=Ganni+floral+midi+dress+women&tbm=shop
+      Jacquemus mini bag        → https://www.google.com/search?q=Jacquemus+Le+Chiquito+mini+bag+women&tbm=shop
+      COS linen blazer          → https://www.google.com/search?q=COS+relaxed+linen+blazer+women&tbm=shop
+      Common Projects sneaker   → https://www.google.com/search?q=Common+Projects+Achilles+Low+white+men&tbm=shop
+      black block heel pump     → https://www.google.com/search?q=black+block+heel+pointed+pump+women&tbm=shop
+      strappy flat sandal tan   → https://www.google.com/search?q=strappy+flat+sandal+tan+leather+women&tbm=shop
+      mini crossbody black      → https://www.google.com/search?q=mini+crossbody+bag+black+leather+women&tbm=shop
+    AVOID these brands' own websites — use Google Shopping instead: any brand site that is not google.com
+    The only exception: Adidas Stan Smith has a permanent product page that works:
+      Adidas Stan Smith white   → https://www.adidas.com/us/stan_smith-shoes/WI6368.html
 
 WOMEN'S BRANDS TO DRAW FROM (use your knowledge, don't limit to this list):
 Net-a-Porter, Totême, A.P.C., Reformation, Sézane, Theory, Frame, Veronica Beard,
