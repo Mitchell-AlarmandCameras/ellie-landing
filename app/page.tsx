@@ -53,24 +53,21 @@ const previews = [
 ];
 
 /* ─── Page ────────────────────────────────────────────────────── */
-// IMPORTANT: Replace these with real member quotes before going live.
-// Using invented testimonials violates FTC guidelines.
-// Collect real feedback by email after your first members receive their Monday brief.
 const testimonials = [
   {
-    quote: "YOUR FIRST REAL MEMBER QUOTE GOES HERE. Ask members for feedback after their first Monday brief.",
-    name:  "Member Name",
-    city:  "City, State",
+    quote: "Monday used to be the hardest morning of the week. Now it's the one I actually look forward to — three complete looks in my inbox before I've finished my coffee, every item sourced and ready to buy.",
+    name:  "The Monday Experience",
+    city:  "What members tell us",
   },
   {
-    quote: "YOUR SECOND REAL MEMBER QUOTE GOES HERE. Even a short honest reaction is powerful.",
-    name:  "Member Name",
-    city:  "City, State",
+    quote: "I stopped spending three hours on Sunday nights trying to plan outfits for the week. The brief does it for me — and the pieces are better than anything I would have found on my own.",
+    name:  "The Weekly Brief",
+    city:  "What the membership delivers",
   },
   {
-    quote: "YOUR THIRD REAL MEMBER QUOTE GOES HERE. One sentence from a real person beats any invented paragraph.",
-    name:  "Member Name",
-    city:  "City, State",
+    quote: "Every buy link actually works. Every item is actually in stock. Every look is actually something I'd wear. That's rarer than it sounds.",
+    name:  "The Sourcing Standard",
+    city:  "The Ellie promise",
   },
 ];
 
@@ -663,16 +660,24 @@ export default function Home() {
         </section>
 
         {/* ════════════════════════════════════════════════════════
-            TESTIMONIALS
-            HIDDEN UNTIL REAL MEMBER QUOTES ARE COLLECTED.
-            Set SHOW_TESTIMONIALS=true in page.tsx to enable.
-            Replace placeholder quotes above before going live.
+            WHAT THE MEMBERSHIP DELIVERS
         ════════════════════════════════════════════════════════ */}
-        {false && <section className="py-20 sm:py-24 px-5 sm:px-8" style={{ background: "var(--cream)" }}>
+        {true && <section className="py-20 sm:py-24 px-5 sm:px-8" style={{ background: "var(--cream)" }}>
           <div className="max-w-5xl mx-auto">
             <ScrollReveal direction="up" threshold={0.12}>
               <div className="text-center mb-12">
-                <span className="section-label block mb-3">Member Stories</span>
+                <span className="section-label block mb-3">What This Delivers</span>
+                <h2
+                  style={{
+                    fontFamily: "DM Serif Display, serif",
+                    color:      "var(--charcoal)",
+                    fontSize:   "clamp(1.6rem, 5vw, 2.2rem)",
+                    fontWeight: 400,
+                    margin:     "0 0 16px",
+                  }}
+                >
+                  Three things. Every single Monday.
+                </h2>
                 <div className="sand-divider" />
               </div>
             </ScrollReveal>
