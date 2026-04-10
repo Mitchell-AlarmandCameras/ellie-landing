@@ -428,6 +428,152 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  /* ── Post to Facebook Page ──────────────────────────────────────────────
+     Posts a weekly summary to the Facebook Page every Sunday on approval.
+     Requires: FACEBOOK_PAGE_ID, FACEBOOK_PAGE_ACCESS_TOKEN in Vercel env vars.
+     How to get: Meta Business Suite → Settings → Page Access Token
+     (see blueprint Part 4 for full instructions)                        */
+  if (process.env.FACEBOOK_PAGE_ID && process.env.FACEBOOK_PAGE_ACCESS_TOKEN) {
+    try {
+      type FBLook = { label: string; tagline: string };
+      const fbLooks   = (lookbook.looks as FBLook[]) ?? [];
+      const fbWeekOf  = String(lookbook.weekOf ?? "");
+      const fbLead    = String(lookbook.editorialLead ?? "");
+      const siteUrl   = (process.env.NEXT_PUBLIC_BASE_URL ?? "https://stylebyellie.com").replace(/\/$/, "");
+
+      const fbLookLines = fbLooks
+        .map((l, i) => `${["✨", "🤍", "🌿"][i] ?? "•"} ${l.label} — "${l.tagline}"`)
+        .join("\n");
+
+      const fbMessage =
+        `This week's Style Refresh is live 🌿\n\n` +
+        `"${fbLead}"\n\n` +
+        `Week of ${fbWeekOf} — three complete looks:\n\n` +
+        `${fbLookLines}\n\n` +
+        `Members get every brand, price, and direct buy link in Monday's brief.\n\n` +
+        `Join for $19/month → ${siteUrl}\n\n` +
+        `#TheStyleRefresh #WomensFashion #PersonalStylist #WeeklyLooks #FashionCuration #OOTD`;
+
+      const fbRes = await fetch(
+        `https://graph.facebook.com/v19.0/${process.env.FACEBOOK_PAGE_ID}/feed`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message:      fbMessage,
+            link:         siteUrl,
+            access_token: process.env.FACEBOOK_PAGE_ACCESS_TOKEN,
+          }),
+        }
+      );
+
+      if (!fbRes.ok) {
+        console.error("[approve-weekly] Facebook post failed:", await fbRes.text());
+      } else {
+        const fbData = await fbRes.json() as { id?: string };
+        console.log("[approve-weekly] Facebook post published:", fbData.id);
+      }
+    } catch (fbErr) {
+      console.error("[approve-weekly] Facebook posting failed (non-fatal):", fbErr);
+    }
+  }
+
+  /* ── Post to Instagram (via Meta Graph API) ──────────────────────────────
+     Auto-posts a photo + caption to @elliestylerefresh every Sunday.
+     Requires Instagram Business Account linked to the Facebook Page.
+     Requires: INSTAGRAM_ACCOUNT_ID, FACEBOOK_PAGE_ACCESS_TOKEN in Vercel.
+     How to get: Meta Business Suite → Instagram → Instagram Account ID
+     Uses a curated fashion photo from Unsplash (or UNSPLASH_ACCESS_KEY
+     for a fresh weekly photo).                                          */
+  if (process.env.INSTAGRAM_ACCOUNT_ID && process.env.FACEBOOK_PAGE_ACCESS_TOKEN) {
+    try {
+      type IGAutoLook = { label: string; tagline: string };
+      const igAutoLooks  = (lookbook.looks as IGAutoLook[]) ?? [];
+      const igAutoWeekOf = String(lookbook.weekOf ?? "");
+      const igAutoLead   = String(lookbook.editorialLead ?? "");
+      const igAutoSite   = (process.env.NEXT_PUBLIC_BASE_URL ?? "https://stylebyellie.com").replace(/\/$/, "");
+
+      const igAutoLookLines = igAutoLooks
+        .map((l, i) => `${["✨", "🤍", "🌿"][i] ?? "•"} ${l.label}\n"${l.tagline}"`)
+        .join("\n\n");
+
+      const igAutoHashtags = [
+        "#TheStyleRefresh", "#StyleRefresh", "#WomensFashion",
+        "#PersonalStylist", "#WeeklyLooks", "#FashionCuration",
+        "#CuratedStyle", "#OOTD", "#StyleInspo", "#EditorialFashion",
+        "#FashionSubscription", "#LookBook", "#StyleEdit", "#MondayVibes",
+      ].join(" ");
+
+      const igCaption =
+        `This week's edit is here. 🌿\n\n` +
+        `"${igAutoLead}"\n\n` +
+        `Week of ${igAutoWeekOf}:\n\n` +
+        `${igAutoLookLines}\n\n` +
+        `Members get every brand, price, and direct buy link.\n` +
+        `Link in bio → ${igAutoSite}\n\n` +
+        `${igAutoHashtags}`;
+
+      /* Pick a curated fashion photo — try Unsplash API first, fall back to static */
+      let igImageUrl = "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=1080&q=85";
+      if (process.env.UNSPLASH_ACCESS_KEY) {
+        try {
+          const uRes = await fetch(
+            `https://api.unsplash.com/photos/random?query=women+fashion+editorial+style&orientation=portrait&client_id=${process.env.UNSPLASH_ACCESS_KEY}`
+          );
+          if (uRes.ok) {
+            const photo = await uRes.json() as { urls?: { regular?: string } };
+            if (photo.urls?.regular) igImageUrl = photo.urls.regular;
+          }
+        } catch { /* use fallback */ }
+      }
+
+      /* Step 1: Create a media container */
+      const containerRes = await fetch(
+        `https://graph.facebook.com/v19.0/${process.env.INSTAGRAM_ACCOUNT_ID}/media`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            image_url:    igImageUrl,
+            caption:      igCaption,
+            access_token: process.env.FACEBOOK_PAGE_ACCESS_TOKEN,
+          }),
+        }
+      );
+
+      if (!containerRes.ok) {
+        console.error("[approve-weekly] Instagram container creation failed:", await containerRes.text());
+      } else {
+        const containerData = await containerRes.json() as { id?: string };
+        const containerId   = containerData.id;
+
+        if (containerId) {
+          /* Step 2: Publish the container */
+          const publishRes = await fetch(
+            `https://graph.facebook.com/v19.0/${process.env.INSTAGRAM_ACCOUNT_ID}/media_publish`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                creation_id: containerId,
+                access_token: process.env.FACEBOOK_PAGE_ACCESS_TOKEN,
+              }),
+            }
+          );
+
+          if (!publishRes.ok) {
+            console.error("[approve-weekly] Instagram publish failed:", await publishRes.text());
+          } else {
+            const publishData = await publishRes.json() as { id?: string };
+            console.log("[approve-weekly] Instagram post published:", publishData.id);
+          }
+        }
+      }
+    } catch (igErr) {
+      console.error("[approve-weekly] Instagram posting failed (non-fatal):", igErr);
+    }
+  }
+
   /* ── Generate Instagram caption ─────────────────────────────────────────
      Ready to paste into Instagram immediately after approving.
      Ellie just needs to add a photo from her camera roll.              */

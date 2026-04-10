@@ -120,9 +120,9 @@ const orgSchema = {
         "Private $19/month membership delivering three curated women's fashion looks " +
         "with direct buy links every Monday.",
       sameAs: [
-        "https://www.instagram.com/stylebyellie",
-        "https://www.pinterest.com/stylebyellie",
-        "https://x.com/stylebyellie",
+        "https://www.instagram.com/elliestylerefresh",
+        "https://www.facebook.com/profile.php?id=61574230690395",
+        "https://www.pinterest.com/elliestylerefresh",
       ],
     },
     {
