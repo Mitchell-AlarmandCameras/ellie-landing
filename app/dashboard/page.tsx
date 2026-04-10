@@ -65,28 +65,28 @@ export default async function DashboardPage() {
   const hasArchive = archiveWeeks.length > 0;
 
   return (
-    <div className="min-h-screen" style={{ background: "var(--cream)" }}>
+    <div className="min-h-screen" style={{ background: "#1A1714" }}>
 
       {/* ── Nav ──────────────────────────────────────────────────── */}
       <header
         className="sticky top-0 z-40"
         style={{
-          background:     "rgba(253,250,245,0.95)",
-          backdropFilter: "blur(20px)",
-          borderBottom:   "1px solid var(--sand-border)",
-          boxShadow:      "0 1px 0 rgba(201,185,154,0.1)",
+          background:     "rgba(20,18,15,0.97)",
+          backdropFilter: "blur(24px)",
+          borderBottom:   "1px solid rgba(196,149,106,0.15)",
+          boxShadow:      "0 1px 0 rgba(0,0,0,0.3)",
         }}
       >
         <div className="max-w-6xl mx-auto px-5 sm:px-8 py-4 flex items-center justify-between gap-4">
 
           {/* Brand — clicking takes you home */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <Link href="/" className="flex flex-col leading-none group" style={{ textDecoration: "none" }} title="Back to homepage">
               <span
-                className="transition-opacity group-hover:opacity-70"
+                className="transition-opacity group-hover:opacity-60"
                 style={{
                   fontFamily:    "DM Serif Display, serif",
-                  color:         "var(--charcoal)",
+                  color:         "#FDFAF5",
                   fontSize:      "1rem",
                   letterSpacing: "0.22em",
                   textTransform: "uppercase",
@@ -95,10 +95,10 @@ export default async function DashboardPage() {
                 Ellie
               </span>
               <span
-                className="transition-opacity group-hover:opacity-70"
+                className="transition-opacity group-hover:opacity-60"
                 style={{
                   fontFamily:    "Inter, sans-serif",
-                  color:         "var(--blush)",
+                  color:         "#C4956A",
                   fontSize:      "0.66rem",
                   letterSpacing: "0.22em",
                   textTransform: "uppercase",
@@ -110,18 +110,18 @@ export default async function DashboardPage() {
             </Link>
 
             <div
-              className="hidden sm:flex items-center px-2.5 py-1"
+              className="hidden sm:flex items-center px-3 py-1"
               style={{
-                border:        "1px solid var(--sand-border)",
-                background:    "var(--cream-dark)",
+                border:     "1px solid rgba(196,149,106,0.4)",
+                background: "rgba(196,149,106,0.08)",
               }}
             >
               <span
                 style={{
                   fontFamily:    "Inter, sans-serif",
-                  color:         "var(--blush)",
-                  fontSize:      "0.68rem",
-                  letterSpacing: "0.22em",
+                  color:         "#C4956A",
+                  fontSize:      "0.66rem",
+                  letterSpacing: "0.28em",
                   textTransform: "uppercase",
                   fontWeight:    500,
                 }}
@@ -137,22 +137,22 @@ export default async function DashboardPage() {
               href={`/api/billing-portal?cid=${customerId}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs uppercase tracking-widest transition-colors hidden sm:block hover:text-charcoal"
-              style={{ fontSize: "0.78rem", fontFamily: "Inter, sans-serif", letterSpacing: "0.15em", color: "var(--warm-gray)" }}
+              className="hidden sm:block uppercase tracking-widest transition-opacity hover:opacity-100"
+              style={{ fontSize: "0.72rem", fontFamily: "Inter, sans-serif", letterSpacing: "0.15em", color: "rgba(253,250,245,0.45)", opacity: 0.7 }}
             >
-              Manage Billing
+              Billing
             </a>
             <Link
               href="/bag"
-              className="text-xs uppercase tracking-widest transition-colors"
-              style={{ fontSize: "0.78rem", fontFamily: "Inter, sans-serif", letterSpacing: "0.15em", color: "var(--warm-gray)", border: "1px solid var(--sand-border)", padding: "0.3rem 0.8rem" }}
+              className="uppercase tracking-widest transition-all"
+              style={{ fontSize: "0.72rem", fontFamily: "Inter, sans-serif", letterSpacing: "0.15em", color: "rgba(253,250,245,0.7)", border: "1px solid rgba(253,250,245,0.2)", padding: "0.3rem 0.9rem" }}
             >
               My Edit ♡
             </Link>
             <a
               href="/api/logout"
-              className="text-xs uppercase tracking-widest transition-colors"
-              style={{ fontSize: "0.78rem", fontFamily: "Inter, sans-serif", letterSpacing: "0.15em", color: "var(--blush)", border: "1px solid var(--blush)", padding: "0.3rem 0.8rem" }}
+              className="uppercase tracking-widest transition-all"
+              style={{ fontSize: "0.72rem", fontFamily: "Inter, sans-serif", letterSpacing: "0.15em", color: "#C4956A", border: "1px solid rgba(196,149,106,0.4)", padding: "0.3rem 0.9rem" }}
             >
               Log Out
             </a>
@@ -162,64 +162,68 @@ export default async function DashboardPage() {
 
       {/* ── Welcome banner ───────────────────────────────────────── */}
       <section
-        className="py-14 sm:py-20 px-5 sm:px-8 text-center relative overflow-hidden"
-        style={{ background: "var(--cream-dark)", borderBottom: "1px solid var(--sand-border)" }}
+        className="py-16 sm:py-24 px-5 sm:px-8 text-center relative overflow-hidden"
+        style={{ background: "#1A1714", borderBottom: "1px solid rgba(196,149,106,0.12)" }}
       >
-        {/* Subtle texture */}
+        {/* Radial gold glow from top center */}
         <div
           className="absolute inset-0 pointer-events-none"
-          style={{
-            backgroundImage: `linear-gradient(rgba(201,185,154,0.07) 1px, transparent 1px),
-                              linear-gradient(90deg, rgba(201,185,154,0.07) 1px, transparent 1px)`,
-            backgroundSize: "56px 56px",
-          }}
           aria-hidden="true"
+          style={{
+            background: "radial-gradient(ellipse 80% 50% at 50% -10%, rgba(196,149,106,0.14) 0%, transparent 70%)",
+          }}
         />
 
         <div className="relative z-10 max-w-2xl mx-auto">
-          <div className="flex items-center justify-center gap-3 mb-5">
-            <div className="h-px w-8" style={{ background: "linear-gradient(90deg, transparent, var(--sand-dark))" }} />
+          <div className="flex items-center justify-center gap-4 mb-6">
+            <div className="h-px w-10" style={{ background: "linear-gradient(90deg, transparent, rgba(196,149,106,0.5))" }} />
             <span
               style={{
                 fontFamily:    "Inter, sans-serif",
-                color:         "var(--blush)",
-                fontSize:      "0.75rem",
-                letterSpacing: "0.3em",
+                color:         "#C4956A",
+                fontSize:      "0.7rem",
+                letterSpacing: "0.36em",
                 textTransform: "uppercase",
                 fontWeight:    500,
               }}
             >
               Week of {week.weekOf}
             </span>
-            <div className="h-px w-8" style={{ background: "linear-gradient(90deg, var(--sand-dark), transparent)" }} />
+            <div className="h-px w-10" style={{ background: "linear-gradient(90deg, rgba(196,149,106,0.5), transparent)" }} />
           </div>
 
           <h1
-            className="font-bold leading-tight mb-5"
+            className="font-bold leading-tight mb-6"
             style={{
               fontFamily: "DM Serif Display, serif",
-              color:      "var(--charcoal)",
-              fontSize:   "clamp(1.8rem, 5.5vw, 3rem)",
-              lineHeight: "1.15",
+              color:      "#FDFAF5",
+              fontSize:   "clamp(2rem, 6vw, 3.4rem)",
+              lineHeight: "1.1",
+              textShadow: "0 2px 32px rgba(0,0,0,0.5)",
             }}
           >
             You&apos;re in the{" "}
-            <em className="not-italic" style={{ color: "var(--blush)" }}>VIP Room.</em>
+            <em className="not-italic" style={{ color: "#C4956A" }}>VIP Room.</em>
           </h1>
 
           <div
-            className="h-px w-12 mx-auto my-5"
-            style={{ background: "linear-gradient(90deg, transparent, var(--sand-dark), transparent)" }}
+            className="mx-auto my-6"
+            style={{
+              width:      "48px",
+              height:     "1px",
+              background: "linear-gradient(90deg, transparent, rgba(196,149,106,0.6), transparent)",
+            }}
           />
 
           <p
             style={{
               fontFamily: "Cormorant Garamond, serif",
-              color:      "var(--charcoal-muted)",
+              color:      "rgba(253,250,245,0.65)",
               fontSize:   "clamp(1.1rem, 3.5vw, 1.25rem)",
-              lineHeight: "1.85",
+              lineHeight: "1.9",
               maxWidth:   "32rem",
               margin:     "0 auto",
+              fontStyle:  "italic",
             }}
           >
             {week.editorialLead}
@@ -228,20 +232,20 @@ export default async function DashboardPage() {
       </section>
 
       {/* ── Lookbook — This Week's Brief ─────────────────────────── */}
-      <section className="py-16 sm:py-24 px-5 sm:px-8 bg-white">
+      <section className="py-16 sm:py-24 px-5 sm:px-8" style={{ background: "#1E1B17" }}>
         <div className="max-w-6xl mx-auto">
 
           <div className="text-center mb-14">
             <span
               style={{
                 fontFamily:    "Inter, sans-serif",
-                color:         "var(--blush)",
-                fontSize:      "0.75rem",
-                letterSpacing: "0.3em",
+                color:         "#C4956A",
+                fontSize:      "0.7rem",
+                letterSpacing: "0.34em",
                 textTransform: "uppercase",
                 fontWeight:    500,
                 display:       "block",
-                marginBottom:  "10px",
+                marginBottom:  "12px",
               }}
             >
               Full Sourced Edition
@@ -250,39 +254,39 @@ export default async function DashboardPage() {
               className="font-bold"
               style={{
                 fontFamily: "DM Serif Display, serif",
-                color:      "var(--charcoal)",
+                color:      "#FDFAF5",
                 fontSize:   "clamp(1.5rem, 4vw, 2.2rem)",
               }}
             >
               This Week&apos;s Blueprint
             </h2>
             <div
-              className="h-px w-12 mx-auto mt-5"
-              style={{ background: "linear-gradient(90deg, transparent, var(--sand-dark), transparent)" }}
+              className="mx-auto mt-5"
+              style={{ width: "48px", height: "1px", background: "linear-gradient(90deg, transparent, rgba(196,149,106,0.5), transparent)" }}
             />
           </div>
 
           {/* Look cards */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-7">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
             {week.looks.map((look) => (
               <article
                 key={look.label}
-                className="relative"
+                className="relative flex flex-col"
                 style={{
-                  border:    "1px solid var(--sand-border)",
-                  borderTop: "2px solid var(--blush)",
-                  background: "var(--cream)",
+                  background:  "#252018",
+                  border:      "1px solid rgba(196,149,106,0.18)",
+                  borderTop:   "2px solid #C4956A",
+                  boxShadow:   "0 4px 32px rgba(0,0,0,0.35)",
                 }}
               >
-                {/* Ghost index — bottom-right so it never overlaps content */}
+                {/* Ghost index — bottom-right, behind content */}
                 <span
                   className="absolute bottom-4 right-5 select-none font-bold leading-none pointer-events-none"
                   style={{
                     fontFamily: "DM Serif Display, serif",
                     fontSize:   "3.5rem",
-                    color:      "var(--sand)",
+                    color:      "rgba(196,149,106,0.12)",
                     lineHeight: "1",
-                    opacity:    0.6,
                     zIndex:     0,
                   }}
                   aria-hidden="true"
@@ -290,30 +294,30 @@ export default async function DashboardPage() {
                   {look.index}
                 </span>
 
-                <div className="p-7 sm:p-8">
+                <div className="p-7 sm:p-8 flex flex-col flex-1" style={{ position: "relative", zIndex: 1 }}>
 
-                  {/* Label + tagline */}
+                  {/* Label */}
                   <span
                     style={{
                       fontFamily:    "Inter, sans-serif",
-                  color:         "var(--blush)",
-                  fontSize:      "0.74rem",
-                  letterSpacing: "0.25em",
-                  textTransform: "uppercase",
-                  fontWeight:    500,
-                  display:       "block",
-                  marginBottom:  "6px",
+                      color:         "#C4956A",
+                      fontSize:      "0.7rem",
+                      letterSpacing: "0.28em",
+                      textTransform: "uppercase",
+                      fontWeight:    500,
+                      display:       "block",
+                      marginBottom:  "8px",
                     }}
                   >
                     {look.label}
                   </span>
 
                   <h3
-                    className="font-bold mb-3"
+                    className="font-bold mb-4"
                     style={{
                       fontFamily: "DM Serif Display, serif",
-                      color:      "var(--charcoal)",
-                      fontSize:   "1.15rem",
+                      color:      "#FDFAF5",
+                      fontSize:   "1.2rem",
                       lineHeight: "1.3",
                     }}
                   >
@@ -321,39 +325,39 @@ export default async function DashboardPage() {
                   </h3>
 
                   <div
-                    className="h-px w-8 mb-5"
-                    style={{ background: "linear-gradient(90deg, var(--blush), var(--sand-dark))" }}
+                    className="mb-5"
+                    style={{ width: "32px", height: "1px", background: "linear-gradient(90deg, #C4956A, rgba(196,149,106,0.2))" }}
                   />
 
                   <p
                     className="mb-7"
                     style={{
-                  fontFamily: "Cormorant Garamond, serif",
-                  color:      "var(--charcoal-muted)",
-                  fontSize:   "1.05rem",
-                  lineHeight: "1.85",
-                }}
-              >
-                {look.description}
+                      fontFamily: "Cormorant Garamond, serif",
+                      color:      "rgba(253,250,245,0.6)",
+                      fontSize:   "1.05rem",
+                      lineHeight: "1.85",
+                    }}
+                  >
+                    {look.description}
                   </p>
 
                   {/* Sourced item list */}
-                  <ul className="space-y-4 mb-7">
+                  <ul className="space-y-4 mb-7 flex-1">
                     {look.items.map((item) => (
                       <li
                         key={item.piece}
                         className="pb-4"
-                        style={{ borderBottom: "1px solid var(--sand-light, #F2ECE4)" }}
+                        style={{ borderBottom: "1px solid rgba(196,149,106,0.12)" }}
                       >
-                        {/* Top row: piece name + buy button */}
-                        <div className="flex items-start justify-between gap-3 mb-1.5">
+                        {/* Piece name + buttons */}
+                        <div className="flex items-start justify-between gap-3 mb-2">
                           <span
-                            className="font-medium"
                             style={{
-                          fontFamily: "Inter, sans-serif",
-                          color:      "var(--charcoal)",
-                          fontSize:   "0.9rem",
-                          lineHeight: "1.5",
+                              fontFamily: "Inter, sans-serif",
+                              color:      "#FDFAF5",
+                              fontSize:   "0.88rem",
+                              fontWeight: 500,
+                              lineHeight: "1.5",
                             }}
                           >
                             {item.piece}
@@ -363,8 +367,30 @@ export default async function DashboardPage() {
                               href={`/api/go?to=${encodeURIComponent(item.buyLink)}&src=dashboard&q=${encodeURIComponent(item.piece + " " + item.brand)}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="btn-buy"
                               aria-label={`Shop ${item.piece} at ${item.brand}`}
+                              style={{
+                                display:       "inline-flex",
+                                alignItems:    "center",
+                                padding:       "0.35rem 0.85rem",
+                                fontFamily:    "Inter, sans-serif",
+                                fontSize:      "0.68rem",
+                                letterSpacing: "0.16em",
+                                textTransform: "uppercase",
+                                color:         "#C4956A",
+                                border:        "1px solid rgba(196,149,106,0.45)",
+                                background:    "transparent",
+                                textDecoration: "none",
+                                whiteSpace:    "nowrap",
+                                transition:    "all 0.2s ease",
+                              }}
+                              onMouseEnter={e => {
+                                (e.currentTarget as HTMLAnchorElement).style.background = "rgba(196,149,106,0.12)";
+                                (e.currentTarget as HTMLAnchorElement).style.borderColor = "#C4956A";
+                              }}
+                              onMouseLeave={e => {
+                                (e.currentTarget as HTMLAnchorElement).style.background = "transparent";
+                                (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(196,149,106,0.45)";
+                              }}
                             >
                               Shop →
                             </a>
@@ -382,65 +408,65 @@ export default async function DashboardPage() {
                           </div>
                         </div>
 
-                        {/* Brand only — no price shown (prices vary by retailer) */}
-                        <div className="flex items-center gap-2 mb-2">
-                          <span
-                            style={{
-                              fontFamily:    "Inter, sans-serif",
-                              color:         "var(--warm-gray)",
-                              fontSize:      "0.78rem",
-                              letterSpacing: "0.08em",
-                            }}
-                          >
-                            {item.brand}
-                          </span>
-                        </div>
-
-                        {/* Ellie's note */}
-                        <p
-                          className="italic"
+                        {/* Brand */}
+                        <span
                           style={{
-                  fontFamily: "Cormorant Garamond, serif",
-                  color:      "var(--warm-gray)",
-                  fontSize:   "0.95rem",
-                  lineHeight: "1.7",
+                            fontFamily:    "Inter, sans-serif",
+                            color:         "rgba(253,250,245,0.4)",
+                            fontSize:      "0.74rem",
+                            letterSpacing: "0.1em",
+                            display:       "block",
+                            marginBottom:  "6px",
                           }}
                         >
-                          &ldquo;{item.note}&rdquo;
+                          {item.brand}
+                        </span>
+
+                        {/* Ellie's note per item */}
+                        <p
+                          style={{
+                            fontFamily: "Cormorant Garamond, serif",
+                            color:      "rgba(253,250,245,0.45)",
+                            fontSize:   "0.95rem",
+                            lineHeight: "1.7",
+                            fontStyle:  "italic",
+                          }}
+                        >
+                          {item.note}
                         </p>
                       </li>
                     ))}
                   </ul>
 
-                  {/* Ellie's note callout */}
+                  {/* Ellie's editor note callout */}
                   <div
-                    className="p-4"
+                    className="p-4 mt-auto"
                     style={{
-                      background:  "var(--cream-dark)",
-                      borderLeft:  "2px solid var(--blush)",
+                      background:  "rgba(196,149,106,0.07)",
+                      borderLeft:  "2px solid rgba(196,149,106,0.5)",
                     }}
                   >
                     <span
                       style={{
                         fontFamily:    "Inter, sans-serif",
-                  color:         "var(--blush)",
-                  fontSize:      "0.72rem",
-                  letterSpacing: "0.2em",
-                  textTransform: "uppercase",
-                  fontWeight:    500,
-                  display:       "block",
-                  marginBottom:  "6px",
+                        color:         "#C4956A",
+                        fontSize:      "0.68rem",
+                        letterSpacing: "0.22em",
+                        textTransform: "uppercase",
+                        fontWeight:    500,
+                        display:       "block",
+                        marginBottom:  "6px",
                       }}
                     >
                       Ellie&apos;s Note
                     </span>
                     <p
-                      className="italic"
                       style={{
-                  fontFamily: "Cormorant Garamond, serif",
-                  color:      "var(--charcoal-muted)",
-                  fontSize:   "1rem",
-                  lineHeight: "1.75",
+                        fontFamily: "Cormorant Garamond, serif",
+                        color:      "rgba(253,250,245,0.65)",
+                        fontSize:   "1rem",
+                        lineHeight: "1.75",
+                        fontStyle:  "italic",
                       }}
                     >
                       {look.editorsNote}
@@ -457,20 +483,20 @@ export default async function DashboardPage() {
       {hasArchive && (
         <section
           className="py-16 sm:py-20 px-5 sm:px-8"
-          style={{ background: "var(--cream-dark)", borderTop: "1px solid var(--sand-border)" }}
+          style={{ background: "#171410", borderTop: "1px solid rgba(196,149,106,0.1)" }}
         >
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-10">
               <span
                 style={{
                   fontFamily:    "Inter, sans-serif",
-                  color:         "var(--blush)",
-                  fontSize:      "0.74rem",
-                  letterSpacing: "0.3em",
+                  color:         "#C4956A",
+                  fontSize:      "0.7rem",
+                  letterSpacing: "0.34em",
                   textTransform: "uppercase",
                   fontWeight:    500,
                   display:       "block",
-                  marginBottom:  "8px",
+                  marginBottom:  "10px",
                 }}
               >
                 Past Editions
@@ -479,15 +505,15 @@ export default async function DashboardPage() {
                 className="font-bold"
                 style={{
                   fontFamily: "DM Serif Display, serif",
-                  color:      "var(--charcoal)",
+                  color:      "#FDFAF5",
                   fontSize:   "clamp(1.4rem, 4vw, 1.9rem)",
                 }}
               >
                 The Archive
               </h2>
               <div
-                className="h-px w-12 mx-auto mt-4"
-                style={{ background: "linear-gradient(90deg, transparent, var(--sand-dark), transparent)" }}
+                className="mx-auto mt-4"
+                style={{ width: "40px", height: "1px", background: "linear-gradient(90deg, transparent, rgba(196,149,106,0.5), transparent)" }}
               />
             </div>
 
@@ -495,18 +521,22 @@ export default async function DashboardPage() {
               {archiveWeeks.map((aw) => (
                 <div
                   key={aw.weekOf}
-                  className="bg-white p-6"
-                  style={{ border: "1px solid var(--sand-border)" }}
+                  className="p-6"
+                  style={{
+                    background: "#222018",
+                    border:     "1px solid rgba(196,149,106,0.15)",
+                    borderTop:  "1px solid rgba(196,149,106,0.3)",
+                  }}
                 >
                   <span
                     style={{
                       fontFamily:    "Inter, sans-serif",
-                  color:         "var(--blush)",
-                  fontSize:      "0.72rem",
-                  letterSpacing: "0.2em",
-                  textTransform: "uppercase",
-                  fontWeight:    500,
-                }}
+                      color:         "#C4956A",
+                      fontSize:      "0.68rem",
+                      letterSpacing: "0.22em",
+                      textTransform: "uppercase",
+                      fontWeight:    500,
+                    }}
                   >
                     Week of
                   </span>
@@ -514,7 +544,7 @@ export default async function DashboardPage() {
                     className="mt-1 font-bold"
                     style={{
                       fontFamily: "DM Serif Display, serif",
-                      color:      "var(--charcoal)",
+                      color:      "#FDFAF5",
                       fontSize:   "1.05rem",
                     }}
                   >
@@ -523,10 +553,11 @@ export default async function DashboardPage() {
                   <p
                     className="mt-2 line-clamp-2"
                     style={{
-                  fontFamily: "Cormorant Garamond, serif",
-                  color:      "var(--charcoal-muted)",
-                  fontSize:   "1rem",
-                  lineHeight: "1.7",
+                      fontFamily: "Cormorant Garamond, serif",
+                      color:      "rgba(253,250,245,0.5)",
+                      fontSize:   "0.98rem",
+                      lineHeight: "1.7",
+                      fontStyle:  "italic",
                     }}
                   >
                     {aw.editorialLead}
@@ -540,17 +571,17 @@ export default async function DashboardPage() {
 
       {/* ── Coming Soon ───────────────────────────────────────────── */}
       <section
-        className="py-14 sm:py-18 px-5 sm:px-8"
-        style={{ background: "white", borderTop: "1px solid var(--sand-border)" }}
+        className="py-14 px-5 sm:px-8"
+        style={{ background: "#1A1714", borderTop: "1px solid rgba(196,149,106,0.1)" }}
       >
         <div className="max-w-5xl mx-auto">
           <p
             className="text-center mb-8"
             style={{
               fontFamily:    "Inter, sans-serif",
-              color:         "var(--warm-gray)",
-              fontSize:      "0.65rem",
-              letterSpacing: "0.3em",
+              color:         "rgba(196,149,106,0.6)",
+              fontSize:      "0.66rem",
+              letterSpacing: "0.32em",
               textTransform: "uppercase",
             }}
           >
@@ -559,17 +590,14 @@ export default async function DashboardPage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             {[
               {
-                icon:  "◫",
                 title: "Style Archive",
                 desc:  "Every brief from the past 52 weeks. Your complete style reference, always growing.",
               },
               {
-                icon:  "◈",
                 title: "Seasonal Lookbooks",
                 desc:  "Curated collections by season — Spring/Summer and Fall/Winter editions for members only.",
               },
               {
-                icon:  "◉",
                 title: "Member Perks",
                 desc:  "Exclusive discounts with Ellie's trusted retailers. Coming to members this season.",
               },
@@ -577,38 +605,35 @@ export default async function DashboardPage() {
               <div
                 key={item.title}
                 className="p-6 relative overflow-hidden"
-                style={{ border: "1px solid var(--sand-border)", background: "var(--cream)" }}
+                style={{
+                  background: "#222018",
+                  border:     "1px solid rgba(196,149,106,0.12)",
+                }}
               >
                 <div
                   className="absolute top-0 left-0 right-0 h-px"
-                  style={{ background: "linear-gradient(90deg, transparent, rgba(196,149,106,0.25), transparent)" }}
-                />
-                <div
-                  className="text-2xl mb-4 select-none"
-                  style={{ color: "var(--sand-dark)", opacity: 0.5 }}
+                  style={{ background: "linear-gradient(90deg, transparent, rgba(196,149,106,0.3), transparent)" }}
                   aria-hidden="true"
-                >
-                  {item.icon}
-                </div>
+                />
                 <h3
-                  className="font-bold mb-2"
-                  style={{ fontFamily: "DM Serif Display, serif", color: "var(--charcoal)", fontSize: "1.05rem" }}
+                  className="font-bold mb-3"
+                  style={{ fontFamily: "DM Serif Display, serif", color: "#FDFAF5", fontSize: "1.05rem" }}
                 >
                   {item.title}
                 </h3>
                 <p
                   style={{
-                  fontFamily: "Cormorant Garamond, serif",
-                  color:      "var(--charcoal-muted)",
-                  fontSize:   "1.05rem",
-                  lineHeight: "1.75",
+                    fontFamily: "Cormorant Garamond, serif",
+                    color:      "rgba(253,250,245,0.5)",
+                    fontSize:   "1.02rem",
+                    lineHeight: "1.75",
                   }}
                 >
                   {item.desc}
                 </p>
                 <p
-                  className="mt-4 text-xs uppercase tracking-widest"
-                  style={{ color: "var(--taupe)", letterSpacing: "0.2em", fontFamily: "Inter, sans-serif" }}
+                  className="mt-5 uppercase"
+                  style={{ color: "rgba(196,149,106,0.5)", letterSpacing: "0.22em", fontFamily: "Inter, sans-serif", fontSize: "0.66rem" }}
                 >
                   Coming soon
                 </p>
@@ -619,15 +644,15 @@ export default async function DashboardPage() {
       </section>
 
       {/* ── Contact Ellie ────────────────────────────────────────── */}
-      <section className="py-12 px-5 sm:px-8" style={{ borderTop: "1px solid var(--sand-border)" }}>
+      <section className="py-12 px-5 sm:px-8" style={{ background: "#171410", borderTop: "1px solid rgba(196,149,106,0.1)" }}>
         <div className="max-w-2xl mx-auto">
-          <p style={{ margin: "0 0 4px", fontSize: "10px", letterSpacing: "0.3em", textTransform: "uppercase", color: "var(--blush)", fontFamily: "Arial, sans-serif" }}>
+          <p style={{ margin: "0 0 5px", fontSize: "0.68rem", letterSpacing: "0.32em", textTransform: "uppercase", color: "#C4956A", fontFamily: "Inter, sans-serif" }}>
             Need Help?
           </p>
-          <h2 style={{ margin: "0 0 6px", fontFamily: "DM Serif Display, serif", fontSize: "1.4rem", color: "var(--charcoal)", fontWeight: 400 }}>
+          <h2 style={{ margin: "0 0 8px", fontFamily: "DM Serif Display, serif", fontSize: "1.4rem", color: "#FDFAF5", fontWeight: 400 }}>
             Ask Ellie directly.
           </h2>
-          <p style={{ margin: "0 0 20px", fontSize: "13px", color: "var(--warm-gray)", fontFamily: "Georgia, serif", lineHeight: 1.7 }}>
+          <p style={{ margin: "0 0 22px", fontSize: "1rem", color: "rgba(253,250,245,0.5)", fontFamily: "Cormorant Garamond, serif", lineHeight: 1.8 }}>
             Billing question, missing brief, feedback — Ellie reads every message personally and responds within 24 hours.
           </p>
           <ContactForm compact />
@@ -635,23 +660,23 @@ export default async function DashboardPage() {
       </section>
 
       {/* ── Refer a Friend ───────────────────────────────────────── */}
-      <section className="py-12 px-5 sm:px-8" style={{ background: "#EDE5D8", borderTop: "1px solid var(--sand-border)" }}>
+      <section className="py-12 px-5 sm:px-8" style={{ background: "#1A1714", borderTop: "1px solid rgba(196,149,106,0.1)" }}>
         <div className="max-w-2xl mx-auto">
-          <p style={{ margin: "0 0 4px", fontSize: "10px", letterSpacing: "0.3em", textTransform: "uppercase", color: "var(--blush)", fontFamily: "Arial, sans-serif" }}>
+          <p style={{ margin: "0 0 5px", fontSize: "0.68rem", letterSpacing: "0.32em", textTransform: "uppercase", color: "#C4956A", fontFamily: "Inter, sans-serif" }}>
             Refer a Friend
           </p>
-          <h2 style={{ margin: "0 0 10px", fontFamily: "DM Serif Display, serif", fontSize: "1.5rem", color: "var(--charcoal)", fontWeight: 400 }}>
+          <h2 style={{ margin: "0 0 10px", fontFamily: "DM Serif Display, serif", fontSize: "1.5rem", color: "#FDFAF5", fontWeight: 400 }}>
             Give 50% off. Keep good company.
           </h2>
-          <p style={{ margin: "0 0 20px", fontSize: "14px", color: "var(--warm-gray)", fontFamily: "Georgia, serif", lineHeight: 1.7 }}>
-            Share your unique link with a friend. They get 50% off their first month — 
+          <p style={{ margin: "0 0 22px", fontSize: "1rem", color: "rgba(253,250,245,0.5)", fontFamily: "Cormorant Garamond, serif", lineHeight: 1.8 }}>
+            Share your unique link with a friend. They get 50% off their first month —
             and you get the satisfaction of sending someone something genuinely useful.
             No limit on referrals.
           </p>
           {customerId ? (
             <ReferralButton customerId={customerId} />
           ) : (
-            <p style={{ fontSize: "12px", color: "var(--warm-gray)", fontFamily: "Arial, sans-serif" }}>
+            <p style={{ fontSize: "0.82rem", color: "rgba(253,250,245,0.35)", fontFamily: "Inter, sans-serif" }}>
               Referral link available after your first billing cycle. Check back soon.
             </p>
           )}
@@ -661,14 +686,14 @@ export default async function DashboardPage() {
       {/* ── Footer ───────────────────────────────────────────────── */}
       <footer
         className="py-8 px-5 sm:px-8"
-        style={{ background: "var(--cream)", borderTop: "1px solid var(--sand-border)" }}
+        style={{ background: "#141210", borderTop: "1px solid rgba(196,149,106,0.12)" }}
       >
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex flex-col leading-none">
             <span
               style={{
                 fontFamily:    "DM Serif Display, serif",
-                color:         "var(--charcoal)",
+                color:         "#FDFAF5",
                 fontSize:      "0.95rem",
                 letterSpacing: "0.22em",
                 textTransform: "uppercase",
@@ -678,45 +703,48 @@ export default async function DashboardPage() {
             </span>
             <span
               style={{
-              fontFamily:    "Inter, sans-serif",
-              color:         "var(--blush)",
-              fontSize:      "0.65rem",
-              letterSpacing: "0.22em",
-              textTransform: "uppercase",
-              marginTop:     "2px",
+                fontFamily:    "Inter, sans-serif",
+                color:         "#C4956A",
+                fontSize:      "0.62rem",
+                letterSpacing: "0.22em",
+                textTransform: "uppercase",
+                marginTop:     "2px",
               }}
             >
               The Style Refresh
             </span>
           </div>
-          <p
-            style={{ fontFamily: "Inter, sans-serif", color: "var(--warm-gray)", fontSize: "0.8rem" }}
-          >
+          <p style={{ fontFamily: "Inter, sans-serif", color: "rgba(253,250,245,0.3)", fontSize: "0.76rem", letterSpacing: "0.06em" }}>
             VIP Room · Membership renews monthly
           </p>
           <div className="flex flex-wrap gap-x-5 gap-y-2 justify-center sm:justify-end">
-            <Link
-              href="/membership"
-              style={{
-                fontFamily:    "Inter, sans-serif",
-                color:         "var(--warm-gray)",
-                fontSize:      "0.78rem",
-                letterSpacing: "0.15em",
-                textTransform: "uppercase",
-                textDecoration: "none",
-              }}
-            >
-              Membership terms
-            </Link>
+            {[
+              { label: "Membership Terms", href: "/membership" },
+            ].map(l => (
+              <Link
+                key={l.label}
+                href={l.href}
+                style={{
+                  fontFamily:    "Inter, sans-serif",
+                  color:         "rgba(253,250,245,0.35)",
+                  fontSize:      "0.72rem",
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  textDecoration: "none",
+                }}
+              >
+                {l.label}
+              </Link>
+            ))}
             <a
               href={`/api/billing-portal?cid=${customerId}`}
               target="_blank"
               rel="noopener noreferrer"
               style={{
                 fontFamily:    "Inter, sans-serif",
-                color:         "var(--warm-gray)",
-                fontSize:      "0.78rem",
-                letterSpacing: "0.15em",
+                color:         "rgba(253,250,245,0.35)",
+                fontSize:      "0.72rem",
+                letterSpacing: "0.14em",
                 textTransform: "uppercase",
                 textDecoration: "none",
               }}
@@ -727,14 +755,14 @@ export default async function DashboardPage() {
               href="/"
               style={{
                 fontFamily:    "Inter, sans-serif",
-                color:         "var(--warm-gray)",
-                fontSize:      "0.78rem",
-                letterSpacing: "0.15em",
+                color:         "rgba(196,149,106,0.6)",
+                fontSize:      "0.72rem",
+                letterSpacing: "0.14em",
                 textTransform: "uppercase",
                 textDecoration: "none",
               }}
             >
-              Back to Site
+              ← Back to Site
             </Link>
           </div>
         </div>
