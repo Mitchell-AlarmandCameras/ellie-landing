@@ -72,10 +72,10 @@ export const currentWeek: WeeklyLookbook = {
         },
         {
           piece:   "Block-heel pointed pump in black",
-          brand:   "Steve Madden",
-          price:   "$110",
-          note:    "Polished enough for the boardroom, comfortable enough for the full day. Steve Madden's heel section has the best selection at this price point.",
-          buyLink: "https://www.stevemadden.com/collections/pumps",
+          brand:   "Nordstrom",
+          price:   "$80–$150",
+          note:    "The block heel pointed pump — polished enough for the boardroom, comfortable enough for a full day. Dozens of options at every price point.",
+          buyLink: "https://www.nordstrom.com/sr?origin=keywordsearch&keyword=black+block+heel+pump",
         },
         {
           piece:   "Structured leather tote in cognac",
@@ -161,10 +161,10 @@ export const currentWeek: WeeklyLookbook = {
         },
         {
           piece:   "Strappy flat sandal in tan",
-          brand:   "Vince Camuto",
-          price:   "$89",
-          note:    "Understated, goes with everything, doesn't compete with the dress. Vince Camuto's sandal range is exactly right for this look.",
-          buyLink: "https://www.vincecamuto.com/sandals/",
+          brand:   "Nordstrom",
+          price:   "$60–$120",
+          note:    "Understated, goes with everything, doesn't compete with the dress. The strappy flat sandal in tan — every major brand available in one place.",
+          buyLink: "https://www.nordstrom.com/sr?origin=keywordsearch&keyword=strappy+flat+sandal+tan",
         },
         {
           piece:   "Delicate gold chain necklace",

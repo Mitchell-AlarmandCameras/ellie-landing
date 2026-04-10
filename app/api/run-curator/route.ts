@@ -186,8 +186,8 @@ REQUIREMENTS:
       Theory blazer       → https://www.theory.com/search?q=blazer
       Vince camisole      → https://www.vince.com/search?q=silk+camisole
       Vince pants         → https://www.vince.com/search?q=wide+leg+pants
-      Sam Edelman pump    → https://www.samedelman.com/collections/heels
-      Sam Edelman sandal  → https://www.samedelman.com/collections/sandals
+      Nordstrom pump      → https://www.nordstrom.com/sr?origin=keywordsearch&keyword=black+block+heel+pump
+      Nordstrom sandal    → https://www.nordstrom.com/sr?origin=keywordsearch&keyword=strappy+flat+sandal+tan
       Tory Burch tote     → https://www.toryburch.com/en-us/search?q=leather+tote
       Tory Burch dress    → https://www.toryburch.com/en-us/search?q=midi+dress
       Reformation pants   → https://www.thereformation.com/search?q=linen+wide+leg+pant
