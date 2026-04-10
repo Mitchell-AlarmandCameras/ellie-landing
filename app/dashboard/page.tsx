@@ -354,15 +354,15 @@ export default async function DashboardPage() {
                     backgroundImage:    `url(${cardImg})`,
                     backgroundSize:     "cover",
                     backgroundPosition: "center top",
-                    opacity:            0.13,
+                    opacity:            0.38,
                   }}
                 />
-                {/* Dark overlay so text stays readable */}
+                {/* Dark overlay — lighter at top so photo shows, dark at bottom for text readability */}
                 <div
                   className="absolute inset-0 pointer-events-none"
                   aria-hidden="true"
                   style={{
-                    background: "linear-gradient(180deg, rgba(37,32,24,0.55) 0%, rgba(37,32,24,0.92) 55%, #252018 100%)",
+                    background: "linear-gradient(180deg, rgba(37,32,24,0.25) 0%, rgba(37,32,24,0.65) 40%, rgba(37,32,24,0.94) 75%, #252018 100%)",
                   }}
                 />
                 {/* Ghost index — bottom-right, behind content */}
