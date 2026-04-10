@@ -128,16 +128,21 @@ export async function POST(req: NextRequest) {
     }
 
     /* Send auto-reply to customer */
-    await resend.emails.send({
-      from:    `Ellie <${fromEmail}>`,
-      to:      email,
+    const { data: replyData, error: replyError } = await resend.emails.send({
+      from:     `Ellie <${fromEmail}>`,
+      to:       email,
       reply_to: fromEmail,
-      subject: "I received your message — The Style Refresh",
-      html:    buildAutoReply(name ?? "", message!, siteUrl),
-      headers: { "List-Unsubscribe": `<${siteUrl}/unsubscribe>` },
+      subject:  "I received your message — The Style Refresh",
+      html:     buildAutoReply(name ?? "", message!, siteUrl),
     });
 
-    return NextResponse.json({ ok: true });
+    if (replyError) {
+      console.error("[contact] Auto-reply failed:", JSON.stringify(replyError));
+    } else {
+      console.log("[contact] Auto-reply sent:", replyData?.id, "→", email);
+    }
+
+    return NextResponse.json({ ok: true, replyId: replyData?.id ?? null, replyError: replyError ?? null });
   } catch (err) {
     console.error("[contact]", err);
     return NextResponse.json({ error: "Failed to send message." }, { status: 500 });
