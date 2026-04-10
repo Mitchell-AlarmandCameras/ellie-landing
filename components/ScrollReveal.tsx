@@ -69,13 +69,12 @@ export default function ScrollReveal({
           }
         });
       },
-      /* rootMargin: trigger slightly before fully in view for a smoother feel */
-      { threshold: Math.min(threshold, 0.05), rootMargin: "0px 0px -40px 0px" }
+      { threshold: 0.08, rootMargin: "0px 0px 0px 0px" }
     );
 
     observer.observe(el);
 
-    /* Safety fallback — never leave content invisible */
+    /* Safety fallback — long timeout so it never fires during normal scrolling */
     const safety = window.setTimeout(() => {
       const op = Number.parseFloat(window.getComputedStyle(el).opacity || "0");
       if (op < 0.99) {
@@ -84,7 +83,7 @@ export default function ScrollReveal({
         el.style.transform  = "translateY(0) translateX(0) scale(1)";
       }
       observer.disconnect();
-    }, 2500);
+    }, 15000);
 
     return () => {
       window.clearTimeout(safety);
