@@ -2,11 +2,11 @@ import { ImageResponse } from "next/og";
 
 /* ─── Next.js OG image config ────────────────────────────────── */
 export const runtime     = "edge";
-export const alt         = "Ellie — The Elite Edit";
+export const alt         = "Ellie — The Style Refresh. Three complete looks with buy links, every Monday.";
 export const size        = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-/* ─── Branded navy / gold OG image ───────────────────────────── */
+/* ─── On-brand charcoal + blush OG image ─────────────────────── */
 export default function OgImage() {
   return new ImageResponse(
     (
@@ -18,40 +18,27 @@ export default function OgImage() {
           flexDirection:   "column",
           alignItems:      "center",
           justifyContent:  "center",
-          backgroundColor: "#000080",
+          backgroundColor: "#2C2C2C",
           position:        "relative",
           overflow:        "hidden",
         }}
       >
-        {/* ── Subtle radial glow — top-right ── */}
+        {/* Warm radial glow — center */}
         <div
           style={{
-            position:        "absolute",
-            top:             -120,
-            right:           -120,
-            width:           480,
-            height:          480,
-            borderRadius:    "50%",
-            background:
-              "radial-gradient(circle, rgba(212,175,55,0.10) 0%, transparent 70%)",
+            position:     "absolute",
+            top:          "50%",
+            left:         "50%",
+            width:        700,
+            height:       700,
+            marginTop:    -350,
+            marginLeft:   -350,
+            borderRadius: "50%",
+            background:   "radial-gradient(circle, rgba(196,149,106,0.12) 0%, transparent 65%)",
           }}
         />
 
-        {/* ── Subtle radial glow — bottom-left ── */}
-        <div
-          style={{
-            position:        "absolute",
-            bottom:          -120,
-            left:            -120,
-            width:           480,
-            height:          480,
-            borderRadius:    "50%",
-            background:
-              "radial-gradient(circle, rgba(212,175,55,0.07) 0%, transparent 70%)",
-          }}
-        />
-
-        {/* ── Gold top border ── */}
+        {/* Blush top rule */}
         <div
           style={{
             position:   "absolute",
@@ -59,11 +46,11 @@ export default function OgImage() {
             left:       0,
             right:      0,
             height:     3,
-            background: "linear-gradient(90deg, transparent, #D4AF37, #f5e9b8, #D4AF37, transparent)",
+            background: "linear-gradient(90deg, transparent, #C4956A, #D4AB88, #C4956A, transparent)",
           }}
         />
 
-        {/* ── Gold bottom border ── */}
+        {/* Blush bottom rule */}
         <div
           style={{
             position:   "absolute",
@@ -71,41 +58,40 @@ export default function OgImage() {
             left:       0,
             right:      0,
             height:     3,
-            background: "linear-gradient(90deg, transparent, #D4AF37, #f5e9b8, #D4AF37, transparent)",
+            background: "linear-gradient(90deg, transparent, #C4956A, #D4AB88, #C4956A, transparent)",
           }}
         />
 
-        {/* ── Content ── */}
+        {/* Content stack */}
         <div
           style={{
             display:        "flex",
             flexDirection:  "column",
             alignItems:     "center",
             justifyContent: "center",
-            gap:            0,
           }}
         >
           {/* Eyebrow */}
           <p
             style={{
               fontFamily:    "serif",
-              fontSize:      18,
-              letterSpacing: "0.35em",
+              fontSize:      16,
+              letterSpacing: "0.42em",
               textTransform: "uppercase",
-              color:         "rgba(212,175,55,0.75)",
-              margin:        "0 0 24px 0",
+              color:         "#C4956A",
+              margin:        "0 0 28px 0",
             }}
           >
-            Private Membership
+            Private Membership · $19/Month
           </p>
 
-          {/* Top gold rule */}
+          {/* Rule */}
           <div
             style={{
-              width:        80,
+              width:        60,
               height:       1,
-              background:   "linear-gradient(90deg, transparent, #D4AF37, transparent)",
-              marginBottom: 32,
+              background:   "linear-gradient(90deg, transparent, #C4956A, transparent)",
+              marginBottom: 36,
             }}
           />
 
@@ -114,24 +100,24 @@ export default function OgImage() {
             style={{
               fontFamily:    "serif",
               fontWeight:    700,
-              fontSize:      120,
-              color:         "#D4AF37",
+              fontSize:      108,
+              color:         "#FDFAF5",
               margin:        0,
               lineHeight:    1,
-              letterSpacing: "0.06em",
+              letterSpacing: "0.08em",
               textTransform: "uppercase",
             }}
           >
             Ellie
           </h1>
 
-          {/* Bottom gold rule */}
+          {/* Rule */}
           <div
             style={{
-              width:       80,
-              height:      1,
-              background:  "linear-gradient(90deg, transparent, #D4AF37, transparent)",
-              margin:      "32px 0",
+              width:      60,
+              height:     1,
+              background: "linear-gradient(90deg, transparent, #C4956A, transparent)",
+              margin:     "36px 0",
             }}
           />
 
@@ -139,35 +125,33 @@ export default function OgImage() {
           <p
             style={{
               fontFamily:    "serif",
-              fontSize:      32,
+              fontSize:      30,
               fontWeight:    400,
-              color:         "#ffffff",
+              color:         "#EDE5D8",
               margin:        0,
-              letterSpacing: "0.08em",
+              letterSpacing: "0.1em",
               textTransform: "uppercase",
             }}
           >
-            The Elite Edit
+            The Style Refresh
           </p>
 
           {/* Tagline */}
           <p
             style={{
               fontFamily:    "serif",
-              fontSize:      18,
-              color:         "rgba(255,255,255,0.45)",
-              margin:        "20px 0 0 0",
-              letterSpacing: "0.2em",
+              fontSize:      17,
+              color:         "rgba(253,250,245,0.42)",
+              margin:        "22px 0 0 0",
+              letterSpacing: "0.22em",
               textTransform: "uppercase",
             }}
           >
-            Style Intelligence · Three Looks · Every Monday
+            Three Complete Looks · Direct Buy Links · Every Monday
           </p>
         </div>
       </div>
     ),
-    {
-      ...size,
-    }
+    { ...size }
   );
 }

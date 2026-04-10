@@ -341,7 +341,124 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  const weekOf  = String(lookbook.weekOf ?? "this week");
+  /* ── Post to Twitter / X ─────────────────────────────────────────────────
+     Fires after approval every Sunday. Needs 4 env vars in Vercel:
+       TWITTER_API_KEY, TWITTER_API_SECRET,
+       TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_SECRET
+     Uses OAuth 1.0a (Twitter v2 endpoint) — no app-level read permissions needed.
+     The tweet teases the three looks and links to the site — no buy links shown.  */
+  if (
+    process.env.TWITTER_API_KEY &&
+    process.env.TWITTER_API_SECRET &&
+    process.env.TWITTER_ACCESS_TOKEN &&
+    process.env.TWITTER_ACCESS_SECRET
+  ) {
+    try {
+      type TweetLook = { label: string; tagline: string };
+      const tweetLooks  = (lookbook.looks as TweetLook[]) ?? [];
+      const weekOfStr   = String(lookbook.weekOf ?? "");
+      const siteUrl     = (process.env.NEXT_PUBLIC_BASE_URL ?? "https://stylebyellie.com").replace(/\/$/, "");
+
+      const lookLines = tweetLooks
+        .map((l, i) => `${["01","02","03"][i] ?? String(i + 1)} — ${l.label}: ${l.tagline}`)
+        .join("\n");
+
+      const tweetText =
+        `This week's Style Refresh is live ✨\n\n` +
+        `${String(lookbook.editorialLead ?? "").substring(0, 120)}\n\n` +
+        `${lookLines}\n\n` +
+        `Full brief + every buy link → ${siteUrl}\n\n` +
+        `#StyleRefresh #PersonalStylist #WomensFashion #MondayLooks #FashionCuration`;
+
+      /* OAuth 1.0a signature for Twitter API v2 */
+      const oauthSign = async (method: string, url: string, params: Record<string, string>) => {
+        const nonce     = Math.random().toString(36).slice(2) + Date.now().toString(36);
+        const timestamp = Math.floor(Date.now() / 1000).toString();
+        const oauthParams: Record<string, string> = {
+          oauth_consumer_key:     process.env.TWITTER_API_KEY!,
+          oauth_nonce:            nonce,
+          oauth_signature_method: "HMAC-SHA256",
+          oauth_timestamp:        timestamp,
+          oauth_token:            process.env.TWITTER_ACCESS_TOKEN!,
+          oauth_version:          "1.0",
+          ...params,
+        };
+        const sortedKeys = Object.keys(oauthParams).sort();
+        const paramStr   = sortedKeys
+          .map(k => `${encodeURIComponent(k)}=${encodeURIComponent(oauthParams[k])}`)
+          .join("&");
+        const sigBase = `${method}&${encodeURIComponent(url)}&${encodeURIComponent(paramStr)}`;
+        const sigKey  =
+          `${encodeURIComponent(process.env.TWITTER_API_SECRET!)}&` +
+          `${encodeURIComponent(process.env.TWITTER_ACCESS_SECRET!)}`;
+
+        /* Crypto is available in Vercel Node.js runtime */
+        const { createHmac } = await import("crypto");
+        const signature = createHmac("sha256", sigKey).update(sigBase).digest("base64");
+        oauthParams.oauth_signature = signature;
+
+        const authHeader =
+          "OAuth " +
+          Object.entries(oauthParams)
+            .filter(([k]) => k.startsWith("oauth_"))
+            .map(([k, v]) => `${encodeURIComponent(k)}="${encodeURIComponent(v)}"`)
+            .join(", ");
+        return authHeader;
+      };
+
+      const tweetUrl  = "https://api.twitter.com/2/tweets";
+      const authHeader = await oauthSign("POST", tweetUrl, {});
+      const tweetRes   = await fetch(tweetUrl, {
+        method:  "POST",
+        headers: {
+          Authorization:  authHeader,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ text: tweetText }),
+      });
+
+      if (!tweetRes.ok) {
+        console.error("[approve-weekly] Twitter post failed:", await tweetRes.text());
+      } else {
+        const tweetData = await tweetRes.json() as { data?: { id: string } };
+        console.log("[approve-weekly] Twitter post published:", tweetData.data?.id);
+      }
+    } catch (twitterErr) {
+      console.error("[approve-weekly] Twitter posting failed (non-fatal):", twitterErr);
+    }
+  }
+
+  /* ── Generate Instagram caption ─────────────────────────────────────────
+     Ready to paste into Instagram immediately after approving.
+     Ellie just needs to add a photo from her camera roll.              */
+  type IGLook = { label: string; tagline: string; items?: Array<{ piece: string }> };
+  const igLooks   = (lookbook.looks as IGLook[]) ?? [];
+  const weekOfStr = String(lookbook.weekOf ?? "");
+  const igLead    = String(lookbook.editorialLead ?? "");
+  const igEmojis  = ["✨", "🤍", "🌿"];
+
+  const igLookLines = igLooks
+    .map((l, i) => `${igEmojis[i] ?? "•"} ${l.label}\n"${l.tagline}"`)
+    .join("\n\n");
+
+  const igHashtags = [
+    "#TheStyleRefresh", "#StyleRefresh", "#WomensFashion",
+    "#PersonalStylist", "#WeeklyLooks", "#FashionCuration",
+    "#CuratedStyle", "#OOTD", "#StyleInspo", "#EditorialFashion",
+    "#FashionSubscription", "#LookBook", "#StyleEdit", "#MondayVibes",
+    "#FashionForWomen",
+  ].join(" ");
+
+  const instagramCaption =
+    `This week's edit is here. 🌿\n\n` +
+    `${igLead}\n\n` +
+    `Week of ${weekOfStr} — three complete looks:\n\n` +
+    `${igLookLines}\n\n` +
+    `Members get every brand, price, and direct buy link in Monday's brief.\n` +
+    `Link in bio → stylebyellie.com\n\n` +
+    `${igHashtags}`;
+
+  const weekOf  = weekOfStr || "this week";
   const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL ?? "https://stylebyellie.com").replace(/\/$/, "");
   const sendUrl = `${baseUrl}/api/send-weekly`;
 
@@ -401,6 +518,29 @@ export async function GET(req: NextRequest) {
       </a>
     </div>
     ${linkCheckHtml}
+
+    <!-- ── Instagram Caption ───────────────────────────────────── -->
+    <div style="margin-top:32px;text-align:left;background:#FDFAF5;border:1px solid #DDD4C5;padding:22px 24px;">
+      <p style="color:#C4956A;font-size:10px;letter-spacing:0.28em;text-transform:uppercase;
+                 font-family:Arial,sans-serif;margin:0 0 10px;">
+        📸 Instagram Caption — Copy &amp; Paste
+      </p>
+      <p style="color:#6B6560;font-size:11px;font-family:Arial,sans-serif;margin:0 0 12px;line-height:1.5;">
+        Add a fashion photo from your camera roll, then paste this caption:
+      </p>
+      <textarea
+        onclick="this.select()"
+        readonly
+        style="width:100%;box-sizing:border-box;height:260px;background:#F5EFE4;
+               border:1px solid #DDD4C5;padding:14px;font-family:Georgia,serif;
+               font-size:12px;color:#2C2C2C;line-height:1.75;resize:vertical;
+               cursor:text;"
+      >${instagramCaption.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</textarea>
+      <p style="color:#B5A99A;font-size:10px;font-family:Arial,sans-serif;margin:8px 0 0;">
+        Tap the box to select all → copy → open Instagram → paste.
+      </p>
+    </div>
+
     <p style="color:#B5A99A;font-size:11px;font-family:Arial,sans-serif;margin-top:24px;">
       Approved at ${new Date().toLocaleString("en-US", { timeZone: "America/New_York" })} ET
     </p>

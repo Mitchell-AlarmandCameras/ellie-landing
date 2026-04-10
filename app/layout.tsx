@@ -1,9 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import CookieBanner from "@/components/CookieBanner";
+import Script from "next/script";
 
-/* ─── Replace with your live domain before deploying ─────────── */
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? "https://stylebyellie.com";
+const BASE_URL  = process.env.NEXT_PUBLIC_BASE_URL ?? "https://stylebyellie.com";
+const GA_ID     = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;   // e.g. G-XXXXXXXXXX
+const GSC_TOKEN = process.env.GOOGLE_SITE_VERIFICATION;        // from Google Search Console
 
 /* ═══════════════════════════════════════════════════════════════
    METADATA
@@ -87,6 +89,7 @@ export const metadata: Metadata = {
     ],
     apple: "/favicon.png",
   },
+
 };
 
 /* ═══════════════════════════════════════════════════════════════
@@ -103,6 +106,67 @@ export const viewport: Viewport = {
 /* ═══════════════════════════════════════════════════════════════
    ROOT LAYOUT
 ═══════════════════════════════════════════════════════════════ */
+/* ── Global JSON-LD: Organization + WebSite schema ───────────────────── */
+const orgSchema = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type":       "Organization",
+      "@id":         `${BASE_URL}/#organization`,
+      name:          "The Style Refresh by Ellie",
+      url:           BASE_URL,
+      logo:          { "@type": "ImageObject", url: `${BASE_URL}/favicon.png` },
+      description:
+        "Private $19/month membership delivering three curated women's fashion looks " +
+        "with direct buy links every Monday.",
+      sameAs: [
+        "https://www.instagram.com/stylebyellie",
+        "https://www.pinterest.com/stylebyellie",
+        "https://x.com/stylebyellie",
+      ],
+    },
+    {
+      "@type":       "WebSite",
+      "@id":         `${BASE_URL}/#website`,
+      url:           BASE_URL,
+      name:          "ELLIE — The Style Refresh",
+      description:
+        "Three complete women's fashion looks with direct buy links, every Monday. " +
+        "$19/month private membership.",
+      publisher:     { "@id": `${BASE_URL}/#organization` },
+      potentialAction: {
+        "@type":       "SearchAction",
+        target:        { "@type": "EntryPoint", urlTemplate: `${BASE_URL}/blog?q={search_term_string}` },
+        "query-input": "required name=search_term_string",
+      },
+    },
+    {
+      "@type":        "Product",
+      "@id":          `${BASE_URL}/#membership`,
+      name:           "The Style Refresh Membership",
+      description:
+        "Three complete, curated women's fashion looks with direct buy links to every item, " +
+        "delivered every Monday. Includes brand, price, and link for each piece.",
+      brand:          { "@id": `${BASE_URL}/#organization` },
+      offers: {
+        "@type":       "Offer",
+        price:         "19.00",
+        priceCurrency: "USD",
+        priceSpecification: {
+          "@type":            "UnitPriceSpecification",
+          price:              "19.00",
+          priceCurrency:      "USD",
+          billingDuration:    1,
+          billingIncrement:   1,
+          unitCode:           "MON",
+        },
+        availability:  "https://schema.org/InStock",
+        url:           `${BASE_URL}/#join`,
+      },
+    },
+  ],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
@@ -115,18 +179,49 @@ export default function RootLayout({
           href="https://fonts.gstatic.com"
           crossOrigin="anonymous"
         />
+
+        {/* Google Search Console verification */}
+        <meta name="google-site-verification" content="4gKd6v209O9t3fsyYGAmVd2-xiK99dBBUzdDonuVCUM" />
+
+        {/* Global structured data — tells Google exactly what this site is */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
+        />
       </head>
+
       <body>
         {children}
         <CookieBanner />
-        {/* Skimlinks auto-monetises every outbound retail link on the site.
-            Sign up at skimlinks.com → get your Publisher ID → add SKIMLINKS_PUBLISHER_ID to Vercel env vars.
-            Zero configuration after that — it handles 50,000+ retailers automatically. */}
+
+        {/* Skimlinks auto-monetises every outbound retail link.
+            Add SKIMLINKS_PUBLISHER_ID to Vercel env vars to activate. */}
         {process.env.SKIMLINKS_PUBLISHER_ID && (
           <script
             async
             src={`https://s.skimresources.com/js/${process.env.SKIMLINKS_PUBLISHER_ID}X.skimlinks.js`}
           />
+        )}
+
+        {/* Google Analytics 4 — add NEXT_PUBLIC_GA_MEASUREMENT_ID to Vercel env vars to activate */}
+        {GA_ID && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+              strategy="afterInteractive"
+            />
+            <Script id="ga4-init" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${GA_ID}', {
+                  page_path: window.location.pathname,
+                  anonymize_ip: true
+                });
+              `}
+            </Script>
+          </>
         )}
       </body>
     </html>
