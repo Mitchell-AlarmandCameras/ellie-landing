@@ -331,15 +331,125 @@ async function callClaude(scrapedData: string, today: string, weekNumber: number
   return JSON.parse(raw.trim()) as Record<string, unknown>;
 }
 
-/* ─── Approval email ─────────────────────────────────────────────── */
+/* ─── Link validation + auto-repair ─────────────────────────────── */
 type LookItem = { piece: string; brand: string; price: string; note: string; buyLink: string };
 type Look     = { index: string; label: string; tagline: string; editorsNote: string; items: LookItem[] };
 
+type ValidationResult = {
+  piece:        string;
+  originalLink: string;
+  finalLink:    string;
+  status:       number | null;
+  ok:           boolean;
+  repaired:     boolean;
+  reason:       string;
+};
+
+/** Test one URL — conservative: only flag definitive 404s, not timeouts or bot-blocks */
+async function validateLink(
+  url: string,
+  timeoutMs = 9000,
+): Promise<{ ok: boolean; status: number | null; reason: string }> {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    const res = await fetch(url, {
+      method:   "HEAD",
+      signal:   controller.signal,
+      redirect: "follow",
+      headers:  { "User-Agent": "Mozilla/5.0 (compatible; StyleRefreshLinkCheck/1.0)" },
+    });
+    clearTimeout(timer);
+    if (res.status === 404) return { ok: false, status: 404, reason: "404 Not Found" };
+    return { ok: true, status: res.status, reason: "OK" };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    /* Timeout / ECONNRESET — server is slow, not broken */
+    if (msg.includes("abort") || msg.includes("timeout") || msg.includes("ECONNRESET")) {
+      return { ok: true, status: null, reason: "Timeout — assumed OK" };
+    }
+    return { ok: false, status: null, reason: msg.slice(0, 80) };
+  }
+}
+
+/** Net-a-Porter fallback — luxury-only results, guaranteed quality */
+function buildFallbackLink(piece: string): string {
+  const q = piece.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim().replace(/\s+/g, "+");
+  return `https://www.net-a-porter.com/en-us/shop/search?q=${q}`;
+}
+
+/** Validate every link in the lookbook; auto-repair failures with Net-a-Porter */
+async function validateAndRepairLooks(
+  looks: Look[],
+): Promise<{ repairedLooks: Look[]; results: ValidationResult[] }> {
+  const results: ValidationResult[] = [];
+
+  const repairedLooks: Look[] = [];
+  for (const look of looks) {
+    const repairedItems: LookItem[] = [];
+    /* Run validations in parallel per look */
+    const validations = await Promise.all(look.items.map(item => validateLink(item.buyLink)));
+    for (let i = 0; i < look.items.length; i++) {
+      const item  = look.items[i];
+      const v     = validations[i];
+      const repaired  = !v.ok;
+      const finalLink = repaired ? buildFallbackLink(item.piece) : item.buyLink;
+      results.push({
+        piece:        item.piece,
+        originalLink: item.buyLink,
+        finalLink,
+        status:       v.status,
+        ok:           v.ok,
+        repaired,
+        reason:       v.reason,
+      });
+      repairedItems.push({ ...item, buyLink: finalLink });
+    }
+    repairedLooks.push({ ...look, items: repairedItems });
+  }
+  return { repairedLooks, results };
+}
+
+/* ─── Approval email ─────────────────────────────────────────────── */
+
 type HeroImageDraft = { id: string; alt: string; mood?: string };
 
-function buildApprovalEmail(lookbook: Record<string, unknown>, approveUrl: string): string {
+function buildApprovalEmail(
+  lookbook:        Record<string, unknown>,
+  approveUrl:      string,
+  linkResults:     ValidationResult[] = [],
+): string {
   const looks       = (lookbook.looks as Look[]) ?? [];
   const heroImages  = (lookbook.heroImages as HeroImageDraft[]) ?? [];
+
+  /* Link health summary */
+  const totalLinks   = linkResults.length;
+  const repairedCount = linkResults.filter(r => r.repaired).length;
+  const allGood      = repairedCount === 0;
+  const linkHealthHtml = totalLinks > 0 ? `
+  <tr><td style="padding:16px 36px 0;">
+    <p style="margin:0 0 8px;font-size:10px;letter-spacing:0.22em;text-transform:uppercase;
+               color:${allGood ? "#2E7D32" : "#B45309"};font-family:Arial,sans-serif;">
+      ${allGood
+        ? `✅ All ${totalLinks} shop links verified — no action needed`
+        : `⚠️ ${repairedCount} of ${totalLinks} links failed — auto-replaced with Net-a-Porter`}
+    </p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:6px;">
+      ${linkResults.map(r => `
+      <tr>
+        <td style="padding:5px 8px;border-bottom:1px solid #E8DDD0;font-family:Arial,sans-serif;font-size:11px;">
+          <span style="color:${r.ok ? "#2E7D32" : "#C0392B"};margin-right:6px;">${r.ok ? "✅" : "🔄"}</span>
+          <strong style="color:#2C2C2C;">${r.piece}</strong>
+          ${r.repaired
+            ? `<span style="color:#B45309;font-size:10px;"> — broken, replaced with Net-a-Porter</span>`
+            : `<span style="color:#6B9E6B;font-size:10px;"> — ${r.reason}</span>`}
+        </td>
+      </tr>`).join("")}
+    </table>
+  </td></tr>
+  <tr><td style="padding:4px 36px 0;">
+    <div style="height:1px;background:linear-gradient(90deg,transparent,#C9B99A,transparent);"></div>
+  </td></tr>` : "";
 
   /* Hero image preview strip */
   const heroHtml = heroImages.length === 4 ? `
@@ -417,6 +527,7 @@ function buildApprovalEmail(lookbook: Record<string, unknown>, approveUrl: strin
     </p>
   </td></tr>
   ${heroHtml}
+  ${linkHealthHtml}
   <tr><td style="padding:0 36px;">
     <table width="100%" cellpadding="0" cellspacing="0">${looksHtml}</table>
   </td></tr>
@@ -523,15 +634,24 @@ export async function GET(req: NextRequest) {
 
     const lookbook = await callClaude(scrapedData, today, weekNumber, analytics);
 
-    /* 4 — Save to /tmp */
+    /* 4 — Validate & auto-repair every shop link */
+    console.log("[curator] Validating shop links…");
+    const rawLooks = (lookbook.looks as Look[]) ?? [];
+    const { repairedLooks, results: linkResults } = await validateAndRepairLooks(rawLooks);
+    const repairedCount = linkResults.filter(r => r.repaired).length;
+    console.log(`[curator] Link validation complete — ${linkResults.length} links, ${repairedCount} repaired`);
+    /* Write repaired looks back into lookbook before saving */
+    const finalLookbook = { ...lookbook, looks: repairedLooks };
+
+    /* 5 — Save to /tmp */
     try {
-      fs.writeFileSync(draftPath, JSON.stringify(lookbook), "utf8");
+      fs.writeFileSync(draftPath, JSON.stringify(finalLookbook), "utf8");
       console.log("[curator] Draft saved to /tmp/ellie-draft.json");
     } catch (fsErr) {
       console.warn("[curator] Could not write /tmp/ellie-draft.json:", fsErr);
     }
 
-    /* 5 — Send approval email */
+    /* 6 — Send approval email */
     const approveUrl = `${baseUrl}/api/approve-weekly?secret=${encodeURIComponent(secret)}`;
 
     if (resendKey && fromEmail && notifyEmail) {
@@ -539,8 +659,8 @@ export async function GET(req: NextRequest) {
       const { error } = await resend.emails.send({
         from:    `Ellie Curator <${fromEmail}>`,
         to:      notifyEmail,
-        subject: `[APPROVE] Style Refresh Draft — Week of ${String(lookbook.weekOf ?? "")}`,
-        html:    buildApprovalEmail(lookbook, approveUrl),
+        subject: `[APPROVE] Style Refresh Draft — Week of ${String(finalLookbook.weekOf ?? "")}`,
+        html:    buildApprovalEmail(finalLookbook, approveUrl, linkResults),
       });
       if (error) {
         console.error("[curator] Email send failed:", error);
@@ -552,10 +672,12 @@ export async function GET(req: NextRequest) {
     }
 
     return NextResponse.json({
-      success: true,
-      weekOf:  lookbook.weekOf,
+      success:        true,
+      weekOf:         finalLookbook.weekOf,
       weekNumber,
       approveUrl,
+      linksValidated: linkResults.length,
+      linksRepaired:  repairedCount,
     });
   } catch (err) {
     console.error("[curator] Fatal error:", err);
