@@ -35,10 +35,15 @@ async function getLiveWeek(): Promise<WeeklyLookbook> {
     if (!res.ok) return currentWeek;
     const data = await res.json() as WeeklyLookbook & { approvedAt?: string };
 
-    /* Only use the Blob version if it's for a NEWER week than the static lookbook.
-       If weekOf matches or blob is older, the static lookbook (with manual fixes) wins. */
-    const blobDate   = new Date(data?.weekOf ?? 0).getTime();
-    const staticDate = new Date(currentWeek.weekOf ?? 0).getTime();
+    /* Only use the Blob version if it's for a strictly NEWER week than the static lookbook.
+       Parse both as dates — fall back to string compare if date parse fails.
+       If equal or blob is older, the static lookbook (with manual fixes) wins. */
+    const parseWeek = (s: string) => {
+      const d = new Date(s);
+      return isNaN(d.getTime()) ? 0 : d.getTime();
+    };
+    const blobDate   = parseWeek(data?.weekOf ?? "");
+    const staticDate = parseWeek(currentWeek.weekOf ?? "");
     if (data?.looks?.length && blobDate > staticDate) return data as WeeklyLookbook;
   } catch {
     /* silently fall back */

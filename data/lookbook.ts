@@ -33,7 +33,7 @@ export interface WeeklyLookbook {
 
 /* ─── Current week — replaced every Monday after approval ─────── */
 export const currentWeek: WeeklyLookbook = {
-  weekOf:     "April 7, 2026",
+  weekOf:     "April 9, 2026",
   weekNumber: 1,
   editorialLead:
     "Spring is asking for softness with a spine this week — effortless at first glance, entirely considered on closer inspection.",
