@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import { currentWeek, archiveWeeks, type WeeklyLookbook } from "@/data/lookbook";
 import ReferralButton from "@/components/ReferralButton";
 import ContactForm from "@/components/ContactForm";
+import SaveButton from "@/components/SaveButton";
 
 export const metadata: Metadata = {
   title: "VIP Room | ELLIE — The Style Refresh",
@@ -137,6 +138,13 @@ export default async function DashboardPage() {
               style={{ fontSize: "0.78rem", fontFamily: "Inter, sans-serif", letterSpacing: "0.15em", color: "var(--warm-gray)" }}
             >
               ← Site
+            </Link>
+            <Link
+              href="/bag"
+              className="text-xs uppercase tracking-widest transition-colors"
+              style={{ fontSize: "0.78rem", fontFamily: "Inter, sans-serif", letterSpacing: "0.15em", color: "var(--warm-gray)", border: "1px solid var(--sand-border)", padding: "0.3rem 0.8rem" }}
+            >
+              My Edit ♡
             </Link>
             <a
               href="/api/logout"
@@ -345,15 +353,28 @@ export default async function DashboardPage() {
                           >
                             {item.piece}
                           </span>
-                          <a
-                            href={`/api/go?to=${encodeURIComponent(item.buyLink)}&src=dashboard&q=${encodeURIComponent(item.piece + " " + item.brand)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="btn-buy shrink-0"
-                            aria-label={`Shop ${item.piece} at ${item.brand}`}
-                          >
-                            Shop →
-                          </a>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <a
+                              href={`/api/go?to=${encodeURIComponent(item.buyLink)}&src=dashboard&q=${encodeURIComponent(item.piece + " " + item.brand)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="btn-buy"
+                              aria-label={`Shop ${item.piece} at ${item.brand}`}
+                            >
+                              Shop →
+                            </a>
+                            <SaveButton
+                              item={{
+                                piece:   item.piece,
+                                brand:   item.brand,
+                                price:   item.price,
+                                note:    item.note,
+                                buyLink: item.buyLink,
+                                look:    look.label,
+                                weekOf:  week.weekOf,
+                              }}
+                            />
+                          </div>
                         </div>
 
                         {/* Brand + price */}
