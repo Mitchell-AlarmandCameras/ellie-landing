@@ -428,22 +428,28 @@ export default function Home() {
                   </p>
                 </ScrollReveal>
 
-                {/* Trust line */}
-                <div className="flex flex-col items-center lg:items-start">
+                {/* Hero CTA */}
+                <div className="flex flex-col items-center lg:items-start gap-4 w-full">
+                  <button
+                    type="button"
+                    onClick={() => handleCheckout("monthly")}
+                    disabled={checkoutLoading}
+                    className="btn-primary"
+                    style={{ minHeight: "54px", fontSize: "0.78rem", padding: "0 2.2rem" }}
+                    aria-label="Join Style Refresh for 19 dollars per month"
+                  >
+                    {checkoutLoading ? "Preparing…" : "Start My Refresh — $19/mo"}
+                  </button>
                   <p
-                    className="uppercase tracking-widest text-center lg:text-left"
                     style={{
-                      fontSize:      "0.8rem",
-                      fontWeight:    600,
-                      color:         "var(--charcoal-muted)",
-                      letterSpacing: "0.14em",
+                      fontSize:      "0.76rem",
+                      color:         "var(--warm-gray)",
+                      letterSpacing: "0.06em",
                       fontFamily:    "Inter, sans-serif",
-                      lineHeight:    1.5,
+                      lineHeight:    1.6,
                     }}
                   >
-                    Secure checkout via Stripe
-                    <br />
-                    <span style={{ fontWeight: 700, color: "var(--charcoal)" }}>Cancel anytime</span>
+                    7-day money-back guarantee · Cancel anytime · Secure checkout
                   </p>
                 </div>
               </div>
@@ -1006,6 +1012,7 @@ export default function Home() {
                   "Direct buy links to every item",
                   "Ellie&apos;s sourcing notes and recommendations",
                   "Access to the VIP Room lookbook archive",
+                  "7-day money-back guarantee — no questions asked",
                   "Cancel anytime — no contracts",
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-3">
@@ -1042,9 +1049,11 @@ export default function Home() {
 
               <p
                 className="text-xs"
-                style={{ color: "rgba(253,250,245,0.35)", fontFamily: "Inter, sans-serif", letterSpacing: "0.1em" }}
+                style={{ color: "rgba(253,250,245,0.45)", fontFamily: "Inter, sans-serif", letterSpacing: "0.06em", lineHeight: 1.7 }}
               >
-                Secure checkout · Billed monthly · Cancel anytime
+                Secure checkout via Stripe · Billed monthly · Cancel anytime
+                <br />
+                <span style={{ color: "rgba(196,149,106,0.8)" }}>Not satisfied within 7 days? Full refund. No questions.</span>
               </p>
 
               {/* Annual plan option */}
