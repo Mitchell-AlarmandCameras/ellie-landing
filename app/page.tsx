@@ -307,7 +307,6 @@ export default function Home() {
               {[
                 { label: "The Story",  href: "#the-story", newTab: false },
                 { label: "This Week",  href: "#this-week", newTab: false },
-                { label: "The Edit",   href: "/blog",      newTab: true  },
               ].map(({ label, href, newTab }) => (
                 <a
                   key={label}
@@ -1409,7 +1408,7 @@ export default function Home() {
                 © {new Date().getFullYear()} The Style Refresh. All rights reserved.
               </p>
               {[
-                { label: "The Edit",         href: "/blog",    newTab: true  },
+                { label: "Style Notes",      href: "/blog",    newTab: false },
                 { label: "Contact",          href: "/contact", newTab: false },
                 { label: "Privacy Policy",   href: "/privacy", newTab: false },
                 { label: "Terms of Service", href: "/terms",   newTab: false },
