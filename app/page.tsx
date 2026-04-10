@@ -785,14 +785,16 @@ export default function Home() {
                     </div>
 
                     <div className="p-7 sm:p-8">
-                    {/* Ghost index */}
+                    {/* Ghost index — decorative, sits behind content */}
                     <span
-                      className="absolute top-[216px] right-5 select-none font-bold leading-none"
+                      className="absolute top-[206px] right-4 select-none font-bold leading-none pointer-events-none"
                       style={{
                         fontFamily: "DM Serif Display, serif",
-                        fontSize:   "4rem",
-                        color:      "var(--cream-deep)",
+                        fontSize:   "3.2rem",
+                        color:      "var(--sand)",
                         lineHeight: "1",
+                        opacity:    0.7,
+                        zIndex:     0,
                       }}
                       aria-hidden="true"
                     >
