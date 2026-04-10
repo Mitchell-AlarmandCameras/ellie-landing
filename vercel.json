@@ -6,6 +6,10 @@
   "regions": ["iad1"],
   "crons": [
     {
+      "path": "/api/monitor",
+      "schedule": "0 */2 * * *"
+    },
+    {
       "path": "/api/health-check",
       "schedule": "0 12 * * 0"
     },
