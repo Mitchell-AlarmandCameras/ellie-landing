@@ -86,7 +86,7 @@ export default async function DashboardPage() {
   const hasArchive = archiveWeeks.length > 0;
 
   return (
-    <div className="min-h-screen" style={{ background: "#1A1714" }}>
+    <div className="min-h-screen vip-bg">
 
       {/* ── Nav ──────────────────────────────────────────────────── */}
       <header
@@ -183,27 +183,33 @@ export default async function DashboardPage() {
 
       {/* ── Welcome banner ───────────────────────────────────────── */}
       <section
-        className="py-16 sm:py-24 px-5 sm:px-8 text-center relative overflow-hidden"
-        style={{ background: "#1A1714", borderBottom: "1px solid rgba(196,149,106,0.12)" }}
+        className="py-20 sm:py-32 px-5 sm:px-8 text-center relative overflow-hidden"
+        style={{ background: "#1A1714", borderBottom: "1px solid rgba(196,149,106,0.18)" }}
       >
-        {/* Weekly editorial background photo — very darkened */}
+        {/* Weekly editorial background photo */}
         <div
           className="absolute inset-0 pointer-events-none"
           aria-hidden="true"
           style={{
             backgroundImage:    `url(${heroBg})`,
             backgroundSize:     "cover",
-            backgroundPosition: "center 30%",
-            opacity:            0.18,
+            backgroundPosition: "center 25%",
+            opacity:            0.32,
           }}
         />
-        {/* Dark vignette over the photo */}
+        {/* Vignette — lighter center so the photo actually reads */}
         <div
           className="absolute inset-0 pointer-events-none"
           aria-hidden="true"
           style={{
-            background: "radial-gradient(ellipse 100% 100% at 50% 50%, rgba(20,18,14,0.4) 0%, rgba(20,18,14,0.92) 100%)",
+            background: "radial-gradient(ellipse 120% 100% at 50% 40%, rgba(20,18,14,0.22) 0%, rgba(20,18,14,0.75) 60%, rgba(20,18,14,0.96) 100%)",
           }}
+        />
+        {/* Bottom fade into next section */}
+        <div
+          className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none"
+          aria-hidden="true"
+          style={{ background: "linear-gradient(transparent, #1E1B17)" }}
         />
 
         <div className="relative z-10 max-w-2xl mx-auto">
@@ -263,8 +269,15 @@ export default async function DashboardPage() {
         </div>
       </section>
 
+      {/* ── Gold section divider ─────────────────────────────────── */}
+      <div className="flex items-center justify-center gap-5 py-8 px-5" style={{ background: "#1E1B17" }} aria-hidden="true">
+        <div className="flex-1 max-w-xs h-px" style={{ background: "linear-gradient(90deg, transparent, rgba(196,149,106,0.25))" }} />
+        <span style={{ color: "rgba(196,149,106,0.5)", fontSize: "0.55rem", letterSpacing: "0.5em", textTransform: "uppercase", fontFamily: "Inter, sans-serif" }}>This Week</span>
+        <div className="flex-1 max-w-xs h-px" style={{ background: "linear-gradient(90deg, rgba(196,149,106,0.25), transparent)" }} />
+      </div>
+
       {/* ── Lookbook — This Week's Brief ─────────────────────────── */}
-      <section className="py-16 sm:py-24 px-5 sm:px-8" style={{ background: "#1E1B17" }}>
+      <section className="pb-16 sm:pb-24 px-5 sm:px-8" style={{ background: "#1E1B17" }}>
         <div className="max-w-6xl mx-auto">
 
           <div className="text-center mb-14">
@@ -299,16 +312,26 @@ export default async function DashboardPage() {
           </div>
 
           {/* Look cards */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-            {week.looks.map((look) => (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-8">
+            {week.looks.map((look, cardIdx) => (
+              <div key={look.label}>
+                {/* Mobile-only numbered divider between cards */}
+                {cardIdx > 0 && (
+                  <div className="flex items-center gap-4 mb-10 lg:hidden" aria-hidden="true">
+                    <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, transparent, rgba(196,149,106,0.3))" }} />
+                    <span style={{ fontFamily: "DM Serif Display, serif", color: "rgba(196,149,106,0.5)", fontSize: "0.9rem", letterSpacing: "0.2em" }}>
+                      {look.index}
+                    </span>
+                    <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, rgba(196,149,106,0.3), transparent)" }} />
+                  </div>
+                )}
               <article
-                key={look.label}
                 className="relative flex flex-col"
                 style={{
                   background:  "#252018",
-                  border:      "1px solid rgba(196,149,106,0.18)",
-                  borderTop:   "2px solid #C4956A",
-                  boxShadow:   "0 4px 32px rgba(0,0,0,0.35)",
+                  border:      "1px solid rgba(196,149,106,0.22)",
+                  borderTop:   "3px solid #C4956A",
+                  boxShadow:   "0 -4px 24px rgba(196,149,106,0.12), 0 8px 48px rgba(0,0,0,0.55)",
                 }}
               >
                 {/* Ghost index — bottom-right, behind content */}
@@ -498,6 +521,7 @@ export default async function DashboardPage() {
                   </div>
                 </div>
               </article>
+              </div>
             ))}
           </div>
         </div>
