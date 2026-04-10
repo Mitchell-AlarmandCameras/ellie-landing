@@ -233,12 +233,44 @@ J.Crew, & Other Stories, COS, Arket, Mango, Zara (for accessible picks), Nordstr
 MEN'S BRANDS (for the one men's/neutral look):
 Mr Porter labels, Sunspel, Hestra, Incotex, Common Projects, A.P.C., COS, Uniqlo U
 
+HERO IMAGES — pick exactly 4 from this verified pool to match this week's mood.
+Each image must come from the list below — do NOT invent photo IDs.
+Select images whose mood best matches the three looks you're generating:
+
+  EXECUTIVE / POWER:
+    id: "1483985988355-763728e1935b"  — fashion models walking, sophisticated
+    id: "1469334031218-e382a71b716b"  — elegant woman, polished portrait
+    id: "1529139574466-a303027ee77f"  — tailored, confident, editorial
+    id: "1594938298603-7f787ef8b22f"  — luxury fashion, structured
+
+  WEEKEND / CASUAL:
+    id: "1490481651871-ab68de25d43d"  — effortless casual style, relaxed
+    id: "1581044777550-4cfa2d08b18a"  — weekend chic, natural light
+    id: "1512436991641-6745cdb1723f"  — easy lifestyle, relaxed polish
+
+  EDITORIAL / WILDCARD:
+    id: "1515886657613-9f3515b0c78f"  — bold editorial model pose
+    id: "1539109136881-3be0616acf4b"  — high fashion editorial
+    id: "1595777457583-95e059d581b8"  — statement look, editorial
+
+  ACCESSORIES / DETAIL:
+    id: "1558769132-cb1aea458c5e"     — jewelry and accessories flatlay
+    id: "1509631179647-0177331693ae"  — woman walking, detail shot
+
+All image URLs follow: https://images.unsplash.com/photo-{id}?auto=format&fit=crop&w=900&q=85
+
 Return ONLY valid JSON — no markdown, no extra text — matching this structure exactly:
 
 {
   "weekOf": "${today}",
   "weekNumber": ${weekNumber},
   "editorialLead": "…",
+  "heroImages": [
+    { "id": "…", "alt": "…brief editorial description…", "mood": "executive|weekend|wildcard|editorial" },
+    { "id": "…", "alt": "…", "mood": "…" },
+    { "id": "…", "alt": "…", "mood": "…" },
+    { "id": "…", "alt": "…", "mood": "…" }
+  ],
   "looks": [
     {
       "index": "01",
@@ -309,8 +341,38 @@ async function callClaude(scrapedData: string, today: string, weekNumber: number
 type LookItem = { piece: string; brand: string; price: string; note: string; buyLink: string };
 type Look     = { index: string; label: string; tagline: string; editorsNote: string; items: LookItem[] };
 
+type HeroImageDraft = { id: string; alt: string; mood?: string };
+
 function buildApprovalEmail(lookbook: Record<string, unknown>, approveUrl: string): string {
-  const looks = (lookbook.looks as Look[]) ?? [];
+  const looks       = (lookbook.looks as Look[]) ?? [];
+  const heroImages  = (lookbook.heroImages as HeroImageDraft[]) ?? [];
+
+  /* Hero image preview strip */
+  const heroHtml = heroImages.length === 4 ? `
+  <tr><td style="padding:16px 36px 0;">
+    <p style="margin:0 0 8px;font-size:10px;letter-spacing:0.24em;text-transform:uppercase;
+               color:#C4956A;font-family:Arial,sans-serif;">This Week's Hero Images</p>
+    <p style="margin:0 0 10px;font-size:11px;color:#6B6560;font-family:Arial,sans-serif;">
+      These 4 photos will auto-slide on the homepage from Monday until next Sunday's approval.
+    </p>
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        ${heroImages.map(img => `
+        <td width="25%" style="padding:2px;">
+          <img src="https://images.unsplash.com/photo-${img.id}?auto=format&fit=crop&w=200&h=260&q=70"
+               width="130" height="170"
+               style="display:block;width:100%;height:auto;object-fit:cover;"
+               alt="${img.alt}" />
+          <p style="margin:3px 0 0;font-size:9px;color:#B5A99A;font-family:Arial,sans-serif;
+                     text-transform:uppercase;letter-spacing:0.1em;">${img.mood ?? ""}</p>
+        </td>`).join("")}
+      </tr>
+    </table>
+  </td></tr>
+  <tr><td style="padding:8px 36px 0;">
+    <div style="height:1px;background:linear-gradient(90deg,transparent,#C9B99A,transparent);"></div>
+  </td></tr>` : "";
+
 
   const looksHtml = looks.map(look => `
     <tr>
@@ -360,6 +422,7 @@ function buildApprovalEmail(lookbook: Record<string, unknown>, approveUrl: strin
       ${lookbook.editorialLead ?? ""}
     </p>
   </td></tr>
+  ${heroHtml}
   <tr><td style="padding:0 36px;">
     <table width="100%" cellpadding="0" cellspacing="0">${looksHtml}</table>
   </td></tr>

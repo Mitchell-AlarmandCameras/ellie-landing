@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import WaitlistModal from "@/components/WaitlistModal";
 import ScrollReveal from "@/components/ScrollReveal";
+import HeroCarousel from "@/components/HeroCarousel";
 
 /* ─── Look preview data (teaser only — full sourcing in VIP Room) */
 const previews = [
@@ -467,36 +468,8 @@ export default function Home() {
                       aria-hidden="true"
                     />
 
-                    {/* Photo */}
-                    <Image
-                      src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=900&q=85"
-                      alt="Sophisticated women's fashion editorial — The Style Refresh"
-                      fill
-                      sizes="(min-width: 1024px) 44vw, 0px"
-                      style={{ objectFit: "cover", objectPosition: "center top", zIndex: 1 }}
-                      priority
-                    />
-
-                    {/* Caption overlay */}
-                    <div
-                      className="absolute bottom-0 left-0 right-0"
-                      style={{
-                        background: "linear-gradient(transparent, rgba(44,44,44,0.58))",
-                        padding:    "36px 18px 14px",
-                        zIndex:     2,
-                      }}
-                    >
-                      <p style={{
-                        margin:        0,
-                        color:         "rgba(253,250,245,0.7)",
-                        fontSize:      "9px",
-                        letterSpacing: "0.26em",
-                        textTransform: "uppercase",
-                        fontFamily:    "Inter, sans-serif",
-                      }}>
-                        Photo: Unsplash
-                      </p>
-                    </div>
+                    {/* Weekly hero carousel — updates every Sunday with the new drop */}
+                    <HeroCarousel />
                   </div>
                 </ScrollReveal>
               </div>

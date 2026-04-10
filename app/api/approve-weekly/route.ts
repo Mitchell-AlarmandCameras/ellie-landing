@@ -143,7 +143,6 @@ export async function GET(req: NextRequest) {
           label:       look.label,
           tagline:     look.tagline,
           description: look.description,
-          /* Teaser: piece names only — buy links stay members-only */
           teaser: ((look.items as Array<{ piece: string }>) ?? [])
             .slice(0, 4)
             .map((item) => item.piece),
@@ -157,6 +156,35 @@ export async function GET(req: NextRequest) {
       console.log("[approve-weekly] Live preview written to Vercel Blob.");
     } catch (blobErr) {
       console.error("[approve-weekly] Blob write failed (non-fatal):", blobErr);
+    }
+  }
+
+  /* ── Save hero images to Vercel Blob so homepage carousel updates ──
+     Claude picks 4 matching Unsplash images as part of the weekly brief.
+     On approval, we save them to ellie-hero/current.json.
+     The HeroCarousel component fetches /api/hero-images which reads here. */
+  type HeroImage = { id: string; alt: string; mood?: string };
+  const rawHeroImages = (lookbook.heroImages as HeroImage[]) ?? [];
+  if (process.env.BLOB_READ_WRITE_TOKEN && rawHeroImages.length === 4) {
+    try {
+      const { put } = await import("@vercel/blob");
+      const heroData = {
+        weekOf:    lookbook.weekOf,
+        updatedAt: new Date().toISOString(),
+        images: rawHeroImages.map(img => ({
+          url:  `https://images.unsplash.com/photo-${img.id}?auto=format&fit=crop&w=900&q=85`,
+          alt:  img.alt,
+          mood: img.mood ?? "editorial",
+        })),
+      };
+      await put("ellie-hero/current.json", JSON.stringify(heroData), {
+        access:          "public",
+        contentType:     "application/json",
+        addRandomSuffix: false,
+      });
+      console.log("[approve-weekly] Hero carousel images saved to Blob.");
+    } catch (blobErr) {
+      console.error("[approve-weekly] Hero image Blob save failed (non-fatal):", blobErr);
     }
   }
 
