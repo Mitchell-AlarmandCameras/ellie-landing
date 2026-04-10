@@ -761,7 +761,12 @@ export default function Home() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
               {activePreviews.map((card, i) => (
-                <ScrollReveal key={card.label} direction="up" delay={i * 80} threshold={0.1}>
+                <ScrollReveal
+                  key={card.label}
+                  direction={i === 0 ? "left" : i === 2 ? "right" : "up"}
+                  delay={i * 120}
+                  threshold={0.1}
+                >
                   <article
                     className="bg-white relative group"
                     style={{ borderTop: "2px solid var(--sand-border)" }}
