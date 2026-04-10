@@ -75,7 +75,7 @@ export const currentWeek: WeeklyLookbook = {
           brand:   "Sam Edelman",
           price:   "$130",
           note:    "The Hazel pump. Comfortable enough for a full day, polished enough for the boardroom.",
-          buyLink: "https://www.samedelman.com/search?q=hazel+pump",
+          buyLink: "https://www.samedelman.com/collections/heels",
         },
         {
           piece:   "Structured leather tote in cognac",
@@ -164,7 +164,7 @@ export const currentWeek: WeeklyLookbook = {
           brand:   "Sam Edelman",
           price:   "$90",
           note:    "The Gigi sandal. Understated, goes with everything, doesn't compete with the dress.",
-          buyLink: "https://www.samedelman.com/search?q=gigi+sandal",
+          buyLink: "https://www.samedelman.com/collections/sandals",
         },
         {
           piece:   "Delicate gold chain necklace",
