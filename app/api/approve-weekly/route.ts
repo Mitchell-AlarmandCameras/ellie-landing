@@ -665,14 +665,44 @@ export async function GET(req: NextRequest) {
     </div>
     ${linkCheckHtml}
 
-    <!-- ── Instagram Caption ───────────────────────────────────── -->
+    <!-- ── Instagram Photos ─────────────────────────────────────── -->
+    ${rawHeroImages.length > 0 ? `
     <div style="margin-top:32px;text-align:left;background:#FDFAF5;border:1px solid #DDD4C5;padding:22px 24px;">
       <p style="color:#C4956A;font-size:10px;letter-spacing:0.28em;text-transform:uppercase;
+                 font-family:Arial,sans-serif;margin:0 0 6px;">
+        📸 This Week's Photos — Tap &amp; Hold to Save
+      </p>
+      <p style="color:#6B6560;font-size:11px;font-family:Arial,sans-serif;margin:0 0 14px;line-height:1.5;">
+        Pick one of these for your Instagram post. Tap and hold on your phone → Save Image, or right-click on desktop → Save.
+      </p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        ${rawHeroImages.map((img: { id: string; alt: string }) => `
+          <a href="https://images.unsplash.com/photo-${img.id}?auto=format&fit=crop&w=1080&q=90"
+             target="_blank"
+             style="display:block;text-decoration:none;">
+            <img
+              src="https://images.unsplash.com/photo-${img.id}?auto=format&fit=crop&w=400&q=80"
+              alt="${img.alt}"
+              style="width:100%;height:180px;object-fit:cover;display:block;border:1px solid #DDD4C5;"
+            />
+            <p style="margin:4px 0 0;font-size:10px;color:#8A8580;font-family:Arial,sans-serif;">
+              Tap to open full size →
+            </p>
+          </a>`).join("")}
+      </div>
+      <p style="color:#B5A99A;font-size:10px;font-family:Arial,sans-serif;margin:12px 0 0;">
+        Photos by Unsplash · Free to use · No credit required for Instagram
+      </p>
+    </div>` : ""}
+
+    <!-- ── Instagram Caption ───────────────────────────────────── -->
+    <div style="margin-top:16px;text-align:left;background:#FDFAF5;border:1px solid #DDD4C5;padding:22px 24px;">
+      <p style="color:#C4956A;font-size:10px;letter-spacing:0.28em;text-transform:uppercase;
                  font-family:Arial,sans-serif;margin:0 0 10px;">
-        📸 Instagram Caption — Copy &amp; Paste
+        ✍️ Instagram Caption — Copy &amp; Paste
       </p>
       <p style="color:#6B6560;font-size:11px;font-family:Arial,sans-serif;margin:0 0 12px;line-height:1.5;">
-        Add a fashion photo from your camera roll, then paste this caption:
+        Save a photo above, then paste this caption:
       </p>
       <textarea
         onclick="this.select()"
