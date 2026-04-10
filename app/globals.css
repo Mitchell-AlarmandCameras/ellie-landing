@@ -30,7 +30,7 @@
 @layer base {
   html {
     scroll-behavior: smooth;
-    font-size: 17px; /* bumped from 16px — scales all rem values site-wide */
+    font-size: 18px; /* bumped from 16px — scales all rem values site-wide */
   }
 
   body {
@@ -39,7 +39,8 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-family: 'Inter', system-ui, sans-serif;
-    line-height: 1.65; /* improved readability throughout */
+    line-height: 1.7;  /* improved readability throughout */
+    font-weight: 400;
   }
 
   h1, h2, h3, h4 {
