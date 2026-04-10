@@ -206,18 +206,23 @@ REQUIREMENTS:
         Adidas Stan Smith (ONLY exception with a direct product URL):
           → https://www.adidas.com/us/stan_smith-shoes/WI6368.html
     TIER 2 — Generic items without a named brand (shoes, bags, accessories listed as "Various"):
-      Use Net-a-Porter search. Net-a-Porter ONLY carries luxury and premium brands — no cheap results.
-      Format: https://www.net-a-porter.com/en-us/shop/search?q=[item+keywords]
+      Use Nordstrom search. Nordstrom is a confirmed-working luxury department store with verified URLs.
+      Format: https://www.nordstrom.com/sr?origin=keywordsearch&keyword=[item+keywords]
       Examples:
-        Black block heel pump     → https://www.net-a-porter.com/en-us/shop/search?q=black+block+heel+pump
-        Strappy flat sandal tan   → https://www.net-a-porter.com/en-us/shop/search?q=strappy+flat+sandal+tan
-        Mini crossbody black      → https://www.net-a-porter.com/en-us/shop/search?q=mini+crossbody+bag+black
-        Leather tote cognac       → https://www.net-a-porter.com/en-us/shop/search?q=leather+tote+cognac
-        Gold chain necklace       → https://www.net-a-porter.com/en-us/shop/search?q=delicate+gold+chain+necklace
-    NEVER use Google Shopping — it mixes luxury and cheap products, which undermines the editorial quality.
+        Black block heel pump     → https://www.nordstrom.com/sr?origin=keywordsearch&keyword=black+block+heel+pointed+pump+women
+        Strappy flat sandal tan   → https://www.nordstrom.com/sr?origin=keywordsearch&keyword=strappy+flat+sandal+tan+women
+        Mini crossbody black      → https://www.nordstrom.com/sr?origin=keywordsearch&keyword=mini+crossbody+bag+black+women
+        Leather tote cognac       → https://www.nordstrom.com/sr?origin=keywordsearch&keyword=leather+tote+cognac+women
+        Linen wide-leg pants      → https://www.nordstrom.com/sr?origin=keywordsearch&keyword=linen+wide+leg+pants+ecru+women
+        Bias-cut slip dress       → https://www.nordstrom.com/sr?origin=keywordsearch&keyword=bias+cut+slip+dress+champagne+women
+        Cropped denim jacket      → https://www.nordstrom.com/sr?origin=keywordsearch&keyword=cropped+denim+jacket+women
+        Ivory blazer              → https://www.nordstrom.com/sr?origin=keywordsearch&keyword=ivory+structured+blazer+women
+        Silk camisole cream       → https://www.nordstrom.com/sr?origin=keywordsearch&keyword=silk+camisole+cream+women
+    NEVER use Net-a-Porter — their search URLs return error pages when constructed externally.
+    NEVER use Google Shopping — it mixes luxury and cheap products.
     NEVER use a product detail URL — they expire when items sell out.
     NEVER use a brand homepage or collection page.
-    AVOID broken brand sites: Sézane, Madewell, J.Crew, ASOS, Zara, Sam Edelman.
+    AVOID broken brand sites: Sézane, Madewell, J.Crew, ASOS, Zara, Sam Edelman, Net-a-Porter.
 
 WOMEN'S BRANDS TO DRAW FROM (use your knowledge, don't limit to this list):
 Net-a-Porter, Totême, A.P.C., Reformation, Sézane, Theory, Frame, Veronica Beard,
