@@ -79,9 +79,9 @@ export default async function DashboardPage() {
       >
         <div className="max-w-6xl mx-auto px-5 sm:px-8 py-4 flex items-center justify-between gap-4">
 
-          {/* Brand */}
+          {/* Brand — clicking takes you home */}
           <div className="flex items-center gap-3">
-            <div className="flex flex-col leading-none">
+            <Link href="/" className="flex flex-col leading-none" style={{ textDecoration: "none" }}>
               <span
                 style={{
                   fontFamily:    "DM Serif Display, serif",
@@ -105,7 +105,7 @@ export default async function DashboardPage() {
               >
                 The Style Refresh
               </span>
-            </div>
+            </Link>
 
             <div
               className="hidden sm:flex items-center px-2.5 py-1"
@@ -140,13 +140,6 @@ export default async function DashboardPage() {
             >
               Manage Billing
             </a>
-            <Link
-              href="/"
-              className="text-xs uppercase tracking-widest transition-colors hidden sm:block"
-              style={{ fontSize: "0.78rem", fontFamily: "Inter, sans-serif", letterSpacing: "0.15em", color: "var(--warm-gray)" }}
-            >
-              ← Site
-            </Link>
             <Link
               href="/bag"
               className="text-xs uppercase tracking-widest transition-colors"
