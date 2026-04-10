@@ -368,28 +368,20 @@ export default async function DashboardPage() {
                               target="_blank"
                               rel="noopener noreferrer"
                               aria-label={`Shop ${item.piece} at ${item.brand}`}
+                              className="vip-shop-btn"
                               style={{
-                                display:       "inline-flex",
-                                alignItems:    "center",
-                                padding:       "0.35rem 0.85rem",
-                                fontFamily:    "Inter, sans-serif",
-                                fontSize:      "0.68rem",
-                                letterSpacing: "0.16em",
-                                textTransform: "uppercase",
-                                color:         "#C4956A",
-                                border:        "1px solid rgba(196,149,106,0.45)",
-                                background:    "transparent",
+                                display:        "inline-flex",
+                                alignItems:     "center",
+                                padding:        "0.35rem 0.85rem",
+                                fontFamily:     "Inter, sans-serif",
+                                fontSize:       "0.68rem",
+                                letterSpacing:  "0.16em",
+                                textTransform:  "uppercase",
+                                color:          "#C4956A",
+                                border:         "1px solid rgba(196,149,106,0.45)",
+                                background:     "transparent",
                                 textDecoration: "none",
-                                whiteSpace:    "nowrap",
-                                transition:    "all 0.2s ease",
-                              }}
-                              onMouseEnter={e => {
-                                (e.currentTarget as HTMLAnchorElement).style.background = "rgba(196,149,106,0.12)";
-                                (e.currentTarget as HTMLAnchorElement).style.borderColor = "#C4956A";
-                              }}
-                              onMouseLeave={e => {
-                                (e.currentTarget as HTMLAnchorElement).style.background = "transparent";
-                                (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(196,149,106,0.45)";
+                                whiteSpace:     "nowrap",
                               }}
                             >
                               Shop →
