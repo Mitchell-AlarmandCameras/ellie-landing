@@ -17,11 +17,11 @@
   --sand-border:    #DDD4C5;
   --charcoal:       #2C2C2C;
   --charcoal-light: #4A4A4A;
-  --charcoal-muted: #6B6560;
+  --charcoal-muted: #524E4A; /* darkened from #6B6560 — better contrast on cream */
   --blush:          #C4956A;
   --blush-light:    #D4AB88;
-  --warm-gray:      #8A8580;
-  --taupe:          #B5A99A;
+  --warm-gray:      #6B6560; /* darkened from #8A8580 — more readable */
+  --taupe:          #8A8580; /* darkened from #B5A99A — better on light backgrounds */
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -30,6 +30,7 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    font-size: 17px; /* bumped from 16px — scales all rem values site-wide */
   }
 
   body {
@@ -38,6 +39,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-family: 'Inter', system-ui, sans-serif;
+    line-height: 1.65; /* improved readability throughout */
   }
 
   h1, h2, h3, h4 {
