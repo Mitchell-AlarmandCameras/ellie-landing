@@ -176,40 +176,48 @@ REQUIREMENTS:
 • Prices: mix $80–$500 (accessible) and $500–$2,500 (aspirational)
 • editorialLead: one sentence setting the week's mood/season
 • editorsNote per look: one insider observation — specific, not generic
-• buyLink: ALWAYS use Google Shopping with a hyper-specific search query.
-    This is the ONLY reliable method. Google Shopping shows photos of real products, real prices from
-    multiple retailers, and the first result will be the exact item if the query is specific enough.
-    Format: https://www.google.com/search?q=[Brand+Item+Name+Color+Gender]&tbm=shop
-    Rules:
-      1. Include the BRAND NAME in the query — this is what makes the first result match the exact item
-      2. Include the EXACT COLOR mentioned in your piece description (ivory, champagne, cognac, etc.)
-      3. Include "women" or "men" to filter results
-      4. Be as specific as possible — more words = better first result
-      5. URL-encode spaces as + (not %20)
-      6. NEVER use a brand's own website — brand sites frequently block links, change URLs, or go 404
-      7. NEVER use a product detail URL — they expire when items sell out
-      8. NEVER use collection or category pages — they show unrelated items
-    Examples (copy this EXACT format):
-      Totême ivory blazer       → https://www.google.com/search?q=Toteme+ivory+structured+blazer+women&tbm=shop
-      Theory black trousers     → https://www.google.com/search?q=Theory+admiral+crepe+wide+leg+trouser+black+women&tbm=shop
-      Vince cream camisole      → https://www.google.com/search?q=Vince+silk+camisole+cream+women&tbm=shop
-      Reformation linen pant    → https://www.google.com/search?q=Reformation+Cleo+linen+wide+leg+pant+ecru+women&tbm=shop
-      Everlane white tee        → https://www.google.com/search?q=Everlane+fitted+crew+tee+white+women&tbm=shop
-      Mejuri gold hoops         → https://www.google.com/search?q=Mejuri+Demi+Fine+Bold+Hoops+gold+medium&tbm=shop
-      Mejuri chain necklace     → https://www.google.com/search?q=Mejuri+fine+gold+chain+necklace+women&tbm=shop
-      Tory Burch cognac tote    → https://www.google.com/search?q=Tory+Burch+Lee+Radziwill+Double+Bag+cognac&tbm=shop
-      Anthropologie slip dress  → https://www.google.com/search?q=Anthropologie+bias+cut+slip+dress+champagne+women&tbm=shop
-      Frame wide-leg jeans      → https://www.google.com/search?q=Frame+wide+leg+jeans+women+off+white&tbm=shop
-      Ganni floral dress        → https://www.google.com/search?q=Ganni+floral+midi+dress+women&tbm=shop
-      Jacquemus mini bag        → https://www.google.com/search?q=Jacquemus+Le+Chiquito+mini+bag+women&tbm=shop
-      COS linen blazer          → https://www.google.com/search?q=COS+relaxed+linen+blazer+women&tbm=shop
-      Common Projects sneaker   → https://www.google.com/search?q=Common+Projects+Achilles+Low+white+men&tbm=shop
-      black block heel pump     → https://www.google.com/search?q=black+block+heel+pointed+pump+women&tbm=shop
-      strappy flat sandal tan   → https://www.google.com/search?q=strappy+flat+sandal+tan+leather+women&tbm=shop
-      mini crossbody black      → https://www.google.com/search?q=mini+crossbody+bag+black+leather+women&tbm=shop
-    AVOID these brands' own websites — use Google Shopping instead: any brand site that is not google.com
-    The only exception: Adidas Stan Smith has a permanent product page that works:
-      Adidas Stan Smith white   → https://www.adidas.com/us/stan_smith-shoes/WI6368.html
+• buyLink: Use a TWO-TIER strategy — brand sites for named brands, Net-a-Porter for generic items.
+    TIER 1 — Named luxury/premium brand items: Use the brand's own SEARCH page.
+      These brands have small, curated catalogs so their search returns only 3–15 results, all high quality.
+      Format: https://[brand-domain]/search?q=[specific+item+keywords]
+      Examples:
+        Totême ivory blazer       → https://toteme-studio.com/search?type=product&q=ivory+blazer
+        Totême trench coat        → https://toteme-studio.com/search?type=product&q=trench+coat
+        Theory wide-leg trouser   → https://www.theory.com/search?q=wide+leg+trouser+black
+        Theory blazer             → https://www.theory.com/search?q=structured+blazer
+        Vince silk camisole       → https://www.vince.com/search?q=silk+camisole+cream
+        Vince trousers            → https://www.vince.com/search?q=wide+leg+trouser
+        Tory Burch tote           → https://www.toryburch.com/en-us/search?q=Lee+Radziwill+tote
+        Reformation linen pant    → https://www.thereformation.com/search?q=cleo+linen+pant
+        Reformation dress         → https://www.thereformation.com/search?q=midi+dress
+        Everlane white tee        → https://www.everlane.com/search?q=fitted+crew+tee+white
+        Everlane denim jacket     → https://www.everlane.com/search?q=cropped+denim+jacket
+        Mejuri gold hoops         → https://mejuri.com/search?q=bold+hoops+gold
+        Mejuri chain necklace     → https://mejuri.com/search?q=fine+gold+chain+necklace
+        Mejuri rings              → https://mejuri.com/search?q=gold+ring
+        Anthropologie slip dress  → https://www.anthropologie.com/search?q=bias+cut+slip+dress+champagne
+        Ganni floral dress        → https://www.ganni.com/en-us/search?q=floral+midi+dress
+        Frame wide-leg jeans      → https://www.frame-store.com/search?q=le+crop+flare+jeans
+        A.P.C. blazer             → https://www.apc.fr/us/search/?q=structured+blazer
+        Jacquemus bag             → https://www.jacquemus.com/search?q=mini+bag
+        COS linen blazer          → https://www.cos.com/en_usd/search.html?q=linen+blazer
+        Staud dress               → https://www.staud.clothing/search?q=midi+dress
+        Veronica Beard blazer     → https://veronicabeard.com/search?q=blazer
+        Adidas Stan Smith (ONLY exception with a direct product URL):
+          → https://www.adidas.com/us/stan_smith-shoes/WI6368.html
+    TIER 2 — Generic items without a named brand (shoes, bags, accessories listed as "Various"):
+      Use Net-a-Porter search. Net-a-Porter ONLY carries luxury and premium brands — no cheap results.
+      Format: https://www.net-a-porter.com/en-us/shop/search?q=[item+keywords]
+      Examples:
+        Black block heel pump     → https://www.net-a-porter.com/en-us/shop/search?q=black+block+heel+pump
+        Strappy flat sandal tan   → https://www.net-a-porter.com/en-us/shop/search?q=strappy+flat+sandal+tan
+        Mini crossbody black      → https://www.net-a-porter.com/en-us/shop/search?q=mini+crossbody+bag+black
+        Leather tote cognac       → https://www.net-a-porter.com/en-us/shop/search?q=leather+tote+cognac
+        Gold chain necklace       → https://www.net-a-porter.com/en-us/shop/search?q=delicate+gold+chain+necklace
+    NEVER use Google Shopping — it mixes luxury and cheap products, which undermines the editorial quality.
+    NEVER use a product detail URL — they expire when items sell out.
+    NEVER use a brand homepage or collection page.
+    AVOID broken brand sites: Sézane, Madewell, J.Crew, ASOS, Zara, Sam Edelman.
 
 WOMEN'S BRANDS TO DRAW FROM (use your knowledge, don't limit to this list):
 Net-a-Porter, Totême, A.P.C., Reformation, Sézane, Theory, Frame, Veronica Beard,
