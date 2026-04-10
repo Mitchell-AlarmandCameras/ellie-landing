@@ -20,24 +20,24 @@ export interface HeroImage {
 /* ── Verified fallback pool — used when Blob has no weekly images ── */
 const FALLBACK_IMAGES: HeroImage[] = [
   {
-    url:  "https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=900&q=85",
-    alt:  "Elegant fashion editorial — The Style Refresh",
-    mood: "editorial",
-  },
-  {
-    url:  "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=900&q=85",
-    alt:  "Sophisticated women's fashion — The Executive",
+    url:  "https://images.unsplash.com/photo-1594938298603-7f787ef8b22f?auto=format&fit=crop&w=900&q=85",
+    alt:  "Luxe tailored fashion editorial — The Style Refresh",
     mood: "executive",
   },
   {
-    url:  "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=900&q=85",
-    alt:  "Effortless weekend style — The Weekender",
+    url:  "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=900&q=85",
+    alt:  "Elevated street style editorial",
+    mood: "editorial",
+  },
+  {
+    url:  "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=900&q=85",
+    alt:  "Polished women's fashion — The Weekender",
     mood: "weekend",
   },
   {
-    url:  "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=900&q=85",
-    alt:  "Bold editorial fashion — The Wildcard",
-    mood: "wildcard",
+    url:  "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&w=900&q=85",
+    alt:  "Luxury accessories and fine jewelry detail",
+    mood: "accessories",
   },
 ];
 
