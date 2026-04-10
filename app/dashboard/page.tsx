@@ -15,23 +15,33 @@ export const metadata: Metadata = {
 /* Always server-render so the latest approved brief is always shown */
 export const dynamic = "force-dynamic";
 
-/* ── Fetch current hero image for VIP Room background ─────────────
-   Uses the same weekly image approved on Sunday. Falls back to a
-   curated editorial photo if no Blob data exists yet. */
-async function getHeroBgImage(): Promise<string> {
-  const FALLBACK = "https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=1600&q=80";
+/* ── Fetch all 4 weekly hero images for VIP Room ──────────────────
+   [0] = welcome header background
+   [1] = The Executive card
+   [2] = The Weekender card
+   [3] = The Wildcard card
+   Falls back to 4 curated Unsplash photos if no Blob data. */
+const HERO_FALLBACKS = [
+  "https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=800&q=80",
+  "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=800&q=80",
+  "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80",
+];
+
+async function getHeroImages(): Promise<string[]> {
   try {
-    if (!process.env.BLOB_READ_WRITE_TOKEN) return FALLBACK;
+    if (!process.env.BLOB_READ_WRITE_TOKEN) return HERO_FALLBACKS;
     const { list } = await import("@vercel/blob");
     const { blobs } = await list({ prefix: "ellie-hero/" });
     const current = blobs.find(b => b.pathname === "ellie-hero/current.json");
-    if (!current) return FALLBACK;
+    if (!current) return HERO_FALLBACKS;
     const res = await fetch(current.url, { cache: "no-store" });
-    if (!res.ok) return FALLBACK;
+    if (!res.ok) return HERO_FALLBACKS;
     const data = await res.json() as { images?: Array<{ url: string }> };
-    return data?.images?.[0]?.url ?? FALLBACK;
+    if (data?.images?.length === 4) return data.images.map(img => img.url);
+    return HERO_FALLBACKS;
   } catch {
-    return FALLBACK;
+    return HERO_FALLBACKS;
   }
 }
 
@@ -81,9 +91,9 @@ export default async function DashboardPage() {
 
   if (!hasAccess) redirect("/login");
 
-  const week       = await getLiveWeek();
-  const heroBg     = await getHeroBgImage();
-  const hasArchive = archiveWeeks.length > 0;
+  const week        = await getLiveWeek();
+  const heroImages  = await getHeroImages();
+  const hasArchive  = archiveWeeks.length > 0;
 
   return (
     <div className="min-h-screen vip-bg">
@@ -191,7 +201,7 @@ export default async function DashboardPage() {
           className="absolute inset-0 pointer-events-none"
           aria-hidden="true"
           style={{
-            backgroundImage:    `url(${heroBg})`,
+            backgroundImage:    `url(${heroImages[0]})`,
             backgroundSize:     "cover",
             backgroundPosition: "center 25%",
             opacity:            0.32,
@@ -313,20 +323,22 @@ export default async function DashboardPage() {
 
           {/* Look cards */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-8">
-            {week.looks.map((look, cardIdx) => (
+            {week.looks.map((look, cardIdx) => {
+              const cardImg = heroImages[cardIdx + 1] ?? heroImages[0];
+              return (
               <div key={look.label}>
                 {/* Mobile-only numbered divider between cards */}
                 {cardIdx > 0 && (
                   <div className="flex items-center gap-4 mb-10 lg:hidden" aria-hidden="true">
-                    <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, transparent, rgba(196,149,106,0.3))" }} />
-                    <span style={{ fontFamily: "DM Serif Display, serif", color: "rgba(196,149,106,0.5)", fontSize: "0.9rem", letterSpacing: "0.2em" }}>
+                    <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, transparent, rgba(196,149,106,0.4))" }} />
+                    <span style={{ fontFamily: "DM Serif Display, serif", color: "#C4956A", fontSize: "1rem", letterSpacing: "0.2em" }}>
                       {look.index}
                     </span>
-                    <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, rgba(196,149,106,0.3), transparent)" }} />
+                    <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg, rgba(196,149,106,0.4), transparent)" }} />
                   </div>
                 )}
               <article
-                className="relative flex flex-col"
+                className="relative flex flex-col overflow-hidden"
                 style={{
                   background:  "#252018",
                   border:      "1px solid rgba(196,149,106,0.22)",
@@ -334,13 +346,32 @@ export default async function DashboardPage() {
                   boxShadow:   "0 -4px 24px rgba(196,149,106,0.12), 0 8px 48px rgba(0,0,0,0.55)",
                 }}
               >
+                {/* Editorial photo background — matches the look's mood */}
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  aria-hidden="true"
+                  style={{
+                    backgroundImage:    `url(${cardImg})`,
+                    backgroundSize:     "cover",
+                    backgroundPosition: "center top",
+                    opacity:            0.13,
+                  }}
+                />
+                {/* Dark overlay so text stays readable */}
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  aria-hidden="true"
+                  style={{
+                    background: "linear-gradient(180deg, rgba(37,32,24,0.55) 0%, rgba(37,32,24,0.92) 55%, #252018 100%)",
+                  }}
+                />
                 {/* Ghost index — bottom-right, behind content */}
                 <span
                   className="absolute bottom-4 right-5 select-none font-bold leading-none pointer-events-none"
                   style={{
                     fontFamily: "DM Serif Display, serif",
                     fontSize:   "3.5rem",
-                    color:      "rgba(196,149,106,0.12)",
+                    color:      "rgba(196,149,106,0.28)",
                     lineHeight: "1",
                     zIndex:     0,
                   }}
@@ -522,7 +553,8 @@ export default async function DashboardPage() {
                 </div>
               </article>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
