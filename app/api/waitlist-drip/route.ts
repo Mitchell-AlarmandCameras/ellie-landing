@@ -403,16 +403,24 @@ export async function GET(req: NextRequest) {
       You've been a member for four weeks now — and I wanted to personally thank you.
     </p>
     <p style="margin:0 0 16px;font-size:15px;color:#2C2C2C;font-family:Georgia,serif;line-height:1.75;">
-      I have a small favor to ask. Would you be willing to share a sentence or two about 
-      your experience? Honest — good or bad — I genuinely want to know.
+      I have one small favor to ask. Would you take two minutes to share your honest experience?
+      Good or bad — I genuinely want to know.
     </p>
-    <p style="margin:0 0 16px;font-size:14px;color:#6B6560;font-family:Georgia,serif;line-height:1.7;font-style:italic;">
-      Something like: <em>"What I like most about the Monday brief is..."</em> or 
-      <em>"I joined because..."</em> — whatever feels natural.
+    <p style="margin:0 0 28px;font-size:15px;color:#2C2C2C;font-family:Georgia,serif;line-height:1.75;">
+      I've made it as easy as possible — just click the button below.
     </p>
-    <p style="margin:0 0 22px;font-size:15px;color:#2C2C2C;font-family:Georgia,serif;line-height:1.75;">
-      If you're comfortable, I may feature your words on the site — first name only, 
-      no last name, no personal details. Just reply to this email and I'll handle the rest.
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+      <tr><td align="center">
+        <a href="${baseUrl}/review"
+           style="display:inline-block;background:#C4956A;color:#FDFAF5;padding:14px 36px;
+                  font-family:Arial,sans-serif;font-size:11px;letter-spacing:0.22em;
+                  text-transform:uppercase;text-decoration:none;">
+          Share Your Thoughts →
+        </a>
+      </td></tr>
+    </table>
+    <p style="margin:0 0 8px;font-size:14px;color:#6B6560;font-family:Georgia,serif;line-height:1.7;font-style:italic;">
+      It takes two minutes. Your words go directly to me — nothing is published without your permission and my personal sign-off.
     </p>
     <p style="margin:0 0 8px;font-size:15px;color:#2C2C2C;font-family:Georgia,serif;">
       Thank you, truly.
@@ -427,7 +435,7 @@ export async function GET(req: NextRequest) {
   <tr><td style="padding:16px 36px 22px;text-align:center;">
     <p style="margin:0;font-size:10px;color:#B5A99A;font-family:Arial,sans-serif;line-height:1.6;">
       ${mailingAddress}<br/>
-      Reply directly to this email with your thoughts.
+      Your response goes only to Ellie — never published automatically.
     </p>
   </td></tr>
 </table>
