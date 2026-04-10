@@ -338,33 +338,51 @@ export default async function DashboardPage() {
                   </div>
                 )}
               <article
-                className="relative flex flex-col overflow-hidden"
+                className="relative flex flex-col"
                 style={{
-                  background:  "#252018",
-                  border:      "1px solid rgba(196,149,106,0.22)",
-                  borderTop:   "3px solid #C4956A",
-                  boxShadow:   "0 -4px 24px rgba(196,149,106,0.12), 0 8px 48px rgba(0,0,0,0.55)",
+                  background: "#252018",
+                  border:     "1px solid rgba(196,149,106,0.22)",
+                  boxShadow:  "0 -3px 20px rgba(196,149,106,0.1), 0 8px 48px rgba(0,0,0,0.55)",
+                  overflow:   "hidden",
                 }}
               >
-                {/* Editorial photo background — matches the look's mood */}
+                {/* Gold top accent line */}
+                <div style={{ height: "3px", background: "linear-gradient(90deg, #C4956A, rgba(196,149,106,0.4))", flexShrink: 0 }} />
+
+                {/* Editorial photo — contained at top, full bleed, not behind text */}
                 <div
-                  className="absolute inset-0 pointer-events-none"
-                  aria-hidden="true"
-                  style={{
-                    backgroundImage:    `url(${cardImg})`,
-                    backgroundSize:     "cover",
-                    backgroundPosition: "center top",
-                    opacity:            0.38,
-                  }}
-                />
-                {/* Dark overlay — lighter at top so photo shows, dark at bottom for text readability */}
-                <div
-                  className="absolute inset-0 pointer-events-none"
-                  aria-hidden="true"
-                  style={{
-                    background: "linear-gradient(180deg, rgba(37,32,24,0.25) 0%, rgba(37,32,24,0.65) 40%, rgba(37,32,24,0.94) 75%, #252018 100%)",
-                  }}
-                />
+                  className="relative overflow-hidden"
+                  style={{ height: "180px", flexShrink: 0 }}
+                >
+                  <div
+                    style={{
+                      position:           "absolute",
+                      inset:              0,
+                      backgroundImage:    `url(${cardImg})`,
+                      backgroundSize:     "cover",
+                      backgroundPosition: "center 20%",
+                    }}
+                  />
+                  {/* Subtle bottom fade into card body */}
+                  <div
+                    className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none"
+                    style={{ background: "linear-gradient(transparent, #252018)" }}
+                    aria-hidden="true"
+                  />
+                  {/* Look label floating over image bottom-left */}
+                  <div className="absolute bottom-3 left-5 z-10">
+                    <span style={{
+                      fontFamily:    "Inter, sans-serif",
+                      color:         "#C4956A",
+                      fontSize:      "0.66rem",
+                      letterSpacing: "0.3em",
+                      textTransform: "uppercase",
+                      fontWeight:    600,
+                    }}>
+                      {look.label}
+                    </span>
+                  </div>
+                </div>
                 {/* Ghost index — bottom-right, behind content */}
                 <span
                   className="absolute bottom-4 right-5 select-none font-bold leading-none pointer-events-none"
@@ -380,23 +398,7 @@ export default async function DashboardPage() {
                   {look.index}
                 </span>
 
-                <div className="p-7 sm:p-8 flex flex-col flex-1" style={{ position: "relative", zIndex: 1 }}>
-
-                  {/* Label */}
-                  <span
-                    style={{
-                      fontFamily:    "Inter, sans-serif",
-                      color:         "#C4956A",
-                      fontSize:      "0.7rem",
-                      letterSpacing: "0.28em",
-                      textTransform: "uppercase",
-                      fontWeight:    500,
-                      display:       "block",
-                      marginBottom:  "8px",
-                    }}
-                  >
-                    {look.label}
-                  </span>
+                <div className="p-7 sm:p-8 flex flex-col flex-1">
 
                   <h3
                     className="font-bold mb-4"
