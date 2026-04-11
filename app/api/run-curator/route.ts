@@ -931,6 +931,77 @@ function buildApprovalEmail(
 </body></html>`;
 }
 
+/* ─── Monthly SEO article keywords (one per month, rotates annually) ── */
+const SEO_KEYWORDS: Record<number, string> = {
+  0:  "how to build a winter capsule wardrobe",
+  1:  "how to dress for your body type",
+  2:  "spring fashion trends for women",
+  3:  "how to build a capsule wardrobe",
+  4:  "quiet luxury fashion brands",
+  5:  "summer outfit ideas for women",
+  6:  "minimalist style guide for women",
+  7:  "back to work outfits for women",
+  8:  "fall fashion trends for women",
+  9:  "smart casual outfits for women",
+  10: "winter wardrobe essentials women",
+  11: "holiday party outfit ideas women",
+};
+
+function isFirstSundayOfMonth(): boolean {
+  const d = new Date(new Date().toLocaleString("en-US", { timeZone: "America/New_York" }));
+  return d.getDay() === 0 && d.getDate() <= 7;
+}
+
+async function generateSEOArticle(keyword: string): Promise<Record<string, unknown> | null> {
+  const apiKey = process.env.ANTHROPIC_API_KEY?.trim();
+  if (!apiKey) return null;
+
+  const prompt = `Write a 650-750 word SEO article for stylebyellie.com targeting the keyword: "${keyword}"
+
+stylebyellie.com is a $19/month subscription where members receive 3 expertly curated fashion looks every Monday morning with direct buy links — like having a personal stylist in their inbox.
+
+Requirements:
+- H1 title that naturally contains the keyword
+- 3 body sections with H2 subheadings — each genuinely useful, not filler
+- A 2-question FAQ section at the end (question + answer format)
+- A closing paragraph that naturally mentions The Style Refresh as the easiest way to implement what the article taught — with a CTA to join
+- Tone: warm, editorial, authoritative — NOT corporate, NOT listicle spam
+- Return clean HTML for the article body only (no <html> or <body> wrappers)
+
+Return ONLY valid JSON:
+{
+  "title": "the H1 title",
+  "metaDescription": "155-character meta description with keyword",
+  "keyword": "${keyword}",
+  "htmlContent": "<h1>...</h1><p>...</p>...",
+  "wordCount": 700
+}`;
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method:  "POST",
+      headers: {
+        "x-api-key":         apiKey,
+        "anthropic-version": "2023-06-01",
+        "content-type":      "application/json",
+      },
+      body: JSON.stringify({
+        model:      "claude-opus-4-5",
+        max_tokens: 2500,
+        messages:   [{ role: "user", content: prompt }],
+      }),
+    });
+    if (!res.ok) throw new Error(`Claude API error ${res.status}`);
+    const json = await res.json() as { content: Array<{ text: string }> };
+    let raw = (json.content[0]?.text ?? "").trim();
+    if (raw.startsWith("```")) raw = raw.split("\n").slice(1).join("\n").replace(/`{3}\s*$/, "").trim();
+    return JSON.parse(raw) as Record<string, unknown>;
+  } catch (err) {
+    console.error("[curator] SEO article generation failed:", err);
+    return null;
+  }
+}
+
 /* ─── GET handler ───────────────────────────────────────────────── */
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get("authorization") ?? "";
@@ -1019,6 +1090,52 @@ export async function GET(req: NextRequest) {
       console.error("[curator] Resend env not configured — no approval email sent.");
     }
 
+    /* 7 — Monthly SEO article (first Sunday of each month only) */
+    let seoArticleSlug: string | null = null;
+    if (isFirstSundayOfMonth() && process.env.BLOB_READ_WRITE_TOKEN) {
+      try {
+        const month   = new Date().getMonth();
+        const keyword = SEO_KEYWORDS[month] ?? "women's fashion style guide";
+        console.log(`[curator] First Sunday of month — generating SEO article for: "${keyword}"`);
+        const article = await generateSEOArticle(keyword);
+
+        if (article) {
+          const { put, list } = await import("@vercel/blob");
+          const slug = `seo-${String(article.keyword ?? keyword).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`;
+          seoArticleSlug = slug;
+
+          await put(`blog/posts/${slug}.json`, JSON.stringify({
+            slug,
+            title:           article.title,
+            keyword:         article.keyword,
+            metaDescription: article.metaDescription,
+            htmlContent:     article.htmlContent,
+            wordCount:       article.wordCount,
+            publishedAt:     new Date().toISOString(),
+            type:            "seo-article",
+          }), { access: "public", contentType: "application/json", addRandomSuffix: false });
+
+          /* Add to blog index */
+          const { blobs: indexBlobs } = await list({ prefix: "blog/index" });
+          let index: Array<{ slug: string; weekOf?: string; publishedAt: string; editorialLead?: string; title?: string; lookLabels?: string[] }> = [];
+          if (indexBlobs[0]) {
+            try {
+              const r = await fetch(indexBlobs[0].url);
+              if (r.ok) index = await r.json();
+            } catch { /* start fresh */ }
+          }
+          const entry = { slug, publishedAt: new Date().toISOString(), title: String(article.title ?? ""), type: "seo-article" };
+          const existingIdx = index.findIndex(p => p.slug === slug);
+          if (existingIdx >= 0) index[existingIdx] = { ...index[existingIdx], ...entry }; else index.unshift(entry);
+          await put("blog/index.json", JSON.stringify(index), { access: "public", contentType: "application/json", addRandomSuffix: false });
+
+          console.log(`[curator] SEO article published: /blog/${slug} (${article.wordCount ?? "~700"} words)`);
+        }
+      } catch (seoErr) {
+        console.error("[curator] SEO article save failed (non-fatal):", seoErr);
+      }
+    }
+
     return NextResponse.json({
       success:          true,
       weekOf:           finalLookbook.weekOf,
@@ -1027,6 +1144,7 @@ export async function GET(req: NextRequest) {
       linksValidated:   linkResults.length,
       linksOriginalOK:  step1Count,
       linksCascaded:    repairedCount,
+      seoArticle:       seoArticleSlug ?? "not this week",
     });
   } catch (err) {
     console.error("[curator] Fatal error:", err);

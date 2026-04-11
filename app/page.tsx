@@ -975,6 +975,29 @@ export default function Home() {
           <div className="relative z-10 max-w-xl mx-auto text-center">
             <ScrollReveal direction="up" threshold={0.15}>
 
+              {/* Social proof counter */}
+              <div
+                className="inline-flex items-center gap-2 mb-6 px-4 py-2"
+                style={{
+                  background: "rgba(196,149,106,0.12)",
+                  border: "1px solid rgba(196,149,106,0.3)",
+                }}
+              >
+                <span style={{
+                  display: "inline-block", width: "6px", height: "6px",
+                  borderRadius: "50%", background: "#C4956A",
+                  boxShadow: "0 0 6px rgba(196,149,106,0.8)",
+                  animation: "pulse 2s infinite",
+                }} />
+                <span style={{
+                  fontFamily: "Arial, sans-serif", fontSize: "11px",
+                  letterSpacing: "0.2em", textTransform: "uppercase",
+                  color: "rgba(196,149,106,0.9)",
+                }}>
+                  Members joining this week
+                </span>
+              </div>
+
               <span className="section-label block mb-5" style={{ color: "var(--blush-light)" }}>
                 The Membership
               </span>

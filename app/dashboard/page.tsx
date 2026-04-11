@@ -742,19 +742,45 @@ export default async function DashboardPage() {
       </section>
 
       {/* ── Refer a Friend ───────────────────────────────────────── */}
-      <section className="py-12 px-5 sm:px-8" style={{ background: "#1A1714", borderTop: "1px solid rgba(196,149,106,0.1)" }}>
+      <section className="py-14 px-5 sm:px-8" style={{ background: "#1A1714", borderTop: "1px solid rgba(196,149,106,0.15)" }}>
         <div className="max-w-2xl mx-auto">
           <p style={{ margin: "0 0 5px", fontSize: "0.68rem", letterSpacing: "0.32em", textTransform: "uppercase", color: "#C4956A", fontFamily: "Inter, sans-serif" }}>
-            Refer a Friend
+            Referral Program
           </p>
-          <h2 style={{ margin: "0 0 10px", fontFamily: "DM Serif Display, serif", fontSize: "1.5rem", color: "#FDFAF5", fontWeight: 400 }}>
-            Give 50% off. Keep good company.
+          <h2 style={{ margin: "0 0 10px", fontFamily: "DM Serif Display, serif", fontSize: "1.6rem", color: "#FDFAF5", fontWeight: 400 }}>
+            Give 50% off. Get a free month.
           </h2>
-          <p style={{ margin: "0 0 22px", fontSize: "1rem", color: "rgba(253,250,245,0.5)", fontFamily: "Cormorant Garamond, serif", lineHeight: 1.8 }}>
-            Share your unique link with a friend. They get 50% off their first month —
-            and you get the satisfaction of sending someone something genuinely useful.
-            No limit on referrals.
+          <p style={{ margin: "0 0 24px", fontSize: "1rem", color: "rgba(253,250,245,0.55)", fontFamily: "Cormorant Garamond, serif", lineHeight: 1.85 }}>
+            Share your unique link. Your friend gets 50% off their first month —
+            and you get one full month free when they subscribe. No limit on referrals.
+            Three referrals = three months free.
           </p>
+
+          {/* How it works */}
+          <div style={{
+            display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px",
+            marginBottom: "28px",
+          }}>
+            {[
+              { step: "01", text: "Copy your unique link below" },
+              { step: "02", text: "Friend subscribes through your link" },
+              { step: "03", text: "You get one month free automatically" },
+            ].map(({ step, text }) => (
+              <div key={step} style={{
+                background: "rgba(196,149,106,0.07)",
+                border: "1px solid rgba(196,149,106,0.2)",
+                padding: "16px",
+              }}>
+                <p style={{ margin: "0 0 6px", color: "#C4956A", fontSize: "10px", letterSpacing: "0.28em", fontFamily: "Inter, sans-serif" }}>
+                  {step}
+                </p>
+                <p style={{ margin: 0, color: "rgba(253,250,245,0.7)", fontSize: "12px", lineHeight: 1.6, fontFamily: "Inter, sans-serif" }}>
+                  {text}
+                </p>
+              </div>
+            ))}
+          </div>
+
           {customerId ? (
             <ReferralButton customerId={customerId} />
           ) : (

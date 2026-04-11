@@ -33,111 +33,157 @@ function buildWelcomeEmail(name: string, _email: string): string {
         <table width="560" cellpadding="0" cellspacing="0"
                style="background:#FDFAF5;max-width:560px;width:100%;border:1px solid #DDD4C5;">
 
-          <!-- Blush top bar -->
+          <!-- Gold top bar -->
           <tr>
-            <td style="height:2px;background:linear-gradient(90deg,transparent,#C4956A,transparent);"></td>
+            <td style="height:3px;background:linear-gradient(90deg,transparent,#C4956A,transparent);"></td>
           </tr>
 
-          <!-- Warm cream header -->
+          <!-- Header -->
           <tr>
-            <td style="background:#EDE5D8;padding:36px 40px;text-align:center;">
-              <p style="margin:0 0 4px;color:#C4956A;font-size:10px;
-                         letter-spacing:0.32em;text-transform:uppercase;
+            <td style="background:#EDE5D8;padding:40px 40px 32px;text-align:center;">
+              <p style="margin:0 0 8px;color:#C4956A;font-size:10px;
+                         letter-spacing:0.38em;text-transform:uppercase;
                          font-family:'Arial',sans-serif;">
-                The Style Refresh
+                Private Membership · The Style Refresh
               </p>
-              <h1 style="margin:8px 0 0;color:#2C2C2C;font-size:30px;
+              <h1 style="margin:0 0 10px;color:#2C2C2C;font-size:32px;
                           font-weight:400;letter-spacing:0.02em;font-family:'Georgia',serif;">
-                You&rsquo;re in the VIP Room.
+                You&rsquo;re in, ${firstName}.
               </h1>
+              <p style="margin:0;color:#6B6560;font-size:14px;font-style:italic;line-height:1.7;">
+                Your first brief lands Monday morning. Until then — here&rsquo;s everything you need to know.
+              </p>
             </td>
           </tr>
 
-          <!-- Sand divider -->
+          <!-- Divider -->
           <tr>
             <td style="padding:0 40px;">
-              <div style="height:1px;margin:28px 0 0;
-                           background:linear-gradient(90deg,transparent,#C9B99A,transparent);">
-              </div>
+              <div style="height:1px;background:linear-gradient(90deg,transparent,#C9B99A,transparent);"></div>
             </td>
           </tr>
 
           <!-- Body -->
           <tr>
-            <td style="padding:24px 40px 0;">
-              <p style="margin:0 0 18px;color:#4A4A4A;font-size:16px;line-height:1.8;">
-                Dear ${firstName},
-              </p>
-              <p style="margin:0 0 18px;color:#4A4A4A;font-size:16px;line-height:1.8;">
-                Your membership is confirmed. Every Monday morning you&rsquo;ll receive
-                three complete looks &mdash; fully sourced with direct buy links to
-                every single item.
-              </p>
-              <p style="margin:0 0 18px;color:#4A4A4A;font-size:16px;line-height:1.8;">
-                No algorithms. No feeds. Just the edit that matters.
-              </p>
+            <td style="padding:32px 40px 0;">
 
-              <!-- What to expect block -->
+              <!-- Step 1: Set up login -->
               <table width="100%" cellpadding="0" cellspacing="0"
-                     style="margin:24px 0;background:#F5EFE4;border-left:2px solid #C4956A;">
+                     style="margin:0 0 24px;background:#F5EFE4;border:1px solid #DDD4C5;">
                 <tr>
-                  <td style="padding:18px 22px;">
-                    <p style="margin:0 0 12px;color:#C4956A;font-size:10px;
-                               letter-spacing:0.25em;text-transform:uppercase;
+                  <td style="padding:20px 24px;">
+                    <p style="margin:0 0 6px;color:#C4956A;font-size:10px;
+                               letter-spacing:0.28em;text-transform:uppercase;
                                font-family:'Arial',sans-serif;">
-                      What arrives every Monday
+                      Step 1 — Set up your VIP Room login
+                    </p>
+                    <p style="margin:0 0 14px;color:#4A4A4A;font-size:14px;line-height:1.75;">
+                      Go to <a href="${siteUrl}/login" style="color:#C4956A;text-decoration:none;">${siteLabel}/login</a>,
+                      enter this email address and choose a password. That&rsquo;s it &mdash;
+                      your VIP Room is waiting on the other side.
+                    </p>
+                    <table cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="background:#2C2C2C;">
+                          <a href="${siteUrl}/login"
+                             style="display:inline-block;padding:12px 28px;
+                                    color:#FDFAF5;font-size:10px;
+                                    letter-spacing:0.2em;text-transform:uppercase;
+                                    text-decoration:none;font-family:'Arial',sans-serif;">
+                            Set Up Login &rarr;
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Step 2: What arrives Monday -->
+              <table width="100%" cellpadding="0" cellspacing="0"
+                     style="margin:0 0 24px;background:#F5EFE4;border:1px solid #DDD4C5;">
+                <tr>
+                  <td style="padding:20px 24px;">
+                    <p style="margin:0 0 12px;color:#C4956A;font-size:10px;
+                               letter-spacing:0.28em;text-transform:uppercase;
+                               font-family:'Arial',sans-serif;">
+                      Step 2 — What arrives every Monday
                     </p>
                     ${[
-                      "The Executive &mdash; boardroom authority, fully sourced",
-                      "The Weekender &mdash; effortless refinement, direct buy links",
-                      "The Wildcard &mdash; one deliberate departure, precisely executed",
-                      "Ellie&rsquo;s Note &mdash; sourcing insight on every item",
-                    ].map(item => `
-                    <p style="margin:0 0 8px;color:#4A4A4A;font-size:14px;line-height:1.65;">
-                      <span style="color:#C4956A;margin-right:8px;">&rarr;</span>
-                      ${item}
+                      ["The Executive", "Complete professional look &mdash; boardroom authority, fully sourced"],
+                      ["The Weekender", "Effortless weekend look &mdash; polished, casual, direct buy links"],
+                      ["The Wildcard", "One deliberate departure &mdash; the piece they&rsquo;ll ask you about"],
+                      ["Ellie&rsquo;s Note", "Sourcing insight on every item &mdash; why it works, who makes it best"],
+                    ].map(([title, desc]) => `
+                    <p style="margin:0 0 10px;color:#4A4A4A;font-size:14px;line-height:1.65;">
+                      <span style="color:#C4956A;font-weight:600;font-family:'Arial',sans-serif;">${title}</span>
+                      &nbsp;&mdash;&nbsp;${desc}
                     </p>`).join("")}
                   </td>
                 </tr>
               </table>
 
-              <!-- CTA button -->
-              <table cellpadding="0" cellspacing="0" style="margin:10px 0 28px;">
+              <!-- Step 3: Refer a friend -->
+              <table width="100%" cellpadding="0" cellspacing="0"
+                     style="margin:0 0 28px;background:#2C2C2C;border:1px solid #2C2C2C;">
                 <tr>
-                  <td style="background:#2C2C2C;border:1px solid #2C2C2C;">
-                    <a href="${siteUrl}/dashboard"
-                       style="display:inline-block;padding:14px 36px;
-                              color:#FDFAF5;font-weight:500;font-size:11px;
-                              letter-spacing:0.18em;text-transform:uppercase;
-                              text-decoration:none;font-family:'Arial',sans-serif;">
-                      Enter the VIP Room &rarr;
-                    </a>
+                  <td style="padding:20px 24px;">
+                    <p style="margin:0 0 6px;color:#C4956A;font-size:10px;
+                               letter-spacing:0.28em;text-transform:uppercase;
+                               font-family:'Arial',sans-serif;">
+                      Step 3 — Earn free months
+                    </p>
+                    <p style="margin:0 0 14px;color:rgba(253,250,245,0.8);font-size:14px;line-height:1.75;">
+                      Every friend you refer gets 50% off their first month &mdash;
+                      and you get one month free when they join. Find your referral link
+                      in your VIP Room dashboard.
+                    </p>
+                    <table cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="background:#C4956A;">
+                          <a href="${siteUrl}/dashboard"
+                             style="display:inline-block;padding:12px 28px;
+                                    color:#FDFAF5;font-size:10px;
+                                    letter-spacing:0.2em;text-transform:uppercase;
+                                    text-decoration:none;font-family:'Arial',sans-serif;">
+                            Get My Referral Link &rarr;
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
                   </td>
                 </tr>
               </table>
 
-              <p style="margin:0 0 28px;color:#4A4A4A;font-size:16px;line-height:1.8;">
-                Your first brief is waiting. I look forward to showing you what
-                considered style actually looks like.
+              <!-- Personal sign-off -->
+              <p style="margin:0 0 6px;color:#4A4A4A;font-size:15px;line-height:1.8;">
+                I&rsquo;ve been doing this for twenty years, and the brief I put out every Monday
+                is the same standard I held for my private clients. You deserve that level of curation.
+                That&rsquo;s exactly what you&rsquo;re getting.
               </p>
-              <p style="margin:0;color:#6B6560;font-size:15px;font-style:italic;">Warmly,</p>
-              <p style="margin:4px 0 0;color:#2C2C2C;font-size:20px;
+              <p style="margin:0 0 28px;color:#4A4A4A;font-size:15px;line-height:1.8;">
+                See you Monday morning.
+              </p>
+              <p style="margin:0;color:#6B6560;font-size:14px;font-style:italic;">Warmly,</p>
+              <p style="margin:4px 0 0;color:#2C2C2C;font-size:22px;
                           font-weight:400;letter-spacing:0.06em;font-family:'Georgia',serif;">
                 Ellie
               </p>
             </td>
           </tr>
 
-          <tr><td style="height:32px;"></td></tr>
+          <tr><td style="height:36px;"></td></tr>
 
           <!-- Divider -->
           <tr>
-            <td style="height:1px;background:linear-gradient(90deg,transparent,#C9B99A,transparent);margin:0 40px;"></td>
+            <td style="padding:0 40px;">
+              <div style="height:1px;background:linear-gradient(90deg,transparent,#C9B99A,transparent);"></div>
+            </td>
           </tr>
 
           <!-- Footer -->
           <tr>
-            <td style="padding:18px 40px;text-align:center;background:#F5EFE4;">
+            <td style="padding:20px 40px;text-align:center;background:#F5EFE4;">
               <p style="margin:0;color:#8A8580;font-size:10px;
                          letter-spacing:0.18em;text-transform:uppercase;
                          font-family:'Arial',sans-serif;">
@@ -151,7 +197,7 @@ function buildWelcomeEmail(name: string, _email: string): string {
                    style="color:#C4956A;text-decoration:none;">Manage or cancel subscription</a>
               </p>
               <p style="margin:6px 0 0;color:#B5A99A;font-size:10px;font-family:'Arial',sans-serif;">
-                ${process.env.BUSINESS_MAILING_ADDRESS ?? "The Style Refresh &middot; [ADD MAILING ADDRESS] &middot; New York, NY"}
+                ${process.env.BUSINESS_MAILING_ADDRESS ?? "The Style Refresh &middot; 3811 Ditmars Blvd #2278 &middot; Astoria, NY 11105"}
               </p>
             </td>
           </tr>
@@ -237,8 +283,8 @@ export async function GET(req: NextRequest) {
       console.warn("[verify-session] Resend env vars not set — emails skipped.");
     }
 
-    // ── Set 30-day access cookie and redirect to dashboard ──────
-    const response = NextResponse.redirect(new URL("/dashboard", baseUrl));
+    // ── Set 30-day access cookie and redirect through /success (fires Google Ads conversion) ──
+    const response = NextResponse.redirect(new URL("/success", baseUrl));
 
     response.cookies.set("ellie_access", "true", {
       httpOnly: true,

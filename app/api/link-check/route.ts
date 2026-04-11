@@ -9,6 +9,7 @@ import path from "path";
 
    Sends Ellie a full business owner report covering:
      • Active members & revenue (Stripe)
+     • Google Analytics 4 traffic — sessions, top pages, channels (if configured)
      • This week's shop link health (pass/fail per item)
      • Top clicked items this week (Vercel Blob analytics)
      • New signups this week
@@ -18,6 +19,170 @@ import path from "path";
 export const runtime     = "nodejs";
 export const dynamic     = "force-dynamic";
 export const maxDuration = 55;
+
+/* ── GA4 types ───────────────────────────────────────────────────────── */
+type GA4Data = {
+  sessions:       number;
+  newUsers:       number;
+  engagementRate: number;
+  topPages:       Array<{ path: string; views: number }>;
+  channels:       Array<{ channel: string; sessions: number }>;
+};
+
+/* ── GA4 report fetch (requires GA4_SERVICE_ACCOUNT_KEY + GA4_PROPERTY_ID) ── */
+async function fetchGA4Report(): Promise<GA4Data | null> {
+  const rawKey     = process.env.GA4_SERVICE_ACCOUNT_KEY?.trim();
+  const propertyId = process.env.GA4_PROPERTY_ID?.trim();
+  if (!rawKey || !propertyId) return null;
+
+  try {
+    const sa = JSON.parse(rawKey) as { client_email: string; private_key: string };
+
+    /* Build JWT for service account auth */
+    const now     = Math.floor(Date.now() / 1000);
+    const header  = Buffer.from(JSON.stringify({ alg: "RS256", typ: "JWT" })).toString("base64url");
+    const payload = Buffer.from(JSON.stringify({
+      iss:   sa.client_email,
+      scope: "https://www.googleapis.com/auth/analytics.readonly",
+      aud:   "https://oauth2.googleapis.com/token",
+      exp:   now + 3600,
+      iat:   now,
+    })).toString("base64url");
+
+    const { createSign } = await import("crypto");
+    const signer = createSign("RSA-SHA256");
+    signer.update(`${header}.${payload}`);
+    const sig = signer.sign(sa.private_key.replace(/\\n/g, "\n"), "base64url");
+    const jwt = `${header}.${payload}.${sig}`;
+
+    /* Exchange JWT for access token */
+    const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+      method:  "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body:    `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwt}`,
+    });
+    if (!tokenRes.ok) throw new Error(`Token exchange failed: ${tokenRes.status}`);
+    const { access_token } = await tokenRes.json() as { access_token: string };
+
+    const apiBase = `https://analyticsdata.googleapis.com/v1beta/properties/${propertyId}:runReport`;
+    const headers = { Authorization: `Bearer ${access_token}`, "Content-Type": "application/json" };
+
+    /* Parallel: channel breakdown + top pages */
+    const [channelRes, pagesRes] = await Promise.all([
+      fetch(apiBase, {
+        method: "POST", headers,
+        body: JSON.stringify({
+          dateRanges: [{ startDate: "7daysAgo", endDate: "today" }],
+          metrics:    [{ name: "sessions" }, { name: "newUsers" }, { name: "engagementRate" }],
+          dimensions: [{ name: "sessionDefaultChannelGroup" }],
+          orderBys:   [{ metric: { metricName: "sessions" }, desc: true }],
+          limit: 8,
+        }),
+      }),
+      fetch(apiBase, {
+        method: "POST", headers,
+        body: JSON.stringify({
+          dateRanges: [{ startDate: "7daysAgo", endDate: "today" }],
+          metrics:    [{ name: "screenPageViews" }],
+          dimensions: [{ name: "pagePath" }],
+          orderBys:   [{ metric: { metricName: "screenPageViews" }, desc: true }],
+          limit: 6,
+        }),
+      }),
+    ]);
+
+    if (!channelRes.ok || !pagesRes.ok) throw new Error("GA4 API call failed");
+
+    type GA4Row = { dimensionValues: Array<{ value: string }>; metricValues: Array<{ value: string }> };
+    type GA4Report = { rows?: GA4Row[] };
+
+    const channelData = await channelRes.json() as GA4Report;
+    const pagesData   = await pagesRes.json() as GA4Report;
+
+    const channels: GA4Data["channels"] = (channelData.rows ?? []).map(r => ({
+      channel:  r.dimensionValues[0]?.value ?? "Unknown",
+      sessions: parseInt(r.metricValues[0]?.value ?? "0", 10),
+    }));
+
+    const totalSessions = channels.reduce((s, c) => s + c.sessions, 0);
+    const totalNewUsers = (channelData.rows ?? []).reduce(
+      (s, r) => s + parseInt(r.metricValues[1]?.value ?? "0", 10), 0
+    );
+    const avgEngagement = (channelData.rows ?? []).reduce(
+      (s, r) => s + parseFloat(r.metricValues[2]?.value ?? "0"), 0
+    ) / Math.max(channelData.rows?.length ?? 1, 1);
+
+    const topPages: GA4Data["topPages"] = (pagesData.rows ?? []).map(r => ({
+      path:  r.dimensionValues[0]?.value ?? "/",
+      views: parseInt(r.metricValues[0]?.value ?? "0", 10),
+    }));
+
+    console.log(`[link-check] GA4: ${totalSessions} sessions, ${totalNewUsers} new users`);
+    return { sessions: totalSessions, newUsers: totalNewUsers, engagementRate: avgEngagement, topPages, channels };
+  } catch (err) {
+    console.error("[link-check] GA4 fetch failed (non-fatal):", err);
+    return null;
+  }
+}
+
+/* ── GA4 email section ───────────────────────────────────────────────── */
+function buildGA4Section(ga4: GA4Data): string {
+  const channelRows = ga4.channels.slice(0, 6).map(c => `
+    <tr>
+      <td style="padding:8px 14px;border-bottom:1px solid #E8DDD0;font-family:Arial,sans-serif;font-size:12px;color:#2C2C2C;">${c.channel}</td>
+      <td style="padding:8px 14px;border-bottom:1px solid #E8DDD0;font-family:Arial,sans-serif;font-size:12px;color:#6B6560;text-align:right;">${c.sessions.toLocaleString()}</td>
+    </tr>`).join("");
+
+  const pageRows = ga4.topPages.slice(0, 5).map(p => `
+    <tr>
+      <td style="padding:8px 14px;border-bottom:1px solid #E8DDD0;font-family:Arial,sans-serif;font-size:11px;color:#2C2C2C;word-break:break-all;">${p.path}</td>
+      <td style="padding:8px 14px;border-bottom:1px solid #E8DDD0;font-family:Arial,sans-serif;font-size:12px;color:#6B6560;text-align:right;">${p.views.toLocaleString()}</td>
+    </tr>`).join("");
+
+  return `
+  <!-- GA4 Traffic Section -->
+  <tr><td style="padding:24px 36px 0;">
+    <p style="margin:0 0 4px;font-size:10px;letter-spacing:0.24em;text-transform:uppercase;color:#C4956A;font-family:Arial,sans-serif;">
+      Website Traffic — Last 7 Days
+    </p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:12px;">
+      <tr>
+        <td style="width:33%;padding:0 6px 0 0;vertical-align:top;">
+          <div style="background:#FDFAF5;border:1px solid #DDD4C5;padding:14px 12px;border-top:3px solid #C4956A;text-align:center;">
+            <div style="font-family:Georgia,serif;font-size:22px;color:#2C2C2C;">${ga4.sessions.toLocaleString()}</div>
+            <div style="font-family:Arial,sans-serif;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:#C4956A;margin-top:4px;">Sessions</div>
+          </div>
+        </td>
+        <td style="width:33%;padding:0 3px;vertical-align:top;">
+          <div style="background:#FDFAF5;border:1px solid #DDD4C5;padding:14px 12px;border-top:3px solid #4A6741;text-align:center;">
+            <div style="font-family:Georgia,serif;font-size:22px;color:#2C2C2C;">${ga4.newUsers.toLocaleString()}</div>
+            <div style="font-family:Arial,sans-serif;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:#4A6741;margin-top:4px;">New Visitors</div>
+          </div>
+        </td>
+        <td style="width:33%;padding:0 0 0 6px;vertical-align:top;">
+          <div style="background:#FDFAF5;border:1px solid #DDD4C5;padding:14px 12px;border-top:3px solid #2C2C2C;text-align:center;">
+            <div style="font-family:Georgia,serif;font-size:22px;color:#2C2C2C;">${Math.round(ga4.engagementRate * 100)}%</div>
+            <div style="font-family:Arial,sans-serif;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:#6B6560;margin-top:4px;">Engagement</div>
+          </div>
+        </td>
+      </tr>
+    </table>
+    <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border:1px solid #E8DDD0;margin-bottom:10px;">
+      <tr style="background:#F5EFE4;">
+        <th style="padding:8px 14px;text-align:left;font-family:Arial,sans-serif;font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:#C4956A;border-bottom:1px solid #E8DDD0;">Channel</th>
+        <th style="padding:8px 14px;text-align:right;font-family:Arial,sans-serif;font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:#C4956A;border-bottom:1px solid #E8DDD0;">Sessions</th>
+      </tr>
+      ${channelRows || `<tr><td colspan="2" style="padding:12px 14px;font-family:Arial,sans-serif;font-size:12px;color:#B5A99A;text-align:center;">No channel data yet</td></tr>`}
+    </table>
+    <p style="margin:0 0 6px;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#8A8580;font-family:Arial,sans-serif;">Top Pages</p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;border:1px solid #E8DDD0;">
+      <tr style="background:#F5EFE4;">
+        <th style="padding:8px 14px;text-align:left;font-family:Arial,sans-serif;font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:#C4956A;border-bottom:1px solid #E8DDD0;">Page</th>
+        <th style="padding:8px 14px;text-align:right;font-family:Arial,sans-serif;font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:#C4956A;border-bottom:1px solid #E8DDD0;">Views</th>
+      </tr>
+      ${pageRows || `<tr><td colspan="2" style="padding:12px 14px;font-family:Arial,sans-serif;font-size:12px;color:#B5A99A;text-align:center;">No page data yet</td></tr>`}
+    </table>
+  </td></tr>`;
 
 type LinkResult = { piece: string; brand: string; url: string; ok: boolean; status: number | string };
 type ClickRecord = { ts: string; url: string; retailer: string; src: string };
@@ -66,10 +231,11 @@ function buildReportEmail(opts: {
   topClicks:       { label: string; count: number }[];
   totalClicksWeek: number;
   mailingAddress:  string;
+  ga4?:            GA4Data | null;
 }): string {
   const {
     checkTime, memberCount, monthlyRevenue, newThisWeek, mrr,
-    linkResults, topClicks, totalClicksWeek, mailingAddress,
+    linkResults, topClicks, totalClicksWeek, mailingAddress, ga4,
   } = opts;
 
   const failCount  = linkResults.filter(r => !r.ok).length;
@@ -148,6 +314,8 @@ function buildReportEmail(opts: {
       </tr>
     </table>
   </td></tr>
+
+  ${ga4 ? buildGA4Section(ga4) : ""}
 
   <!-- Shop clicks this week -->
   <tr><td style="padding:24px 36px 0;">
@@ -283,7 +451,10 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  /* ── 2. Click analytics from Vercel Blob ──────────────────────────── */
+  /* ── 2. GA4 traffic report ──────────────────────────────────────── */
+  const ga4Data = await fetchGA4Report();
+
+  /* ── 3. Click analytics from Vercel Blob ──────────────────────────── */
   let topClicks:       { label: string; count: number }[] = [];
   let totalClicksWeek = 0;
 
@@ -313,7 +484,7 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  /* ── 3. Load approved brief for link checking ────────────────────── */
+  /* ── 4. Load approved brief for link checking ────────────────────── */
   type LookItem = { piece: string; brand: string; buyLink: string };
   type Look     = { label: string; items: LookItem[] };
   type Brief    = { looks: Look[] };
@@ -342,7 +513,7 @@ export async function GET(req: NextRequest) {
     } catch { /* fall through */ }
   }
 
-  /* ── 4. Check every buy link ─────────────────────────────────────── */
+  /* ── 5. Check every buy link ─────────────────────────────────────── */
   const linkResults: LinkResult[] = [];
 
   if (brief?.looks?.length) {
@@ -363,7 +534,7 @@ export async function GET(req: NextRequest) {
 
   console.log(`[link-check] members=${memberCount} mrr=${mrr} clicks=${totalClicksWeek} links=${linkResults.length} failures=${failCount}`);
 
-  /* ── 5. Send report email ────────────────────────────────────────── */
+  /* ── 6. Send report email ────────────────────────────────────────── */
   if (resendKey && notifyEmail) {
     const resend = new Resend(resendKey);
     const subject = failCount > 0
@@ -377,6 +548,7 @@ export async function GET(req: NextRequest) {
       html:    buildReportEmail({
         checkTime, memberCount, monthlyRevenue, newThisWeek, mrr,
         linkResults, topClicks, totalClicksWeek, mailingAddress,
+        ga4: ga4Data,
       }),
     });
   }

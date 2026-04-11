@@ -717,6 +717,33 @@ export async function GET(req: NextRequest) {
       </p>
     </div>
 
+    ${(() => {
+      /* Show Wave bookkeeping reminder on the last Sunday of each month */
+      const now = new Date();
+      const nextSunday = new Date(now);
+      nextSunday.setDate(now.getDate() + 7);
+      const isLastSundayOfMonth = nextSunday.getMonth() !== now.getMonth();
+      return isLastSundayOfMonth ? `
+    <div style="margin-top:24px;background:#F5EFE4;border:1px solid #DDD4C5;padding:18px 22px;">
+      <p style="color:#C4956A;font-size:10px;letter-spacing:0.28em;text-transform:uppercase;
+                 font-family:Arial,sans-serif;margin:0 0 8px;">
+        📒 Monthly Reminder — Wave Bookkeeping
+      </p>
+      <p style="color:#4A4A4A;font-size:13px;line-height:1.75;font-family:Arial,sans-serif;margin:0 0 10px;">
+        It's the last Sunday of the month. Takes 2 minutes:
+      </p>
+      <ol style="color:#4A4A4A;font-size:13px;line-height:2;font-family:Arial,sans-serif;margin:0;padding-left:20px;">
+        <li>Go to <a href="https://waveapps.com" style="color:#C4956A;">waveapps.com</a> → log in</li>
+        <li>Accounting → Transactions → Add Transaction</li>
+        <li>Enter your Stripe payout amount from this month</li>
+        <li>Label it: <em>Stripe payout — The Style Refresh memberships</em></li>
+      </ol>
+      <p style="color:#8A8580;font-size:11px;font-family:Arial,sans-serif;margin:10px 0 0;">
+        That's it. Books stay clean for tax time.
+      </p>
+    </div>` : "";
+    })()}
+
     <p style="color:#B5A99A;font-size:11px;font-family:Arial,sans-serif;margin-top:24px;">
       Approved at ${new Date().toLocaleString("en-US", { timeZone: "America/New_York" })} ET
     </p>
