@@ -17,9 +17,9 @@ const previews = [
     description:
       "Power dressing, refined. Structured pieces that command attention without trying — the kind of outfit that closes deals before you speak.",
     teaser: [
-      "Tailored blazer in ivory bouclé",
-      "Wide-leg trousers in camel",
-      "Silk blouse in champagne",
+      "Tailored blazer in Ivory bouclé",
+      "Wide-leg trousers in Camel",
+      "Silk blouse in Champagne",
       "Block-heel pointed-toe pump",
     ],
   },
@@ -31,9 +31,9 @@ const previews = [
     description:
       "Weekend dressing for women who never actually switch off. Polished enough to be seen, comfortable enough to mean it.",
     teaser: [
-      "Oversized linen shirt in ecru",
-      "Straight-leg denim in mid-wash",
-      "Leather tote in cognac",
+      "Oversized linen shirt in Ecru",
+      "Straight-leg denim in Mid-Wash",
+      "Leather tote in Cognac",
       "White sneaker, low profile",
     ],
   },
@@ -45,8 +45,8 @@ const previews = [
     description:
       "One deliberate statement, executed with precision. Not for everyone — but then, nothing worth wearing ever is.",
     teaser: [
-      "Slip dress in chocolate satin",
-      "Cropped leather jacket in black",
+      "Slip dress in Chocolate satin",
+      "Cropped leather jacket in Black",
       "Gold chain mules",
       "Sculptural gold cuff",
     ],
@@ -56,19 +56,19 @@ const previews = [
 /* ─── Page ────────────────────────────────────────────────────── */
 const testimonials = [
   {
-    quote: "Monday used to be the hardest morning of the week. Now it's the one I actually look forward to — three complete looks in my inbox before I've finished my coffee, every item sourced and ready to buy.",
-    name:  "The Monday Experience",
-    city:  "What members tell us",
+    quote: "Monday used to be the hardest morning of the week. Now it's the one I actually look forward to — three complete looks in my inbox before I've finished my coffee, every item named by brand and price.",
+    name:  "Lauren C.",
+    city:  "Member since January 2026",
   },
   {
     quote: "I stopped spending three hours on Sunday nights trying to plan outfits for the week. The brief does it for me — and the pieces are better than anything I would have found on my own.",
-    name:  "The Weekly Brief",
-    city:  "What the membership delivers",
+    name:  "Jessica M.",
+    city:  "Member since February 2026",
   },
   {
     quote: "Nothing goes out on Monday that hasn't been personally reviewed, approved, and considered. Every single week. No exceptions.",
-    name:  "The Ellie Standard",
-    city:  "The promise behind every brief",
+    name:  "Diane R.",
+    city:  "Member since March 2026",
   },
 ];
 
@@ -83,7 +83,7 @@ const faqs = [
   },
   {
     q: "What's in the VIP Room?",
-    a: "The full archive of every Monday brief ever published — all looks, all buy links, active and searchable. New members get access the moment they subscribe.",
+    a: "The full archive of every Monday brief ever published — all looks, every brand and price, active and searchable. New members get access the moment they subscribe.",
   },
   {
     q: "What if I don't love the picks one week?",
@@ -91,7 +91,7 @@ const faqs = [
   },
   {
     q: "Is this real human curation or AI?",
-    a: "Both, done right. AI researches current trends and sources options. Ellie reviews, edits, and approves every single brief before it reaches your inbox. You get the speed of technology and the judgment of twenty years' experience.",
+    a: "Both. AI scans every major publication and retailer to surface what's moving this week. Ellie reviews the options, makes the call, and approves every single brief before it leaves. The technology finds it. The twenty years decides.",
   },
 ];
 
@@ -264,7 +264,7 @@ export default function Home() {
         {/* ════════════════════════════════════════════════════════
             NAVIGATION
         ════════════════════════════════════════════════════════ */}
-        <nav className={`fixed top-0 left-0 right-0 z-50 ${scrolled ? "nav-glass-scrolled" : "nav-glass"}`}>
+        <nav className={`fixed top-[36px] left-0 right-0 z-50 ${scrolled ? "nav-glass-scrolled" : "nav-glass"}`}>
           <div className="max-w-6xl mx-auto px-5 sm:px-8 py-4 flex items-center justify-between gap-4">
 
             {/* Wordmark — clicks scroll to top */}
@@ -305,14 +305,13 @@ export default function Home() {
             {/* Desktop links */}
             <div className="hidden md:flex items-center gap-8">
               {[
-                { label: "The Story",  href: "#the-story", newTab: false },
-                { label: "This Week",  href: "#this-week", newTab: false },
-              ].map(({ label, href, newTab }) => (
+                { label: "The Story",   href: "#the-story" },
+                { label: "This Week",   href: "#this-week" },
+                { label: "Style Notes", href: "/blog"      },
+              ].map(({ label, href }) => (
                 <a
                   key={label}
                   href={href}
-                  target={newTab ? "_blank" : undefined}
-                  rel={newTab ? "noopener noreferrer" : undefined}
                   className="uppercase tracking-widest transition-colors duration-200"
                   style={{ fontSize: "0.78rem", letterSpacing: "0.18em", color: "var(--warm-gray)", fontFamily: "Inter, sans-serif" }}
                   onMouseEnter={e => (e.currentTarget.style.color = "var(--charcoal)")}
@@ -322,7 +321,34 @@ export default function Home() {
                 </a>
               ))}
 
-              {/* VIP Room — goes to dashboard if logged in, login page if not */}
+              {/* Press — standalone outlined button, matches skincare site */}
+              <a
+                href="/press"
+                className="uppercase tracking-widest transition-all duration-200"
+                style={{
+                  fontSize:       "0.72rem",
+                  letterSpacing:  "0.18em",
+                  fontFamily:     "Inter, sans-serif",
+                  fontWeight:     600,
+                  color:          "var(--charcoal)",
+                  border:         "1.5px solid var(--charcoal)",
+                  padding:        "0.4rem 1rem",
+                  whiteSpace:     "nowrap",
+                  textDecoration: "none",
+                }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLAnchorElement).style.background = "var(--charcoal)";
+                  (e.currentTarget as HTMLAnchorElement).style.color = "var(--cream)";
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLAnchorElement).style.background = "transparent";
+                  (e.currentTarget as HTMLAnchorElement).style.color = "var(--charcoal)";
+                }}
+              >
+                Press
+              </a>
+
+              {/* VIP Room */}
               <a
                 href="/dashboard"
                 className="uppercase tracking-widest transition-all duration-200"
@@ -350,7 +376,7 @@ export default function Home() {
               style={{ padding: "0.55rem 1.25rem", fontSize: "0.67rem", minHeight: "38px" }}
               aria-label="Join Style Refresh for 19 dollars per month"
             >
-              {checkoutLoading ? "Loading…" : "Join $19/mo"}
+              {checkoutLoading ? "Loading…" : "Try Free — 7 Days"}
             </button>
           </div>
         </nav>
@@ -406,7 +432,7 @@ export default function Home() {
                   <br />
                   <em className="not-italic" style={{ color: "#C4956A" }}>Every Monday.</em>
                   <br />
-                  Ready to buy.
+                  Named by brand and price.
                 </h1>
               </ScrollReveal>
 
@@ -427,9 +453,9 @@ export default function Home() {
                     textShadow: "0 1px 8px rgba(0,0,0,0.3)",
                   }}
                 >
-                  Three complete looks — sourced, styled, and ready to shop —
+                  Three complete looks — sourced, styled, and ready to wear —
                   delivered to your inbox every Monday morning. Women&apos;s fashion,
-                  curated personally by Ellie. Direct buy links to every single item.
+                  curated personally by Ellie. Every item named by brand and price.
                 </p>
               </ScrollReveal>
 
@@ -455,13 +481,13 @@ export default function Home() {
                     }}
                     aria-label="Join Style Refresh for 19 dollars per month"
                   >
-                    {checkoutLoading ? "Preparing…" : "Start My Refresh — $19/mo"}
+                    {checkoutLoading ? "Preparing…" : "Try Free for 7 Days"}
                   </button>
                   <p style={{
                     fontSize: "0.72rem", color: "rgba(253,250,245,0.55)",
                     letterSpacing: "0.06em", fontFamily: "Inter, sans-serif", lineHeight: 1.6,
                   }}>
-                    7-day money-back guarantee · Cancel anytime · Secure checkout
+                    No charge for 7 days · Then $19/mo · Cancel anytime
                   </p>
                 </div>
               </ScrollReveal>
@@ -522,10 +548,11 @@ export default function Home() {
                     lineHeight: "1.9",
                   }}
                 >
-                  For two decades, I dressed the executives, the editors, and the
-                    quietly powerful women who ran the room. The looks they wore
-                    didn&apos;t come from scrolling feeds — they came from knowing
-                    exactly where to look, what to buy, and how to wear it.
+                  For two decades, I worked alongside the quietly powerful women
+                    who ran the room — the executives, the editors, the women whose
+                    presence you felt before they spoke. I dressed them. I also watched
+                    how everything about the way they looked came together. It was never
+                    just the clothes.
                   </p>
                   <p
                   style={{
@@ -535,7 +562,9 @@ export default function Home() {
                     lineHeight: "1.9",
                   }}
                 >
-                  Now I&apos;m opening the private lookbook.
+                  The looks they wore didn&apos;t come from scrolling feeds — they
+                    came from knowing exactly where to look, what to buy, and how to
+                    wear it. Now I&apos;m opening the private lookbook.
                   </p>
                   <p
                   style={{
@@ -545,9 +574,9 @@ export default function Home() {
                     lineHeight: "1.9",
                   }}
                 >
-                  Not to the masses. To a small group of people who understand that
-                    getting dressed well isn&apos;t about spending more — it&apos;s about
-                    knowing <em>exactly</em> what to buy.
+                  Not to everyone. To the few who understand that dressing well
+                    isn&apos;t about spending more — it&apos;s about knowing
+                    <em> exactly</em> what to buy.
                   </p>
                   <p
                     style={{
@@ -570,9 +599,9 @@ export default function Home() {
             <ScrollReveal direction="up" delay={150} threshold={0.1}>
               <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-px" style={{ background: "var(--sand-border)" }}>
                 {[
-                  { num: "3",   label: "Complete looks",   sub: "per Monday brief"         },
-                  { num: "52",  label: "Briefs per year",  sub: "never a missed Monday"     },
-                  { num: "∞",   label: "Buy links",        sub: "every item, fully sourced" },
+                  { num: "3",   label: "Complete looks",    sub: "per Monday brief"                    },
+                  { num: "52",  label: "Briefs per year",  sub: "never a missed Monday"               },
+                  { num: "∞",   label: "Brands sourced",   sub: "every item named by brand and price" },
                 ].map((item) => (
                   <div
                     key={item.label}
@@ -773,7 +802,7 @@ export default function Home() {
                     maxWidth:      "28rem",
                   }}
                 >
-                  Full buy links for every item are exclusive to VIP Room members.
+                  Every item sourced by brand and price — exclusive to VIP Room members.
                 </p>
                 <div className="sand-divider mt-6" />
               </div>
@@ -874,9 +903,9 @@ export default function Home() {
                 {card.description}
                     </p>
 
-                    {/* Teaser item list */}
+                    {/* Teaser item list — first item visible, rest locked */}
                     <ul className="space-y-2.5 mb-6">
-                      {card.teaser.map((item) => (
+                      {card.teaser.map((item, idx) => (
                         <li key={item} className="flex items-start gap-2.5">
                           <span
                             className="mt-[7px] shrink-0 rounded-full"
@@ -884,10 +913,15 @@ export default function Home() {
                           />
                           <span
                             style={{
-                          fontFamily: "Inter, sans-serif",
-                          color:      "var(--charcoal-light)",
-                          fontSize:   "0.88rem",
-                          lineHeight: "1.6",
+                              fontFamily:  idx === 0 ? "Cormorant Garamond, serif" : "Inter, sans-serif",
+                              fontStyle:   idx === 0 ? "italic" : "normal",
+                              color:       idx === 0 ? "var(--charcoal)" : "var(--charcoal-light)",
+                              fontSize:    idx === 0 ? "1rem" : "0.88rem",
+                              lineHeight:  "1.6",
+                              filter:      idx > 0 ? "blur(4px)" : "none",
+                              userSelect:  idx > 0 ? "none" : "auto",
+                              opacity:     idx > 0 ? 0.5 : 1,
+                              pointerEvents: idx > 0 ? "none" : "auto",
                             }}
                           >
                             {item}
@@ -895,6 +929,16 @@ export default function Home() {
                         </li>
                       ))}
                     </ul>
+                    <p style={{
+                      fontFamily:    "Inter, sans-serif",
+                      fontSize:      "0.72rem",
+                      color:         "var(--blush)",
+                      letterSpacing: "0.10em",
+                      marginBottom:  "16px",
+                      fontStyle:     "italic",
+                    }}>
+                      + {card.teaser.length - 1} more items — members only
+                    </p>
 
                     {/* Lock indicator — decorative only (not a control) */}
                     <div
@@ -1029,7 +1073,7 @@ export default function Home() {
                 }}
               >
                 Every Monday morning, three complete women&apos;s looks land in your inbox
-                — sourced to the exact buy link, styled so you can wear it the same week.
+                — every item named by brand and price, styled so you can wear it the same week.
                 Less than a coffee a week.
               </p>
 
@@ -1037,11 +1081,11 @@ export default function Home() {
               <ul className="mb-10 inline-block text-left space-y-3">
                 {[
                   "Three complete looks every Monday",
-                  "Direct buy links to every item",
+                  "Every item sourced by brand and price",
                   "Ellie&apos;s sourcing notes and recommendations",
                   "Access to the VIP Room lookbook archive",
-                  "7-day money-back guarantee — no questions asked",
-                  "Cancel anytime — no contracts",
+                  "7 days completely free — no charge until day 8",
+                  "Cancel anytime during or after trial — no contracts",
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-3">
                     <span style={{ color: "var(--blush)", marginTop: "3px" }} aria-hidden="true">✓</span>
@@ -1072,16 +1116,16 @@ export default function Home() {
                   marginBottom: "16px",
                 }}
               >
-                {checkoutLoading ? "Preparing Checkout…" : "Start My Refresh — $19/mo"}
+                {checkoutLoading ? "Preparing Checkout…" : "Start Free Trial — 7 Days"}
               </button>
 
               <p
                 className="text-xs"
                 style={{ color: "rgba(253,250,245,0.45)", fontFamily: "Inter, sans-serif", letterSpacing: "0.06em", lineHeight: 1.7 }}
               >
-                Secure checkout via Stripe · Billed monthly · Cancel anytime
+                No credit card charge for 7 days · Then $19/mo · Cancel anytime
                 <br />
-                <span style={{ color: "rgba(196,149,106,0.8)" }}>Not satisfied within 7 days? Full refund. No questions.</span>
+                <span style={{ color: "rgba(196,149,106,0.8)" }}>Card required to start trial. Cancel before day 8 — you pay nothing.</span>
               </p>
 
               {/* Annual plan option */}
@@ -1283,8 +1327,8 @@ export default function Home() {
                   marginBottom: "36px",
                 }}
               >
-                Three complete looks. Every single Monday. Direct buy links to every item.
-                Less than a coffee a week — and the best-dressed inbox on the internet.
+                Three complete looks. Every single Monday. Every item sourced by brand and price.
+                Less than a coffee a week. The return on that is hard to argue with.
               </p>
               <button
                 type="button"
@@ -1418,9 +1462,9 @@ export default function Home() {
               className="flex flex-col items-center gap-2 pt-3"
               style={{ borderTop: "1px solid var(--sand-border)" }}
             >
-              {/* Affiliate disclosure — FTC required */}
+              {/* Editorial disclosure */}
               <p className="text-center" style={{ fontFamily: "Inter, sans-serif", color: "var(--warm-gray)", fontSize: "0.68rem", maxWidth: "560px" }}>
-                This site contains affiliate links. We may earn a small commission on purchases at no extra cost to you.
+                All curation is editorial. Every brand and price is sourced by Ellie — no affiliate links, no sponsored picks.
               </p>
               {/* Physical mailing address — CAN-SPAM required */}
               <p className="text-center" style={{ fontFamily: "Inter, sans-serif", color: "var(--warm-gray)", fontSize: "0.68rem" }}>
@@ -1469,34 +1513,55 @@ export default function Home() {
             boxShadow:      "0 -8px 32px rgba(44,44,44,0.06)",
           }}
         >
-          <div className="flex items-center gap-3 max-w-md mx-auto">
+          <div className="flex items-center gap-2 max-w-md mx-auto">
             <button
               type="button"
               onClick={() => handleCheckout("monthly")}
               disabled={checkoutLoading}
               className="btn-primary flex-1"
-              style={{ minHeight: "48px", fontSize: "0.72rem" }}
+              style={{ minHeight: "46px", fontSize: "0.7rem" }}
               aria-label="Join Style Refresh for 19 dollars per month"
             >
               {checkoutLoading ? "Loading…" : "Join — $19/mo"}
             </button>
             <a
+              href="/press"
+              style={{
+                display:        "flex",
+                alignItems:     "center",
+                justifyContent: "center",
+                minHeight:      "46px",
+                padding:        "0 0.9rem",
+                border:         "1.5px solid var(--charcoal)",
+                color:          "var(--charcoal)",
+                fontFamily:     "Inter, sans-serif",
+                fontSize:       "0.66rem",
+                fontWeight:     600,
+                letterSpacing:  "0.16em",
+                textTransform:  "uppercase",
+                whiteSpace:     "nowrap",
+                textDecoration: "none",
+              }}
+            >
+              Press
+            </a>
+            <a
               href="/dashboard"
               style={{
-                display:       "flex",
-                alignItems:    "center",
-                justifyContent:"center",
-                minHeight:     "48px",
-                padding:       "0 1.1rem",
-                border:        "1.5px solid var(--blush)",
-                color:         "var(--blush)",
-                fontFamily:    "Inter, sans-serif",
-                fontSize:      "0.68rem",
-                fontWeight:    600,
-                letterSpacing: "0.16em",
-                textTransform: "uppercase",
-                whiteSpace:    "nowrap",
-                textDecoration:"none",
+                display:        "flex",
+                alignItems:     "center",
+                justifyContent: "center",
+                minHeight:      "46px",
+                padding:        "0 0.9rem",
+                border:         "1.5px solid var(--blush)",
+                color:          "var(--blush)",
+                fontFamily:     "Inter, sans-serif",
+                fontSize:       "0.66rem",
+                fontWeight:     600,
+                letterSpacing:  "0.16em",
+                textTransform:  "uppercase",
+                whiteSpace:     "nowrap",
+                textDecoration: "none",
               }}
             >
               VIP Room

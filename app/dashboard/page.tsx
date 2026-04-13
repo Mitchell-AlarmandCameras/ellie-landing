@@ -178,7 +178,7 @@ export default async function DashboardPage() {
               className="uppercase tracking-widest transition-all"
               style={{ fontSize: "0.72rem", fontFamily: "Inter, sans-serif", letterSpacing: "0.15em", color: "rgba(253,250,245,0.7)", border: "1px solid rgba(253,250,245,0.2)", padding: "0.3rem 0.9rem" }}
             >
-              My Edit ♡
+              Saved ♡
             </Link>
             <a
               href="/api/logout"
@@ -437,7 +437,7 @@ export default async function DashboardPage() {
                         className="pb-4"
                         style={{ borderBottom: "1px solid rgba(196,149,106,0.12)" }}
                       >
-                        {/* Piece name + buttons */}
+                        {/* Piece name */}
                         <div className="flex items-start justify-between gap-3 mb-2">
                           <span
                             style={{
@@ -450,56 +450,32 @@ export default async function DashboardPage() {
                           >
                             {item.piece}
                           </span>
-                          <div className="flex items-center gap-2 shrink-0">
-                            <a
-                              href={`/api/go?to=${encodeURIComponent(item.buyLink)}&src=dashboard&q=${encodeURIComponent(item.piece + " " + item.brand)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              aria-label={`Shop ${item.piece} at ${item.brand}`}
-                              className="vip-shop-btn"
-                              style={{
-                                display:        "inline-flex",
-                                alignItems:     "center",
-                                padding:        "0.35rem 0.85rem",
-                                fontFamily:     "Inter, sans-serif",
-                                fontSize:       "0.68rem",
-                                letterSpacing:  "0.16em",
-                                textTransform:  "uppercase",
-                                color:          "#C4956A",
-                                border:         "1px solid rgba(196,149,106,0.45)",
-                                background:     "transparent",
-                                textDecoration: "none",
-                                whiteSpace:     "nowrap",
-                              }}
-                            >
-                              Shop →
-                            </a>
-                            <SaveButton
-                              item={{
-                                piece:   item.piece,
-                                brand:   item.brand,
-                                price:   item.price,
-                                note:    item.note,
-                                buyLink: item.buyLink,
-                                look:    look.label,
-                                weekOf:  week.weekOf,
-                              }}
-                            />
-                          </div>
+                          <SaveButton
+                            item={{
+                              piece:   item.piece,
+                              brand:   item.brand,
+                              price:   item.price,
+                              note:    item.note,
+                              buyLink: item.buyLink,
+                              look:    look.label,
+                              weekOf:  week.weekOf,
+                            }}
+                          />
                         </div>
 
-                        {/* Brand */}
+                        {/* Brand + Price — editorial line */}
                         <span
                           style={{
                             fontFamily:    "Inter, sans-serif",
-                            color:         "rgba(253,250,245,0.4)",
-                            fontSize:      "0.74rem",
-                            letterSpacing: "0.1em",
+                            color:         "#C4956A",
+                            fontSize:      "0.72rem",
+                            letterSpacing: "0.14em",
+                            textTransform: "uppercase",
                             display:       "block",
                             marginBottom:  "6px",
                           }}
                         >
-                          {item.brand}
+                          {item.brand} · {item.price}
                         </span>
 
                         {/* Ellie's note per item */}

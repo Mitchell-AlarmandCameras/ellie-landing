@@ -267,12 +267,41 @@ export async function POST(req: NextRequest) {
       html: replyHtml,
     });
 
-    if (replyError) console.error("[contact] Reply send failed:", JSON.stringify(replyError));
-    else console.log("[contact] Reply sent to", email, "| AI handled:", aiHandled, "| category:", category);
+    if (replyError) {
+      console.error("[contact] Reply send failed:", JSON.stringify(replyError));
+      /* Surface a meaningful error to the form so the customer knows what happened */
+      const msg = typeof replyError === "object" && "message" in replyError
+        ? String((replyError as { message: string }).message)
+        : "Email delivery failed";
+      return NextResponse.json({ ok: false, error: `Message received but reply failed: ${msg}. Please email ${fromEmail} directly.` }, { status: 502 });
+    }
+
+    console.log("[contact] Reply sent to", email, "| AI handled:", aiHandled, "| category:", category);
+
+    /* ── Log conversation to Blob for owner inbox ───────────────── */
+    if (process.env.BLOB_READ_WRITE_TOKEN) {
+      try {
+        const { put } = await import("@vercel/blob");
+        const id  = `${Date.now()}-${email.replace(/[^a-z0-9]/gi, "_").slice(0, 30)}`;
+        await put(
+          `ellie-inbox/fashion/${id}.json`,
+          JSON.stringify({
+            id, site: "fashion", timestamp: new Date().toISOString(),
+            name: name ?? "", email, type: type ?? "general",
+            message, category, aiHandled,
+            needsFollowup: triage?.needsFollowup ?? true,
+            aiReply: triage?.reply ?? null,
+          }),
+          { access: "public", contentType: "application/json", addRandomSuffix: false }
+        );
+      } catch (blobErr) {
+        console.warn("[contact] Blob log failed (non-fatal):", blobErr);
+      }
+    }
 
     return NextResponse.json({ ok: true, replyId: replyData?.id ?? null, aiHandled, category });
   } catch (err) {
     console.error("[contact]", err);
-    return NextResponse.json({ error: "Failed to send message." }, { status: 500 });
+    return NextResponse.json({ error: "Failed to send message. Please try again or email us directly." }, { status: 500 });
   }
 }

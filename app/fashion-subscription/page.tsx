@@ -4,7 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Women's Fashion Subscription — Weekly Style Curation | The Style Refresh",
   description:
-    "The Style Refresh is a private weekly fashion subscription for women. Three complete looks, direct buy links, personal curation — every Monday for $19/month.",
+    "The Style Refresh is a private weekly fashion subscription for women. Three complete looks, every item by brand and price, personal curation — every Monday for $19/month.",
   keywords: [
     "women's fashion subscription",
     "fashion subscription box women",
@@ -20,13 +20,13 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Women's Fashion Subscription — Weekly Style Curation | The Style Refresh",
     description:
-      "Three complete looks, direct buy links, personal curation — every Monday for $19/month. Private membership. Cancel anytime.",
+      "Three complete looks, every item by brand and price, personal curation — every Monday for $19/month. Private membership. Cancel anytime.",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "Women's Fashion Subscription — The Style Refresh",
-    description: "Three complete looks every Monday. Direct buy links. $19/month. Cancel anytime.",
+    description: "Three complete looks every Monday. Every item by brand and price. $19/month. Cancel anytime.",
   },
 };
 
@@ -37,7 +37,7 @@ const jsonLd = {
   "@type": "Product",
   name: "The Style Refresh — Weekly Fashion Subscription",
   description:
-    "A private weekly fashion subscription delivering three complete, curated looks with direct buy links every Monday morning.",
+    "A private weekly fashion subscription delivering three complete, curated looks every Monday morning — every item named by brand and price.",
   url: `${SITE_URL}/fashion-subscription`,
   brand: { "@type": "Brand", name: "The Style Refresh" },
   offers: {
@@ -62,9 +62,9 @@ const differences = [
       "Each Monday you get three full outfits: a professional look, a casual weekend look, and an elevated evening look. Every piece in every look is styled together intentionally.",
   },
   {
-    label: "Direct buy links, not a mood board",
+    label: "Brand and price — not a mood board",
     detail:
-      "Every piece has one link that goes directly to the item on the retailer's site — the right color, the right style. Not a search page, not a Pinterest board. The exact product.",
+      "Every piece is named by brand and exact price. Search the brand directly and you'll find it — the right color, the right style. Not a vague inspiration board. Actual, sourced pieces.",
   },
   {
     label: "Private membership — no ads, no sponsors",
@@ -86,7 +86,7 @@ const differences = [
 const compares = [
   { feature: "Frequency", us: "Every Monday", them: "Quarterly or monthly" },
   { feature: "Content", us: "3 complete looks", them: "Single pieces or mood boards" },
-  { feature: "Buy links", us: "Direct to exact product", them: "Search pages or affiliate boards" },
+  { feature: "Sourcing", us: "Brand + price for every item", them: "Mood boards or vague inspiration" },
   { feature: "Curation", us: "Human stylist, reviewed weekly", them: "Algorithm or trend aggregation" },
   { feature: "Ads / sponsors", us: "None — member-funded only", them: "Often ad-supported" },
   { feature: "Price", us: "$19/month", them: "$30–150+/month" },
@@ -96,7 +96,7 @@ const compares = [
 const faqs = [
   {
     q: "What exactly do I get with a Style Refresh membership?",
-    a: "Every Monday morning you receive an email with three complete looks — a professional outfit, a casual weekend outfit, and an elevated evening outfit. Each look includes every piece styled together: brand name, exact price, and a direct link to buy. The VIP Room dashboard shows every week's brief so you can browse back at any time.",
+    a: "Every Monday morning you receive an email with three complete looks — a professional outfit, a casual weekend outfit, and an elevated evening look. Each look includes every piece styled together: brand name and exact price. The VIP Room dashboard shows every week's brief so you can browse back at any time.",
   },
   {
     q: "How is this different from a fashion subscription box?",
@@ -168,7 +168,7 @@ export default function FashionSubscriptionPage() {
           margin: "0 auto 24px", maxWidth: "560px", color: "#4A4A4A",
           fontSize: "17px", lineHeight: 1.8, fontStyle: "italic",
         }}>
-          Three complete looks. Direct buy links. Personal curation.
+          Three complete looks. Every item by brand and price. Personal curation.
           Every Monday — for less than a single cocktail per week.
         </p>
         <div style={{
@@ -273,7 +273,7 @@ export default function FashionSubscriptionPage() {
             margin: "14px 0 0", color: "#8A8580", fontSize: "11px",
             fontFamily: "Arial, sans-serif", letterSpacing: "0.1em",
           }}>
-            — What members tell us
+            — Lauren C., member since January 2026
           </p>
         </div>
 
@@ -315,7 +315,7 @@ export default function FashionSubscriptionPage() {
             margin: "0 auto 16px", maxWidth: "420px", color: "#4A4A4A",
             fontSize: "14px", lineHeight: 1.75,
           }}>
-            Three complete looks every Monday. Direct buy links. Cancel anytime.
+            Three complete looks every Monday. Every item named by brand and price. Cancel anytime.
           </p>
           <p style={{
             margin: "0 auto 28px", maxWidth: "340px", color: "#6B6560",

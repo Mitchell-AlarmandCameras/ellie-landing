@@ -1,46 +1,23 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { staticBlogPosts } from "@/data/blog-posts";
 
-export const revalidate = 3600; // Re-render at most once per hour
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: "The Edit — Weekly Women's Fashion Looks | The Style Refresh",
+  title: "Style Guide & Fashion Advice | The Style Refresh by Ellie",
   description:
-    "Browse every weekly curated look — sourced from the best retailers, " +
-    "styled for real life. Three complete looks every Monday. " +
-    "Subscribe for direct buy links to every item.",
+    "Expert women's fashion advice, capsule wardrobe guides, and style tips from a 20-year fashion consultant. " +
+    "Three complete looks sourced every Monday. Every item by brand and price.",
   openGraph: {
-    title: "The Edit — Weekly Women's Fashion Looks",
-    description: "Three complete looks, every Monday. Subscribe for direct buy links.",
+    title: "Style Guide & Fashion Advice | The Style Refresh",
+    description: "Expert capsule wardrobe guides and style tips. Three sourced looks every Monday.",
     type: "website",
   },
 };
 
-type IndexEntry = {
-  slug: string;
-  weekOf: string;
-  publishedAt: string;
-  editorialLead: string;
-  lookLabels: string[];
-};
-
-async function getPosts(): Promise<IndexEntry[]> {
-  try {
-    const token = process.env.BLOB_READ_WRITE_TOKEN;
-    if (!token) return [];
-    const { list } = await import("@vercel/blob");
-    const { blobs } = await list({ prefix: "blog/index" });
-    if (!blobs[0]) return [];
-    const res = await fetch(blobs[0].url, { next: { revalidate: 3600 } });
-    if (!res.ok) return [];
-    return (await res.json()) as IndexEntry[];
-  } catch {
-    return [];
-  }
-}
-
 export default async function BlogIndexPage() {
-  const posts = await getPosts();
+  const posts = staticBlogPosts;
 
   return (
     <div style={{ background: "#F5EFE4", minHeight: "100vh", fontFamily: "Georgia, serif" }}>
@@ -78,84 +55,63 @@ export default async function BlogIndexPage() {
           Ellie · The Style Refresh
         </p>
         <h1 style={{ margin: "0 0 12px", color: "#2C2C2C", fontSize: "36px", fontWeight: 400 }}>
-          The Edit
+          The Style Guide
         </h1>
         <p style={{
           margin: "0 auto", maxWidth: "520px", color: "#6B6560",
           fontSize: "15px", lineHeight: 1.75,
         }}>
-          Every Monday I publish three complete looks — sourced, styled, and ready to shop.
-          Members get direct buy links to every item. Here you can browse every edit, free.
+          Fashion advice, capsule wardrobe guides, and exactly what to buy — from a 20-year style consultant.
+          Three complete sourced looks delivered every Monday.
         </p>
       </div>
 
       {/* ── Post grid ── */}
-      <div style={{ maxWidth: "900px", margin: "0 auto", padding: "48px 24px" }}>
-        {posts.length === 0 ? (
-          <div style={{ textAlign: "center", padding: "80px 0", color: "#8A8580" }}>
-            <p style={{ fontSize: "15px", fontStyle: "italic", marginBottom: "24px" }}>
-              The first edit drops this Monday. Check back then — or join now to receive it in your inbox.
-            </p>
-            <Link href="/#join" style={{
-              display: "inline-block", background: "#2C2C2C", color: "#FDFAF5",
-              padding: "13px 34px", fontFamily: "Arial, sans-serif", fontSize: "11px",
-              letterSpacing: "0.22em", textTransform: "uppercase", textDecoration: "none",
-            }}>
-              Join for $19/month
-            </Link>
-          </div>
-        ) : (
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
-            gap: "24px",
-          }}>
-            {posts.map(post => (
-              <Link
-                key={post.slug}
-                href={`/blog/${post.slug}`}
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
-                <article style={{
-                  background: "#FDFAF5", border: "1px solid #DDD4C5",
-                  padding: "24px", transition: "box-shadow 0.2s",
-                  cursor: "pointer",
+      <div style={{ maxWidth: "960px", margin: "0 auto", padding: "48px 24px" }}>
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+          gap: "28px",
+        }}>
+          {posts.map(post => (
+            <Link
+              key={post.slug}
+              href={`/blog/${post.slug}`}
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
+              <article style={{
+                background: "#FDFAF5", border: "1px solid #DDD4C5",
+                padding: "28px", cursor: "pointer",
+                transition: "box-shadow 0.2s, transform 0.2s",
+              }}>
+                <p style={{
+                  margin: "0 0 10px", fontSize: "10px", letterSpacing: "0.28em",
+                  textTransform: "uppercase", color: "#C4956A", fontFamily: "Arial, sans-serif",
                 }}>
-                  <p style={{
-                    margin: "0 0 8px", fontSize: "10px", letterSpacing: "0.28em",
-                    textTransform: "uppercase", color: "#C4956A", fontFamily: "Arial, sans-serif",
-                  }}>
-                    Week of {post.weekOf}
-                  </p>
-                  <p style={{
-                    margin: "0 0 12px", fontSize: "16px", color: "#2C2C2C",
-                    fontStyle: "italic", lineHeight: 1.5,
-                  }}>
-                    &ldquo;{post.editorialLead.substring(0, 90)}{post.editorialLead.length > 90 ? "…" : ""}&rdquo;
-                  </p>
-                  <div style={{
-                    borderTop: "1px solid #E8DDD0", paddingTop: "12px", marginTop: "12px",
-                  }}>
-                    {post.lookLabels.map((label, i) => (
-                      <p key={i} style={{
-                        margin: "3px 0", fontSize: "11px", color: "#6B6560",
-                        fontFamily: "Arial, sans-serif",
-                      }}>
-                        · {label}
-                      </p>
-                    ))}
-                  </div>
-                  <p style={{
-                    margin: "14px 0 0", fontSize: "11px", color: "#C4956A",
-                    fontFamily: "Arial, sans-serif", letterSpacing: "0.1em",
-                  }}>
-                    View the edit →
-                  </p>
-                </article>
-              </Link>
-            ))}
-          </div>
-        )}
+                  {post.category} · {post.readTime}
+                </p>
+                <h2 style={{
+                  margin: "0 0 12px", fontSize: "17px", color: "#2C2C2C",
+                  lineHeight: 1.45, fontWeight: 400,
+                }}>
+                  {post.title}
+                </h2>
+                <p style={{
+                  margin: "0 0 16px", fontSize: "13px", color: "#6B6560",
+                  lineHeight: 1.7, fontFamily: "Arial, sans-serif",
+                }}>
+                  {post.intro.substring(0, 110)}…
+                </p>
+                <p style={{
+                  margin: 0, fontSize: "11px", color: "#C4956A",
+                  fontFamily: "Arial, sans-serif", letterSpacing: "0.1em",
+                }}>
+                  Read the guide →
+                </p>
+              </article>
+            </Link>
+          ))}
+        </div>
       </div>
 
       {/* ── CTA Banner ── */}
@@ -171,14 +127,14 @@ export default async function BlogIndexPage() {
         <h2 style={{
           margin: "0 0 14px", color: "#FDFAF5", fontSize: "24px", fontWeight: 400,
         }}>
-          Direct buy links to every item, every week.
+          Brand and price for every item, every week.
         </h2>
         <p style={{
           margin: "0 auto 28px", maxWidth: "440px", color: "#B5A99A",
           fontSize: "14px", lineHeight: 1.7,
         }}>
-          Everything you see here is the teaser. Members get the full look — 
-          brand, price, and a direct link to buy every single piece.
+          Everything you see here is the teaser. Members get the full look —
+          every brand, every price, and Ellie's sourcing note for every single piece.
         </p>
         <Link href="/#join" style={{
           display: "inline-block", background: "#C4956A", color: "#FDFAF5",

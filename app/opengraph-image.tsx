@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 
 /* ─── Next.js OG image config ────────────────────────────────── */
 export const runtime     = "edge";
-export const alt         = "Ellie — The Style Refresh. Three complete looks with buy links, every Monday.";
+export const alt         = "Ellie — The Style Refresh. Three complete looks every Monday, every item by brand and price.";
 export const size        = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -147,7 +147,7 @@ export default function OgImage() {
               textTransform: "uppercase",
             }}
           >
-            Three Complete Looks · Direct Buy Links · Every Monday
+            Three Complete Looks · Brand & Price · Every Monday
           </p>
         </div>
       </div>

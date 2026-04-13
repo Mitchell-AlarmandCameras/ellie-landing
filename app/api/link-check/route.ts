@@ -183,6 +183,7 @@ function buildGA4Section(ga4: GA4Data): string {
       ${pageRows || `<tr><td colspan="2" style="padding:12px 14px;font-family:Arial,sans-serif;font-size:12px;color:#B5A99A;text-align:center;">No page data yet</td></tr>`}
     </table>
   </td></tr>`;
+}
 
 type LinkResult = { piece: string; brand: string; url: string; ok: boolean; status: number | string };
 type ClickRecord = { ts: string; url: string; retailer: string; src: string };

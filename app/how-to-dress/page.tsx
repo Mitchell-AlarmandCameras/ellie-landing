@@ -125,7 +125,7 @@ const faqs = [
   },
   {
     q: "How does The Style Refresh help me dress better?",
-    a: "Every Monday you get three complete looks with every piece, price, and direct buy link. Each look applies these principles — fit, silhouette, third piece, the right shoe. It's styling delivered to your inbox so you never start from scratch.",
+    a: "Every Monday you get three complete looks with every piece and price. Each look applies these principles — fit, silhouette, third piece, the right shoe. It's styling delivered to your inbox so you never start from scratch.",
   },
 ];
 
@@ -290,7 +290,7 @@ export default function HowToDressPage() {
             fontSize: "14px", lineHeight: 1.75,
           }}>
             Every Monday — three complete looks built on these exact principles.
-            Every piece, every price, every direct buy link. The thinking done for you.
+            Every piece, every price, every brand. The thinking done for you.
           </p>
           <Link href="/#join" style={{
             display: "inline-block", background: "#C4956A", color: "#FDFAF5",

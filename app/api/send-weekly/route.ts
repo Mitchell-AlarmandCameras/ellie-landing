@@ -90,12 +90,6 @@ function buildMemberEmail(lookbook: Lookbook, dashboardUrl: string, manageUrl: s
               <span style="font-size:11px;color:#6B6560;font-family:Arial,sans-serif;line-height:1.5;">
                 ${item.note}
               </span>
-              <br/>
-              <a href="${trackLink(item.buyLink, trackBase, `brief-${look.label.toLowerCase().replace(/\s+/g,"-")}`)}"
-                 style="font-size:10px;color:#C4956A;font-family:Arial,sans-serif;
-                         letter-spacing:0.1em;text-decoration:none;">
-                Shop now →
-              </a>
             </td>
           </tr>`).join("")}
         </table>
@@ -163,8 +157,7 @@ function buildMemberEmail(lookbook: Lookbook, dashboardUrl: string, manageUrl: s
       ${mailingAddress}
     </p>
     <p style="margin:4px 0 0;color:#B5A99A;font-size:10px;font-family:Arial,sans-serif;">
-      Links in this email may include affiliate links. We may earn a small commission
-      at no extra cost to you. This never influences our curation.
+      Every brand and price in this brief was sourced by Ellie. All editorial. No affiliate links.
     </p>
   </td></tr>
 
@@ -273,7 +266,7 @@ async function runSend(req?: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ success: true, sent: 0, message: "No active subscribers yet." });
   }
 
-  const stripePortal = "https://billing.stripe.com/p/login/test_00g00000000000000000";
+  const stripePortal = process.env.STRIPE_PORTAL_URL ?? `${baseUrl}/dashboard`;
   const emailHtml = buildMemberEmail(lookbook, `${baseUrl}/dashboard`, stripePortal, baseUrl);
   const subject   = `Your Monday Style Brief — Week of ${lookbook.weekOf}`;
   let sentCount   = 0;
@@ -317,7 +310,7 @@ async function runSend(req?: NextRequest): Promise<NextResponse> {
       const tweetText  =
         `This week's edit just dropped for members.\n\n` +
         `${lookLabels}\n\n` +
-        `Three complete looks. Every buy link sourced.\n\n` +
+        `Three complete looks. Every item by brand and price.\n\n` +
         `Join → stylebyellie.com\n\n` +
         `#StyleRefresh #WomensFashion #PersonalStylist #WeeklyLooks`;
 

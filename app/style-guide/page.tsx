@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     "weekly fashion curation",
     "women's fashion subscription",
     "personal stylist online",
-    "direct buy links fashion",
+    "editorial fashion curation",
   ],
   openGraph: {
     title: "The 5-Piece Formula — Free Style Guide for Women",
@@ -222,15 +222,15 @@ export default function StyleGuidePage() {
           {[
             {
               q: "What do I get every week?",
-              a: "Three complete looks — a professional look, a casual weekend look, and an elevated evening look. Each look includes every piece styled together with brand, exact price, and a direct link to buy.",
+              a: "Three complete looks — a professional look, a casual weekend look, and an elevated evening look. Each look includes every piece styled together: brand name and exact price.",
             },
             {
               q: "How are looks selected?",
               a: "I personally review the week's fashion landscape — editorial coverage, retail arrivals, season transitions — and curate three complete outfits that work together. Nothing algorithmic. No sponsored placements.",
             },
             {
-              q: "What does \"direct buy links\" mean?",
-              a: "Every piece in every look has one link that goes directly to that item on the retailer's site — the right color, the right style. Not a search page. Not a Pinterest board. The exact product.",
+              q: "How do I find the pieces Ellie recommends?",
+              a: "Every piece in every look includes the brand name and exact price. Search that brand directly — brand.com — and you'll find it. Nothing algorithmic. No guessing.",
             },
             {
               q: "Can I cancel anytime?",
@@ -269,8 +269,8 @@ export default function StyleGuidePage() {
             margin: "0 auto 28px", maxWidth: "440px", color: "#4A4A4A",
             fontSize: "14px", lineHeight: 1.75,
           }}>
-            Every Monday I publish three complete looks — every piece, every price,
-            every direct buy link. This is the 5-piece formula in motion, curated fresh each week.
+            Every Monday I publish three complete looks — every piece, every brand,
+            every price. This is the 5-piece formula in motion, curated fresh each week.
           </p>
           <Link href="/#join" style={{
             display: "inline-block", background: "#C4956A", color: "#FDFAF5",
