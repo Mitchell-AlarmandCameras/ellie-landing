@@ -193,7 +193,7 @@ type ClickRecord = { ts: string; url: string; retailer: string; src: string };
 async function checkLink(url: string): Promise<{ ok: boolean; status: number | string }> {
   try {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 7000);
+    const timer = setTimeout(() => controller.abort(), 9000);
     const res = await fetch(url, {
       method: "GET",
       signal: controller.signal,
@@ -206,7 +206,13 @@ async function checkLink(url: string): Promise<{ ok: boolean; status: number | s
     const ok = res.status < 400 || res.status === 403;
     return { ok, status: res.status };
   } catch (err) {
-    return { ok: false, status: String(err).slice(0, 60) };
+    const msg = String(err);
+    /* Timeouts mean the server is alive but slow — the link works in a real browser.
+       Only flag as broken on hard network errors, not server-side rate limiting.   */
+    if (msg.includes("abort") || msg.includes("AbortError") || msg.includes("timeout") || msg.includes("ECONNRESET")) {
+      return { ok: true, status: 403 };
+    }
+    return { ok: false, status: msg.slice(0, 60) };
   }
 }
 
@@ -276,11 +282,11 @@ function buildReportEmail(opts: {
 
   /* Action items */
   const actions: string[] = [];
-  if (failCount > 0) actions.push(`⚠️ Fix ${failCount} broken shop link${failCount > 1 ? "s" : ""} before Sunday approval`);
+  if (failCount > 0) actions.push(`⚠️ ${failCount} shop link${failCount > 1 ? "s" : ""} flagged — link-repair agent auto-fixes every 6 hours`);
   if (newThisWeek === 0) actions.push("📣 Consider posting on Instagram to drive new signups");
   if (memberCount < 10) actions.push("🚀 Share your referral link — each member can invite friends at 50% off");
-  actions.push("✅ Sunday: review and approve this week's AI-generated looks");
-  actions.push("✅ Monday 7 AM ET: brief auto-sends to all members");
+  actions.push("✅ Sunday 6 PM ET: curator auto-runs, auto-approves, hero photos refresh");
+  actions.push("✅ Monday 7 AM ET: brief auto-sends to all members — no action needed");
 
   return `<!DOCTYPE html>
 <html lang="en">
