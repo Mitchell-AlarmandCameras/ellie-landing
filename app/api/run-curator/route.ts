@@ -1177,14 +1177,13 @@ export async function GET(req: NextRequest) {
     }
 
     return NextResponse.json({
-      success:          true,
-      weekOf:           finalLookbook.weekOf,
+      success:        true,
+      weekOf:         finalLookbook.weekOf,
       weekNumber,
-      approveUrl,
-      linksValidated:   linkResults.length,
-      linksOriginalOK:  step1Count,
-      linksCascaded:    repairedCount,
-      seoArticle:       seoArticleSlug ?? "not this week",
+      autoApproved:   true,
+      linksValidated: linkResults.length,
+      linksCascaded:  repairedCount,
+      seoArticle:     seoArticleSlug ?? "not this week",
     });
   } catch (err) {
     console.error("[curator] Fatal error:", err);
