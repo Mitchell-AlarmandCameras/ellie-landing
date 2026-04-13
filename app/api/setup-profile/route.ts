@@ -18,7 +18,7 @@ export const runtime     = "nodejs";
 export const maxDuration = 60;
 export const dynamic     = "force-dynamic";
 
-const AVATAR_URL = "https://stylebyellie.com/ellie-avatar.png";
+const AVATAR_URL = "https://stylebyellie.com/ellie-avatar.jpg";
 const TWITTER_BIO = "Weekly fashion edits curated by Ellie — three complete looks with direct buy links, every Monday. stylebyellie.com";
 const BLUESKY_BIO = "Weekly fashion edits — three complete looks with direct buy links, every Monday. stylebyellie.com";
 const BSKY = "https://bsky.social/xrpc";
@@ -122,7 +122,7 @@ async function updateBlueskyProfile(): Promise<{ ok: boolean; detail: string }> 
     // 3 — Upload blob
     const blobRes = await fetch(`${BSKY}/com.atproto.repo.uploadBlob`, {
       method:  "POST",
-      headers: { Authorization: `Bearer ${session.accessJwt}`, "Content-Type": "image/png" },
+      headers: { Authorization: `Bearer ${session.accessJwt}`, "Content-Type": "image/jpeg" },
       body:    imgBuf,
     });
     if (!blobRes.ok) return { ok: false, detail: "Bluesky blob upload failed" };
