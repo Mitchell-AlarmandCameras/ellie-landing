@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import fs from "fs";
 import path from "path";
+import { searchBestProduct } from "@/lib/product-hunter";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    GET /api/run-curator
@@ -16,25 +17,16 @@ import path from "path";
      4. Email Ellie a preview with an Approve button
 ═══════════════════════════════════════════════════════════════════════════ */
 
-export const runtime    = "nodejs";
+export const runtime     = "nodejs";
 export const maxDuration = 60;
+export const dynamic     = "force-dynamic";
 
 /* ─── Scrape sources — 10 sources across editorial + retail ────── */
 const SCRAPE_SOURCES = [
   {
-    name: "Vogue — Fashion",
-    url:  "https://www.vogue.com/fashion",
-    hint: "women's high fashion editorial, current season trends, runway to street",
-  },
-  {
     name: "Who What Wear — Trends",
     url:  "https://www.whowhatwear.com/fashion/trends",
     hint: "women's accessible luxury trends, what's selling this week",
-  },
-  {
-    name: "The Cut — Fashion",
-    url:  "https://www.thecut.com/fashion/",
-    hint: "women's fashion editorial and cultural commentary",
   },
   {
     name: "Elle — Fashion",
@@ -42,34 +34,14 @@ const SCRAPE_SOURCES = [
     hint: "women's fashion trend reports, seasonal looks, runway coverage",
   },
   {
-    name: "Harper's Bazaar — Style",
-    url:  "https://www.harpersbazaar.com/fashion/",
-    hint: "luxury women's fashion, seasonal must-haves, best-dressed picks",
-  },
-  {
-    name: "Refinery29 — Fashion",
-    url:  "https://www.refinery29.com/en-us/fashion",
-    hint: "contemporary women's fashion, accessible styling ideas, what real women buy",
-  },
-  {
-    name: "Shopbop — New Arrivals",
-    url:  "https://www.shopbop.com/new-arrivals/br/v=1/N-16de.htm",
-    hint: "what contemporary luxury women are buying right now — real trending pieces",
-  },
-  {
     name: "Revolve — New Arrivals",
     url:  "https://www.revolve.com/clothing/br/d25a59/?navsrc=subclothing",
     hint: "resort and contemporary luxury trends, what's moving right now",
   },
   {
-    name: "Net-a-Porter — New In",
-    url:  "https://www.net-a-porter.com/en-us/shop/new-in",
-    hint: "luxury women's designer new arrivals, season's key pieces",
-  },
-  {
-    name: "Mr Porter — Style",
-    url:  "https://www.mrporter.com/en-us/mens/clothing",
-    hint: "luxury menswear styling and editorial inspiration",
+    name: "Refinery29 — Fashion",
+    url:  "https://www.refinery29.com/en-us/fashion",
+    hint: "contemporary women's fashion, accessible styling ideas, what real women buy",
   },
 ];
 
@@ -106,16 +78,119 @@ async function fetchSnippet(source: { name: string; url: string; hint: string })
 }
 
 /* ─── Claude prompt ─────────────────────────────────────────────── */
-const SYSTEM_PROMPT = `You are Ellie, a private style consultant with twenty years dressing executives,
-editors, and high-net-worth individuals — primarily women, with an eye for men's style too.
+const SYSTEM_PROMPT = `You are Ellie — twenty years working alongside the quietly powerful women
+who ran the room. You dressed the executives, the editors, the women whose presence was felt
+before they spoke. You know fashion the way a trusted insider knows it: what actually works,
+what is overrated, and exactly where to find the right piece at the right price.
+
 You run "The Style Refresh" — a $19/month membership delivering three complete, sourced looks
-every Monday morning with direct buy links.
+every Monday morning. Brand, price, and your editorial note for every piece. Your members are
+professional women who want to look polished and intentional without spending hours on it.
 
-Your clientele is predominantly women who want to look polished, current, and effortlessly
-intentional. Occasionally you include a look suitable for men or both.
+TONE AND WRITING RULES — NON-NEGOTIABLE:
+- Write like a real person with opinions, not a content generator.
+- Be specific. Name the brand. Name the price point. Name the reason it belongs in this look.
+- Short sentences earn their place. So do long ones — but only when the idea requires it.
+- Use first person sparingly. When you do, mean it.
+- One em-dash per section maximum.
 
-Tone: authoritative, specific, warm. No filler. No "chic" or "stunning". 
-Speak as if writing a short note to a trusted client — not a magazine spread.`;
+BANNED WORDS — never write these:
+elevate, seamlessly, transformative, game-changing, curated (use: sourced/chosen/selected),
+stunning, chic, luxurious, intuitive, innovative, cutting-edge, empower, journey, discover
+(as a CTA), thoughtfully, intentional (as a vague adjective), premium (just say why it's good),
+nourishing, effortless (unless earned by specifics), comprehensive, bespoke, tailored (vague).
+
+BANNED PHRASES — never write these:
+"In today's world...", "It's no secret that...", "Take your style to the next level",
+"Look no further", "Whether you're a beginner or seasoned...", "Say goodbye to X and hello to Y",
+"The perfect solution", "Designed with you in mind", "Like having a stylist in your pocket",
+"...and so much more!", "Unlock your potential", "Your style journey".
+
+PRODUCT NOTES — this is where AI reveals itself most:
+BAD: "This luxurious blazer elevates any look with its sophisticated silhouette."
+GOOD: "Ivory bouclé, Vince. Worn open over a silk shell this is a closing-meeting blazer. Belted with wide-leg trousers it's something else entirely."
+
+The reader is a woman who reads Vogue, buys $300 shoes, and immediately recognizes generic copy.
+Write as if a senior editor at a premium fashion publication reviewed every word.`;
+
+
+/* ─── Load Trend Scout brief from Blob ────────────────────────── */
+async function loadTrendBrief(): Promise<string> {
+  try {
+    const token = process.env.BLOB_READ_WRITE_TOKEN;
+    if (!token) return "";
+    const { list } = await import("@vercel/blob");
+    const { blobs } = await list({ prefix: "ellie-trends/" });
+    const file = blobs.find(b => b.pathname === "ellie-trends/current.json");
+    if (!file) return "";
+
+    /* Only use if generated within the last 2 days */
+    const ageHours = (Date.now() - new Date(file.uploadedAt).getTime()) / 3_600_000;
+    if (ageHours > 48) return "";
+
+    const r = await fetch(file.url, { cache: "no-store" });
+    if (!r.ok) return "";
+    const brief = await r.json() as {
+      season: string;
+      dominantColors: string[];
+      keyPieces: string[];
+      mood: string;
+      trendInsights: string;
+      whatToAvoid: string[];
+      occasionContext: string;
+    };
+
+    return `
+TREND BRIEF FROM ELLIE'S RESEARCH ANALYST (generated this week):
+Season: ${brief.season}
+Editorial Mood: ${brief.mood}
+Dominant Colors This Week: ${brief.dominantColors.join(", ")}
+Key Pieces Having a Moment: ${brief.keyPieces.join(", ")}
+Trend Insights: ${brief.trendInsights}
+What Members Are Dressing For This Week: ${brief.occasionContext}
+AVOID THIS WEEK (overdone or off-brand): ${brief.whatToAvoid.join(", ")}
+→ Let this brief guide the look selection, color palette, and piece choices for this week.`;
+  } catch {
+    return "";
+  }
+}
+
+/* ─── Load Content Director directive from Blob ───────────────── */
+async function loadContentDirective(): Promise<string> {
+  try {
+    const token = process.env.BLOB_READ_WRITE_TOKEN;
+    if (!token) return "";
+    const { list } = await import("@vercel/blob");
+    const { blobs } = await list({ prefix: "ellie-directives/" });
+    const file = blobs.find(b => b.pathname === "ellie-directives/content.json");
+    if (!file) return "";
+
+    /* Only use if generated within the last 12 hours (same Sunday) */
+    const ageHours = (Date.now() - new Date(file.uploadedAt).getTime()) / 3_600_000;
+    if (ageHours > 12) return "";
+
+    const r = await fetch(file.url, { cache: "no-store" });
+    if (!r.ok) return "";
+    const d = await r.json() as {
+      emphasize?:       string[];
+      brandsToFeature?: string[];
+      brandsToRest?:    string[];
+      avoidRepeat?:     string[];
+      curatorNote?:     string;
+    };
+
+    const parts: string[] = ["\nCONTENT DIRECTOR BRIEF (set 1 hour ago):"];
+    if (d.emphasize?.length)       parts.push(`Emphasize this week: ${d.emphasize.join(", ")}`);
+    if (d.brandsToFeature?.length) parts.push(`Brands to feature (underused recently): ${d.brandsToFeature.join(", ")}`);
+    if (d.brandsToRest?.length)    parts.push(`Brands to rest (recently shown): ${d.brandsToRest.join(", ")}`);
+    if (d.avoidRepeat?.length)     parts.push(`Avoid repeating these piece types: ${d.avoidRepeat.join(", ")}`);
+    if (d.curatorNote)             parts.push(`Director's note: "${d.curatorNote}"`);
+    parts.push("→ This brief reflects CEO strategy + recent content history. Follow it.");
+    return parts.join("\n");
+  } catch {
+    return "";
+  }
+}
 
 /* ─── Load 4-week click analytics from Blob ───────────────────── */
 async function loadClickAnalytics(): Promise<string> {
@@ -181,7 +256,7 @@ ${topRetailers}
   }
 }
 
-function buildUserPrompt(scrapedData: string, today: string, weekNumber: number, analytics = ""): string {
+function buildUserPrompt(scrapedData: string, today: string, weekNumber: number, analytics = "", trendBrief = ""): string {
   return `It is Sunday. Generate this week's Monday Style Refresh brief.
 
 Use the scraped editorial and fashion data below as inspiration.
@@ -192,7 +267,7 @@ SCRAPED DATA:
 ${scrapedData}
 
 TODAY: ${today}
-WEEK NUMBER: ${weekNumber}${analytics}
+WEEK NUMBER: ${weekNumber}${trendBrief}${analytics}
 
 REQUIREMENTS:
 • Three complete looks: The Executive, The Weekender, The Wildcard
@@ -201,6 +276,11 @@ REQUIREMENTS:
 • Prices: mix $80–$500 (accessible) and $500–$2,500 (aspirational)
 • editorialLead: one sentence setting the week's mood/season
 • editorsNote per look: one insider observation — specific, not generic
+• CAPITALIZATION RULE (NON-NEGOTIABLE): In the "piece" field, ALL words must be Title Case.
+    Color names and fabric/material descriptors must ALWAYS be capitalized.
+    ✅ CORRECT: "Tailored Blazer in Ivory Bi-Stretch Cotton", "Wide-Leg Trouser in Sand Stretch-Twill", "Bias-Cut Silk Slip Dress in Champagne"
+    ❌ WRONG:   "tailored blazer in ivory bi-stretch cotton", "Wide-leg trouser in sand stretch-twill"
+    This applies to every color word: Ivory, Sand, Nude, Cognac, Ecru, Champagne, Camel, Indigo, Natural, Flax, Cream, Blush, etc.
 • buyLink: Use a THREE-TIER strategy. The more specific your search query, the closer it gets
     to the exact item, color, fabric, and silhouette. Always include color + material + silhouette.
 
@@ -254,7 +334,12 @@ REQUIREMENTS:
       Anthropologie linen blazer       → https://www.anthropologie.com/search?q=linen+blazer+women
       Free People maxi dress boho      → https://www.freepeople.com/search?query=maxi+dress+linen+women
       Club Monaco tailored blazer      → https://www.clubmonaco.com/search?q=tailored+blazer+women
-      Quince cashmere crewneck         → https://www.onequince.com/search?q=cashmere+crewneck+women
+      Quince cashmere crewneck         → https://www.quince.com/women/clothing/sweaters?q=cashmere+crewneck
+      Quince silk cami ivory           → https://www.quince.com/women/clothing/tops?q=silk+cami+ivory
+      Quince wide-leg trouser          → https://www.quince.com/women/clothing/pants?q=wide+leg+trouser
+      Quince silk slip dress           → https://www.quince.com/women/clothing/dresses?q=silk+slip+dress
+      Quince pima cotton tee           → https://www.quince.com/women/clothing/tops?q=pima+cotton+tee
+      NOTE: ALWAYS use quince.com/women/clothing/[category]?q=... — NEVER use quince.com/search which returns men's results
       Everlane fitted white tee        → https://www.everlane.com/search?q=fitted+crew+tee+white+cotton
       Everlane wide-leg trouser        → https://www.everlane.com/search?q=wide+leg+trouser+women
       Banana Republic tailored blazer  → https://bananarepublic.gap.com/browse/search.do?searchText=tailored+blazer+women
@@ -283,9 +368,7 @@ REQUIREMENTS:
 
   ─── TIER 2: Luxury multi-brand retailers (USE when no specific brand is named, ───
   ─── or when a broader curated selection fits the brief better)                 ───
-    Shopbop (contemporary luxury, ships fast, great search):
-      https://www.shopbop.com/s/search?q=[color+material+item+women]
-      e.g. cream silk blouse women → https://www.shopbop.com/s/search?q=cream+silk+blouse+women
+    ❌ DO NOT USE Shopbop — their search URLs return 404 errors externally. NEVER generate a shopbop.com link.
     Revolve (resort/contemporary, young luxury):
       https://www.revolve.com/r/Search.jsp?q=[color+item+style]
       e.g. linen wide leg pant → https://www.revolve.com/r/Search.jsp?q=linen+wide+leg+pant+women
@@ -321,8 +404,10 @@ REQUIREMENTS:
     ❌ NEVER use Google Shopping — mixes luxury and cheap, destroys editorial quality
     ❌ NEVER use a direct product URL — it expires when the item sells out
     ❌ NEVER use a brand homepage or collection landing page
-    ❌ BLOCKED SITES (server rejects all external requests) — never link to:
-       Sézane, Madewell, J.Crew, ASOS, Zara, H&M, Sam Edelman
+    ❌ BLOCKED SITES (server rejects bots OR URLs are unreliable) — NEVER use ANY of these brands at all.
+       Do not pick them as the brand, do not link to them, do not mention them.
+       Complete ban list: Baggu, Shopbop, Sézane, Madewell, J.Crew, ASOS, Zara, H&M, Sam Edelman,
+       Net-a-Porter, Target, Amazon, Walmart, TJ Maxx, Shein, Temu, Fashion Nova
 
 WOMEN'S BRANDS TO DRAW FROM — pull from across this full universe:
 
@@ -417,7 +502,7 @@ Return ONLY valid JSON — no markdown, no extra text — matching this structur
 }`;
 }
 
-async function callClaude(scrapedData: string, today: string, weekNumber: number, analytics = ""): Promise<Record<string, unknown>> {
+async function callClaude(scrapedData: string, today: string, weekNumber: number, analytics = "", trendBrief = ""): Promise<Record<string, unknown>> {
   const apiKey = process.env.ANTHROPIC_API_KEY?.trim();
   if (!apiKey) throw new Error("ANTHROPIC_API_KEY not set");
 
@@ -429,10 +514,10 @@ async function callClaude(scrapedData: string, today: string, weekNumber: number
       "content-type":      "application/json",
     },
     body: JSON.stringify({
-      model:      "claude-opus-4-5",
-      max_tokens: 4096,
+      model:      "claude-3-5-sonnet-20241022",
+      max_tokens: 3000,
       system:     SYSTEM_PROMPT,
-      messages:   [{ role: "user", content: buildUserPrompt(scrapedData, today, weekNumber, analytics) }],
+      messages:   [{ role: "user", content: buildUserPrompt(scrapedData, today, weekNumber, analytics, trendBrief) }],
     }),
   });
 
@@ -958,7 +1043,7 @@ async function generateSEOArticle(keyword: string): Promise<Record<string, unkno
 
   const prompt = `Write a 650-750 word SEO article for stylebyellie.com targeting the keyword: "${keyword}"
 
-stylebyellie.com is a $19/month subscription where members receive 3 expertly curated fashion looks every Monday morning with direct buy links — like having a personal stylist in their inbox.
+stylebyellie.com is a $19/month subscription where members receive 3 expertly curated fashion looks every Monday morning — brand, price, and editorial notes for every piece, like having a personal stylist in their inbox.
 
 Requirements:
 - H1 title that naturally contains the keyword
@@ -986,7 +1071,7 @@ Return ONLY valid JSON:
         "content-type":      "application/json",
       },
       body: JSON.stringify({
-        model:      "claude-opus-4-5",
+        model:      "claude-3-5-sonnet-20241022",
         max_tokens: 2500,
         messages:   [{ role: "user", content: prompt }],
       }),
@@ -1005,9 +1090,10 @@ Return ONLY valid JSON:
 /* ─── GET handler ───────────────────────────────────────────────── */
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get("authorization") ?? "";
+  const qSecret    = new URL(req.url).searchParams.get("secret") ?? "";
   const cronSecret = process.env.CRON_SECRET?.trim() ?? process.env.CURATOR_APPROVE_SECRET?.trim() ?? "";
 
-  if (authHeader !== `Bearer ${cronSecret}`) {
+  if (authHeader !== `Bearer ${cronSecret}` && qSecret !== cronSecret) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -1040,15 +1126,31 @@ export async function GET(req: NextRequest) {
       timeZone: "America/New_York",
     });
 
-    /* 3 — Generate with Claude */
+    /* 3 — Generate with Claude (enhancements skipped to stay within 60s budget) */
     console.log("[curator] Calling Claude…");
-    /* Load 4-week click performance data to feed back into Claude */
-    const analytics = await loadClickAnalytics();
-    if (analytics) console.log("[curator] Analytics loaded:", analytics.substring(0, 120));
+    const lookbook = await callClaude(scrapedData, today, weekNumber, "", "");
 
-    const lookbook = await callClaude(scrapedData, today, weekNumber, analytics);
+    /* 4 — Product Hunter: upgrade Claude's search URLs to exact product links */
+    /* Disabled to keep function within serverless timeout budget */
+    const serperKey = null;
+    if (serperKey && lookbook.looks) {
+      console.log("[curator] Running Product Hunter — upgrading to exact product links…");
+      const rawLooksForHunter = lookbook.looks as Array<{ items: Array<{ piece: string; brand: string; price: string; buyLink: string }> }>;
+      const allHunterItems: Array<{ look: typeof rawLooksForHunter[0]; item: typeof rawLooksForHunter[0]["items"][0] }> = [];
+      for (const look of rawLooksForHunter) {
+        for (const item of (look.items ?? [])) allHunterItems.push({ look, item });
+      }
+      const hunterResults = await Promise.all(
+        allHunterItems.map(({ item }) => searchBestProduct(serperKey, item.piece, item.brand, item.price))
+      );
+      let upgraded = 0;
+      hunterResults.forEach((exactUrl, idx) => {
+        if (exactUrl) { allHunterItems[idx].item.buyLink = exactUrl; upgraded++; }
+      });
+      console.log(`[curator] Product Hunter upgraded ${upgraded} links to exact products`);
+    }
 
-    /* 4 — Validate & auto-repair every shop link (5-step waterfall cascade) */
+    /* 5 — Validate & auto-repair every shop link (waterfall cascade) */
     console.log("[curator] Running waterfall link validation…");
     const rawLooks = (lookbook.looks as Look[]) ?? [];
     const { repairedLooks, results: linkResults } = await validateAndRepairLooks(rawLooks);
@@ -1091,8 +1193,9 @@ export async function GET(req: NextRequest) {
     }
 
     /* 7 — Monthly SEO article (first Sunday of each month only) */
+    /* Skipped inline — runs separately to avoid timeout */
     let seoArticleSlug: string | null = null;
-    if (isFirstSundayOfMonth() && process.env.BLOB_READ_WRITE_TOKEN) {
+    if (false && isFirstSundayOfMonth() && process.env.BLOB_READ_WRITE_TOKEN) {
       try {
         const month   = new Date().getMonth();
         const keyword = SEO_KEYWORDS[month] ?? "women's fashion style guide";
