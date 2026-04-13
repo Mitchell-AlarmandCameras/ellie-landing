@@ -1150,39 +1150,113 @@ export async function GET(req: NextRequest) {
       console.log(`[curator] Product Hunter upgraded ${upgraded} links to exact products`);
     }
 
-    /* 5 — Skip live link validation to stay within 60s budget */
-    /* Links are validated on Monday by the link-check cron instead */
-    const rawLooks   = (lookbook.looks as Look[]) ?? [];
-    const linkResults: ValidationResult[] = [];
-    const finalLookbook = { ...lookbook, looks: rawLooks };
-    console.log(`[curator] Link validation skipped — ${rawLooks.reduce((n, l) => n + (l.items?.length ?? 0), 0)} links will be checked by Monday link-check cron`);
+    /* 5 — Auto-approve: save directly to Blob — no human click needed */
+    const rawLooks      = (lookbook.looks as Look[]) ?? [];
+    const finalLookbook = { ...lookbook, looks: rawLooks, approvedAt: new Date().toISOString() };
 
-    /* 5 — Save to /tmp */
+    /* Also save to /tmp as fallback for approve-weekly if called manually */
     try {
       fs.writeFileSync(draftPath, JSON.stringify(finalLookbook), "utf8");
-      console.log("[curator] Draft saved to /tmp/ellie-draft.json");
-    } catch (fsErr) {
-      console.warn("[curator] Could not write /tmp/ellie-draft.json:", fsErr);
+    } catch { /* non-fatal */ }
+
+    if (process.env.BLOB_READ_WRITE_TOKEN) {
+      try {
+        const { put, list } = await import("@vercel/blob");
+        const slug = String(finalLookbook.weekOf ?? "")
+          .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+        /* Save approved brief */
+        await put(
+          `ellie-approved/${slug}.json`,
+          JSON.stringify(finalLookbook),
+          { access: "public", contentType: "application/json", addRandomSuffix: false }
+        );
+
+        /* Save homepage preview (no buy links) */
+        const previewData = {
+          weekOf:        finalLookbook.weekOf,
+          editorialLead: finalLookbook.editorialLead ?? "",
+          updatedAt:     new Date().toISOString(),
+          looks: rawLooks.map((look) => ({
+            index:   look.index,
+            label:   look.label,
+            tagline: look.tagline,
+            teaser:  (look.items ?? []).slice(0, 4).map((item) => item.piece),
+          })),
+        };
+        await put("ellie-preview/current.json", JSON.stringify(previewData), {
+          access: "public", contentType: "application/json", addRandomSuffix: false,
+        });
+
+        /* Publish SEO blog post */
+        const postSlug = `week-of-${String(finalLookbook.weekOf ?? "")
+          .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "")}`;
+        await put(`blog/posts/${postSlug}.json`, JSON.stringify({
+          slug:          postSlug,
+          weekOf:        finalLookbook.weekOf,
+          publishedAt:   new Date().toISOString(),
+          editorialLead: String(finalLookbook.editorialLead ?? ""),
+          looks: rawLooks.map(look => ({
+            index: look.index, label: look.label, tagline: look.tagline,
+            editorsNote: look.editorsNote ?? "",
+            teaser: (look.items ?? []).slice(0, 5).map(i => i.piece),
+          })),
+        }), { access: "public", contentType: "application/json", addRandomSuffix: false });
+
+        /* Update blog index */
+        const { blobs: idxBlobs } = await list({ prefix: "blog/index" });
+        let blogIndex: Array<Record<string, unknown>> = [];
+        if (idxBlobs[0]) {
+          try { const r = await fetch(idxBlobs[0].url); if (r.ok) blogIndex = await r.json(); } catch { /* start fresh */ }
+        }
+        const idxEntry = { slug: postSlug, weekOf: finalLookbook.weekOf, publishedAt: new Date().toISOString(), editorialLead: String(finalLookbook.editorialLead ?? "").substring(0, 140), lookLabels: rawLooks.map(l => l.label) };
+        const existingIdx = blogIndex.findIndex((p) => p.slug === postSlug);
+        if (existingIdx >= 0) blogIndex[existingIdx] = idxEntry; else blogIndex.unshift(idxEntry);
+        await put("blog/index.json", JSON.stringify(blogIndex.slice(0, 52)), { access: "public", contentType: "application/json", addRandomSuffix: false });
+
+        console.log(`[curator] Auto-approved and saved to Blob — week of ${String(finalLookbook.weekOf ?? "")}`);
+      } catch (blobErr) {
+        console.error("[curator] Blob save failed:", blobErr);
+      }
     }
 
-    /* 6 — Send approval email */
-    const approveUrl = `${baseUrl}/api/approve-weekly?secret=${encodeURIComponent(secret)}`;
-
+    /* 6 — Send notification email (brief is live — no approval needed) */
     if (resendKey && fromEmail && notifyEmail) {
       const resend = new Resend(resendKey);
+      const looks  = rawLooks as Array<{ label: string; tagline: string; items?: Array<{ piece: string; brand: string; price: string }> }>;
+      const notifyHtml = `<!DOCTYPE html><html><body style="background:#F5EFE4;font-family:Georgia,serif;padding:36px 16px;">
+<table width="580" cellpadding="0" cellspacing="0" style="background:#FDFAF5;max-width:580px;margin:0 auto;border:1px solid #DDD4C5;">
+  <tr><td style="height:3px;background:linear-gradient(90deg,transparent,#C4956A,transparent);"></td></tr>
+  <tr><td style="padding:28px 36px;text-align:center;background:#EDE5D8;">
+    <p style="margin:0;color:#C4956A;font-size:10px;letter-spacing:0.32em;text-transform:uppercase;font-family:Arial,sans-serif;">Ellie · The Style Refresh</p>
+    <h1 style="margin:8px 0 0;color:#2C2C2C;font-size:22px;font-weight:400;">✓ This week's brief is live</h1>
+    <p style="margin:8px 0 0;color:#6B6560;font-size:13px;font-family:Arial,sans-serif;">Week of ${String(finalLookbook.weekOf ?? "")} · Auto-approved · Sends Monday 7 AM ET</p>
+  </td></tr>
+  <tr><td style="padding:24px 36px;">
+    <p style="margin:0 0 16px;font-size:14px;color:#4A4A4A;font-family:Georgia,serif;font-style:italic;line-height:1.7;">${String(finalLookbook.editorialLead ?? "")}</p>
+    ${looks.map(look => `
+    <div style="margin-bottom:20px;border-left:2px solid #C4956A;padding-left:14px;">
+      <p style="margin:0 0 4px;font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:#C4956A;font-family:Arial,sans-serif;">${look.label}</p>
+      <p style="margin:0 0 8px;font-size:15px;color:#2C2C2C;font-family:Georgia,serif;font-style:italic;">"${look.tagline}"</p>
+      ${(look.items ?? []).map(item => `<p style="margin:3px 0;font-size:12px;font-family:Arial,sans-serif;color:#4A4A4A;">${item.piece} — <span style="color:#C4956A;">${item.brand} · ${item.price}</span></p>`).join("")}
+    </div>`).join("")}
+  </td></tr>
+  <tr><td style="padding:0 36px 28px;text-align:center;">
+    <p style="color:#8A8580;font-size:11px;font-family:Arial,sans-serif;margin:0;">
+      Brief auto-approved and scheduled · No action needed<br/>
+      <a href="${baseUrl}/api/send-weekly" style="color:#C4956A;">Send now instead →</a>
+    </p>
+  </td></tr>
+</table></body></html>`;
+
       const { error } = await resend.emails.send({
         from:    `Ellie Curator <${fromEmail}>`,
         to:      notifyEmail,
-        subject: `[APPROVE] Style Refresh Draft — Week of ${String(finalLookbook.weekOf ?? "")}`,
-        html:    buildApprovalEmail(finalLookbook, approveUrl, linkResults),
+        subject: `✓ Style Refresh auto-approved — Week of ${String(finalLookbook.weekOf ?? "")} · Sends Monday 7 AM`,
+        html:    notifyHtml,
       });
-      if (error) {
-        console.error("[curator] Email send failed:", error);
-      } else {
-        console.log("[curator] Approval email sent to", notifyEmail);
-      }
-    } else {
-      console.error("[curator] Resend env not configured — no approval email sent.");
+      if (error) console.error("[curator] Notification email failed:", error);
+      else        console.log("[curator] Notification email sent to", notifyEmail);
     }
 
     /* 7 — Monthly SEO article (first Sunday of each month only) */
