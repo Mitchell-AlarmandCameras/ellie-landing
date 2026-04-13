@@ -257,207 +257,22 @@ ${topRetailers}
 }
 
 function buildUserPrompt(scrapedData: string, today: string, weekNumber: number, analytics = "", trendBrief = ""): string {
-  return `It is Sunday. Generate this week's Monday Style Refresh brief.
+  return `Generate this week's Monday Style Refresh brief. Today is ${today}, week ${weekNumber}.
 
-Use the scraped editorial and fashion data below as inspiration.
-Supplement with your own expertise for gaps — especially for women's luxury brands,
-current season pieces, and real product URLs.
-
-SCRAPED DATA:
-${scrapedData}
-
-TODAY: ${today}
-WEEK NUMBER: ${weekNumber}${trendBrief}${analytics}
+${scrapedData ? `TREND CONTEXT:\n${scrapedData.substring(0, 800)}\n` : ""}${trendBrief}${analytics}
 
 REQUIREMENTS:
 • Three complete looks: The Executive, The Weekender, The Wildcard
-• Lean women's fashion (2 of 3 looks should read women's; 1 can be gender-neutral or men's)
-• Each look: 4–5 pieces with brand, price, buyer's note, and a real buyLink URL
-• Prices: mix $80–$500 (accessible) and $500–$2,500 (aspirational)
-• editorialLead: one sentence setting the week's mood/season
-• editorsNote per look: one insider observation — specific, not generic
-• CAPITALIZATION RULE (NON-NEGOTIABLE): In the "piece" field, ALL words must be Title Case.
-    Color names and fabric/material descriptors must ALWAYS be capitalized.
-    ✅ CORRECT: "Tailored Blazer in Ivory Bi-Stretch Cotton", "Wide-Leg Trouser in Sand Stretch-Twill", "Bias-Cut Silk Slip Dress in Champagne"
-    ❌ WRONG:   "tailored blazer in ivory bi-stretch cotton", "Wide-leg trouser in sand stretch-twill"
-    This applies to every color word: Ivory, Sand, Nude, Cognac, Ecru, Champagne, Camel, Indigo, Natural, Flax, Cream, Blush, etc.
-• buyLink: Use a THREE-TIER strategy. The more specific your search query, the closer it gets
-    to the exact item, color, fabric, and silhouette. Always include color + material + silhouette.
-
-  ─── TIER 1: Named brand's own site (BEST — use whenever you name a specific brand) ───
-    Format: https://[brand-domain]/search?q=[color+material+silhouette+item]
-    Verified brand search URLs — copy the format exactly:
-
-    FRENCH / EUROPEAN LUXURY:
-      Totême structured blazer ivory   → https://toteme-studio.com/search?type=product&q=ivory+structured+blazer
-      Totême trench coat camel         → https://toteme-studio.com/search?type=product&q=trench+coat+camel
-      Totême wrap dress silk           → https://toteme-studio.com/search?type=product&q=wrap+dress+silk
-      Jacquemus mini bag leather black → https://www.jacquemus.com/search?q=mini+bag+leather+black
-      Jacquemus linen blazer           → https://www.jacquemus.com/search?q=linen+blazer
-      A.P.C. structured blazer navy    → https://www.apc.fr/us/search/?q=structured+blazer+navy
-      A.P.C. high-rise jeans           → https://www.apc.fr/us/search/?q=high+rise+jeans+straight
-      Isabel Marant suede jacket       → https://www.isabelmarant.com/en-us/search?q=suede+jacket+camel
-      Isabel Marant ankle boot leather → https://www.isabelmarant.com/en-us/search?q=ankle+boot+leather+black
-      AMI Paris relaxed blazer         → https://www.ami-paris.com/en-us/search?q=relaxed+blazer+men
-      Ganni floral midi dress          → https://www.ganni.com/en-us/search?q=floral+midi+dress
-      Ganni denim jacket off-white     → https://www.ganni.com/en-us/search?q=denim+jacket+off+white
-      Nanushka vegan leather jacket    → https://www.nanushka.com/search?q=vegan+leather+jacket
-      Ba&sh floral silk blouse         → https://www.ba-sh.com/en_us/search?q=silk+floral+blouse
-      Sandro tailored blazer ivory     → https://www.sandro-paris.com/en/search?q=tailored+blazer+ivory
-      Maje knit midi dress             → https://www.maje.com/en/search?q=knit+midi+dress
-      IRO leather jacket biker         → https://www.iro.com/en_us/search?q=leather+biker+jacket
-
-    CONTEMPORARY LUXURY (AMERICAN):
-      Theory wide-leg trouser black    → https://www.theory.com/search?q=wide+leg+trouser+black+wool
-      Theory single-button blazer      → https://www.theory.com/search?q=single+button+blazer+ivory
-      Theory fitted knit top           → https://www.theory.com/search?q=fitted+knit+top
-      Vince silk camisole cream        → https://www.vince.com/search?q=silk+camisole+cream
-      Vince wide-leg trouser ivory     → https://www.vince.com/search?q=wide+leg+trouser+ivory
-      Vince relaxed cashmere sweater   → https://www.vince.com/search?q=cashmere+relaxed+pullover
-      L'Agence silk blouse ivory       → https://www.lagence.com/search?q=silk+blouse+ivory
-      L'Agence high-rise straight jean → https://www.lagence.com/search?q=high+rise+straight+leg+jeans
-      Frame flared jeans dark wash     → https://www.frame-store.com/search?q=le+crop+flare+dark+wash
-      Frame silk blouse ivory          → https://www.frame-store.com/search?q=silk+blouse+ivory
-      Equipment silk shirt white       → https://www.equipmentfr.com/search?q=silk+shirt+white+button+down
-      Veronica Beard dickey blazer     → https://veronicabeard.com/search?q=dickey+jacket+blazer
-      Ulla Johnson floral midi dress   → https://ullajohnson.com/search?q=floral+midi+dress
-      Alice + Olivia structured blazer → https://www.aliceandolivia.com/search?q=structured+blazer
-      Rag & Bone slim trouser black    → https://www.rag-bone.com/search?q=slim+trouser+black
-      Rag & Bone Chelsea boot leather  → https://www.rag-bone.com/search?q=chelsea+boot+leather
-      Staud midi dress floral          → https://www.staud.clothing/search?q=floral+midi+dress
-      Staud structured tote bag        → https://www.staud.clothing/search?q=structured+tote+bag
-
-    ACCESSIBLE LUXURY:
-      Reformation linen wide-leg pant  → https://www.thereformation.com/search?q=linen+wide+leg+pant
-      Reformation midi dress silk      → https://www.thereformation.com/search?q=silk+midi+dress
-      Anthropologie slip dress champ.  → https://www.anthropologie.com/search?q=slip+dress+champagne+bias+cut
-      Anthropologie linen blazer       → https://www.anthropologie.com/search?q=linen+blazer+women
-      Free People maxi dress boho      → https://www.freepeople.com/search?query=maxi+dress+linen+women
-      Club Monaco tailored blazer      → https://www.clubmonaco.com/search?q=tailored+blazer+women
-      Quince cashmere crewneck         → https://www.quince.com/women/clothing/sweaters?q=cashmere+crewneck
-      Quince silk cami ivory           → https://www.quince.com/women/clothing/tops?q=silk+cami+ivory
-      Quince wide-leg trouser          → https://www.quince.com/women/clothing/pants?q=wide+leg+trouser
-      Quince silk slip dress           → https://www.quince.com/women/clothing/dresses?q=silk+slip+dress
-      Quince pima cotton tee           → https://www.quince.com/women/clothing/tops?q=pima+cotton+tee
-      NOTE: ALWAYS use quince.com/women/clothing/[category]?q=... — NEVER use quince.com/search which returns men's results
-      Everlane fitted white tee        → https://www.everlane.com/search?q=fitted+crew+tee+white+cotton
-      Everlane wide-leg trouser        → https://www.everlane.com/search?q=wide+leg+trouser+women
-      Banana Republic tailored blazer  → https://bananarepublic.gap.com/browse/search.do?searchText=tailored+blazer+women
-
-    EUROPEAN MID-RANGE:
-      COS oversized linen blazer       → https://www.cos.com/en_usd/search.html?q=oversized+linen+blazer
-      COS wide-leg trouser linen       → https://www.cos.com/en_usd/search.html?q=wide+leg+linen+trouser
-      & Other Stories silk midi dress  → https://www.stories.com/en_usd/search.html?q=silk+midi+dress
-      & Other Stories tailored blazer  → https://www.stories.com/en_usd/search.html?q=tailored+blazer
-      Arket linen shirt dress          → https://www.arket.com/en_usd/search?q=linen+shirt+dress
-      Mango linen blazer women         → https://www.mango.com/us/search?q=linen+blazer+women
-      Massimo Dutti tailored trousers  → https://www.massimodutti.com/us/search?q=tailored+trousers+women
-
-    JEWELRY & ACCESSORIES:
-      Mejuri bold gold hoops           → https://mejuri.com/search?q=bold+gold+hoop+earrings
-      Mejuri fine chain necklace gold  → https://mejuri.com/search?q=fine+chain+necklace+gold
-      Mejuri stackable rings           → https://mejuri.com/search?q=gold+stacking+rings
-      Monica Vinader layered necklace  → https://www.monicavinader.com/us/search?q=layered+gold+necklace
-      Gorjana dainty gold necklace     → https://gorjana.com/search?q=layered+gold+necklace
-      Tory Burch structured tote       → https://www.toryburch.com/en-us/search?q=structured+leather+tote
-      Tory Burch leather ballet flat   → https://www.toryburch.com/en-us/search?q=leather+ballet+flat
-      Kate Spade satchel bag           → https://www.katespade.com/search?q=leather+satchel+bag
-      Stuart Weitzman pointed pump     → https://www.stuartweitzman.com/search?q=pointed+toe+pump+leather
-      Schutz heeled sandal strappy     → https://www.schutz-shoes.com/search?q=strappy+heeled+sandal
-      Adidas Stan Smith white women    → https://www.adidas.com/us/search?q=stan+smith+white+women
-
-  ─── TIER 2: Luxury multi-brand retailers (USE when no specific brand is named, ───
-  ─── or when a broader curated selection fits the brief better)                 ───
-    ❌ DO NOT USE Shopbop — their search URLs return 404 errors externally. NEVER generate a shopbop.com link.
-    Revolve (resort/contemporary, young luxury):
-      https://www.revolve.com/r/Search.jsp?q=[color+item+style]
-      e.g. linen wide leg pant → https://www.revolve.com/r/Search.jsp?q=linen+wide+leg+pant+women
-    SSENSE (designer, avant-garde, curated):
-      https://www.ssense.com/en-us/women/search?q=[item+keywords]
-      e.g. structured trench coat → https://www.ssense.com/en-us/women/search?q=structured+trench+coat
-    Mytheresa (ultra-luxury designer only):
-      https://www.mytheresa.com/en-us/shop/women?q=[item+keywords]
-      e.g. cashmere turtleneck → https://www.mytheresa.com/en-us/shop/women?q=cashmere+turtleneck+women
-    Farfetch (global luxury, widest selection):
-      https://www.farfetch.com/shopping/women/search/items.aspx?q=[item+keywords]
-      e.g. tailored blazer beige → https://www.farfetch.com/shopping/women/search/items.aspx?q=tailored+blazer+beige+women
-    Saks Fifth Avenue (classic American luxury):
-      https://www.saksfifthavenue.com/search?query=[item+keywords]
-      e.g. chain strap bag → https://www.saksfifthavenue.com/search?query=chain+strap+shoulder+bag+women
-    Neiman Marcus (American luxury, designer):
-      https://www.neimanmarcus.com/en-us/c.cat?q=[item+keywords]
-      e.g. cashmere wrap coat → https://www.neimanmarcus.com/en-us/c.cat?q=cashmere+wrap+coat+women
-    Bloomingdale's (broad luxury, great for accessories):
-      https://www.bloomingdales.com/shop/search?Q=[item+keywords]
-      e.g. leather tote cognac → https://www.bloomingdales.com/shop/search?Q=leather+tote+cognac+women
-
-  ─── TIER 3: Nordstrom (USE for truly generic/unbranded items only) ───
-    https://www.nordstrom.com/sr?origin=keywordsearch&keyword=[color+material+item+women]
-    Always include "women" and be specific: color + material + silhouette
-    e.g. black pointed heel pump women → https://www.nordstrom.com/sr?origin=keywordsearch&keyword=black+pointed+toe+pump+leather+women
-
-  ─── NON-NEGOTIABLE LINK RULES ───
-    ✅ Brand shown on the card MUST match the brand/retailer in the buyLink URL
-    ✅ Always include color + material + silhouette in search queries for closer results
-    ✅ Always include "women" in multi-brand retailer searches
-    ❌ NEVER use Net-a-Porter for buyLinks — search URLs fail externally (use for trend research only)
-    ❌ NEVER use Google Shopping — mixes luxury and cheap, destroys editorial quality
-    ❌ NEVER use a direct product URL — it expires when the item sells out
-    ❌ NEVER use a brand homepage or collection landing page
-    ❌ BLOCKED SITES (server rejects bots OR URLs are unreliable) — NEVER use ANY of these brands at all.
-       Do not pick them as the brand, do not link to them, do not mention them.
-       Complete ban list: Baggu, Shopbop, Sézane, Madewell, J.Crew, ASOS, Zara, H&M, Sam Edelman,
-       Net-a-Porter, Target, Amazon, Walmart, TJ Maxx, Shein, Temu, Fashion Nova
-
-WOMEN'S BRANDS TO DRAW FROM — pull from across this full universe:
-
-  FRENCH / EUROPEAN LUXURY: Totême, Jacquemus, A.P.C., Isabel Marant, AMI Paris,
-    Nanushka, Ganni, Ba&sh, Sandro, Maje, IRO, Wandler
-
-  CONTEMPORARY LUXURY (AMERICAN): Theory, Vince, L'Agence, Frame, Veronica Beard,
-    Equipment, Ulla Johnson, Alice + Olivia, Rag & Bone, Staud, SMYTHE, 10 Crosby
-
-  ACCESSIBLE LUXURY: Reformation, Anthropologie, Free People, Club Monaco, Quince,
-    Everlane, Banana Republic
-
-  EUROPEAN MID-RANGE: COS, & Other Stories, Arket, Mango, Massimo Dutti
-
-  JEWELRY: Mejuri, Aurate, Monica Vinader, Gorjana, Sophie Buhai
-
-  SHOES: Stuart Weitzman, Schutz, Loeffler Randall, Isabel Marant, Tory Burch, Adidas Stan Smith
-
-  MULTI-BRAND RETAILERS (when no specific brand is named):
-    Shopbop, Revolve, SSENSE, Mytheresa, Farfetch, Saks Fifth Avenue, Neiman Marcus,
-    Bloomingdale's, Nordstrom
-
-MEN'S BRANDS (for the one men's/neutral look):
-  A.P.C., COS, AMI Paris, Sunspel, Norse Projects, Common Projects, Acne Studios, Incotex
-
-HERO IMAGES — pick exactly 4 from this verified pool to match this week's mood.
-Each image must come from the list below — do NOT invent photo IDs.
-Select images whose mood best matches the three looks you're generating:
-
-  EXECUTIVE / POWER:
-    id: "1483985988355-763728e1935b"  — fashion models walking, sophisticated
-    id: "1469334031218-e382a71b716b"  — elegant woman, polished portrait
-    id: "1529139574466-a303027ee77f"  — tailored, confident, editorial
-    id: "1594938298603-7f787ef8b22f"  — luxury fashion, structured
-
-  WEEKEND / CASUAL:
-    id: "1490481651871-ab68de25d43d"  — effortless casual style, relaxed
-    id: "1581044777550-4cfa2d08b18a"  — weekend chic, natural light
-    id: "1512436991641-6745cdb1723f"  — easy lifestyle, relaxed polish
-
-  EDITORIAL / WILDCARD:
-    id: "1515886657613-9f3515b0c78f"  — bold editorial model pose
-    id: "1539109136881-3be0616acf4b"  — high fashion editorial
-    id: "1595777457583-95e059d581b8"  — statement look, editorial
-
-  ACCESSORIES / DETAIL:
-    id: "1558769132-cb1aea458c5e"     — jewelry and accessories flatlay
-    id: "1509631179647-0177331693ae"  — woman walking, detail shot
-
-All image URLs follow: https://images.unsplash.com/photo-{id}?auto=format&fit=crop&w=900&q=85
+• Use brands from: Totême, A.P.C., Theory, Vince, L'Agence, Frame, Rag & Bone, Reformation, COS, & Other Stories, Arket, Isabel Marant, Ganni, Staud, Ulla Johnson, Everlane, Club Monaco, Mejuri, Gorjana, Stuart Weitzman, Schutz
+• buyLink format: brand search URL e.g. https://www.theory.com/search?q=wide+leg+trouser+black — NEVER direct product URLs, NEVER Shopbop, NEVER Net-a-Porter, NEVER Sézane, NEVER Madewell, NEVER Zara, NEVER Amazon
+• 2 women's looks + 1 gender-neutral or men's look
+• Each look: 4–5 pieces with brand, price, note, buyLink
+• Prices: mix $80–$500 and $500–$2,500
+• Piece names: Title Case always (e.g. "Wide-Leg Trouser in Ivory Stretch-Twill")
+• editorialLead: one sentence setting the week's mood
+• editorsNote per look: one specific insider observation
+• buyLink: brand search URL with color+material+item keywords (e.g. https://www.theory.com/search?q=wide+leg+trouser+ivory+wool). Use brand's own site when named. Fallback: revolve.com or nordstrom.com search. NEVER direct product URLs, NEVER Shopbop, NEVER Net-a-Porter.
+• heroImages: pick 4 ids from: "1483985988355-763728e1935b", "1469334031218-e382a71b716b", "1529139574466-a303027ee77f", "1490481651871-ab68de25d43d", "1581044777550-4cfa2d08b18a", "1515886657613-9f3515b0c78f", "1539109136881-3be0616acf4b", "1595777457583-95e059d581b8"
 
 Return ONLY valid JSON — no markdown, no extra text — matching this structure exactly:
 
@@ -1104,11 +919,8 @@ export async function GET(req: NextRequest) {
   const secret      = cronSecret;
 
   try {
-    /* 1 — Scrape */
-    console.log("[curator] Scraping fashion sources…");
-    const snippets = await Promise.all(SCRAPE_SOURCES.map(fetchSnippet));
-    const scrapedData = snippets.filter(Boolean).join("\n") ||
-      "[Scraping unavailable — using expert knowledge only]";
+    /* 1 — Skip scraping to stay within 60s budget — Claude uses expert knowledge */
+    const scrapedData = "";
 
     /* 2 — Determine week number */
     const tmpDir  = "/tmp";
