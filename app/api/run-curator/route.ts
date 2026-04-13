@@ -349,7 +349,7 @@ async function callClaude(scrapedData: string, today: string, weekNumber: number
       "content-type":      "application/json",
     },
     body: JSON.stringify({
-      model:      "claude-3-5-sonnet-20241022",
+      model:      "claude-3-5-haiku-20241022",
       max_tokens: 4096,
       system:     SYSTEM_PROMPT,
       messages:   [{ role: "user", content: buildUserPrompt(scrapedData, today, weekNumber, analytics, trendBrief) }],
