@@ -341,35 +341,56 @@ async function callClaude(scrapedData: string, today: string, weekNumber: number
   const apiKey = process.env.ANTHROPIC_API_KEY?.trim();
   if (!apiKey) throw new Error("ANTHROPIC_API_KEY not set");
 
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "x-api-key":         apiKey,
-      "anthropic-version": "2023-06-01",
-      "content-type":      "application/json",
-    },
-    body: JSON.stringify({
-      model:      process.env.ANTHROPIC_MODEL?.trim() || "claude-opus-4-5",
-      max_tokens: 4096,
-      system:     SYSTEM_PROMPT,
-      messages:   [{ role: "user", content: buildUserPrompt(scrapedData, today, weekNumber, analytics, trendBrief) }],
-    }),
-  });
+  /* Try models in order until one works */
+  const models = [
+    process.env.ANTHROPIC_MODEL?.trim(),
+    "claude-opus-4-5",
+    "claude-sonnet-4-5",
+    "claude-3-7-sonnet-20250219",
+    "claude-3-5-sonnet-20241022",
+    "claude-3-5-sonnet-20240620",
+    "claude-3-opus-20240229",
+    "claude-3-sonnet-20240229",
+  ].filter(Boolean) as string[];
 
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Claude API error ${res.status}: ${err}`);
+  let lastError = "";
+  for (const model of models) {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "x-api-key":         apiKey,
+        "anthropic-version": "2023-06-01",
+        "content-type":      "application/json",
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: 4096,
+        system:     SYSTEM_PROMPT,
+        messages:   [{ role: "user", content: buildUserPrompt(scrapedData, today, weekNumber, analytics, trendBrief) }],
+      }),
+    });
+
+    if (res.status === 404) {
+      console.log(`[curator] Model ${model} not available, trying next…`);
+      lastError = `Model ${model} not found`;
+      continue;
+    }
+
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(`Claude API error ${res.status}: ${err}`);
+    }
+
+    console.log(`[curator] Using model: ${model}`);
+    const json = await res.json() as { content: Array<{ text: string }> };
+    let raw = json.content[0]?.text ?? "";
+    raw = raw.trim();
+    if (raw.startsWith("```")) raw = raw.split("\n").slice(1).join("\n");
+    if (raw.endsWith("```")) raw = raw.split("```").slice(0, -1).join("```");
+    return JSON.parse(raw.trim()) as Record<string, unknown>;
   }
 
-  const json = await res.json() as { content: Array<{ text: string }> };
-  let raw = json.content[0]?.text ?? "";
-
-  /* Strip accidental markdown fences */
-  raw = raw.trim();
-  if (raw.startsWith("```")) raw = raw.split("\n").slice(1).join("\n");
-  if (raw.endsWith("```")) raw = raw.split("```").slice(0, -1).join("```");
-
-  return JSON.parse(raw.trim()) as Record<string, unknown>;
+  throw new Error(`No available Claude model found. Last error: ${lastError}`);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
