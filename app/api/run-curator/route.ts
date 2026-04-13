@@ -18,15 +18,25 @@ import { searchBestProduct } from "@/lib/product-hunter";
 ═══════════════════════════════════════════════════════════════════════════ */
 
 export const runtime     = "nodejs";
-export const maxDuration = 60;
+export const maxDuration = 300;
 export const dynamic     = "force-dynamic";
 
 /* ─── Scrape sources — 10 sources across editorial + retail ────── */
 const SCRAPE_SOURCES = [
   {
+    name: "Vogue — Fashion",
+    url:  "https://www.vogue.com/fashion",
+    hint: "women's high fashion editorial, current season trends, runway to street",
+  },
+  {
     name: "Who What Wear — Trends",
     url:  "https://www.whowhatwear.com/fashion/trends",
     hint: "women's accessible luxury trends, what's selling this week",
+  },
+  {
+    name: "The Cut — Fashion",
+    url:  "https://www.thecut.com/fashion/",
+    hint: "women's fashion editorial and cultural commentary",
   },
   {
     name: "Elle — Fashion",
@@ -34,14 +44,24 @@ const SCRAPE_SOURCES = [
     hint: "women's fashion trend reports, seasonal looks, runway coverage",
   },
   {
-    name: "Revolve — New Arrivals",
-    url:  "https://www.revolve.com/clothing/br/d25a59/?navsrc=subclothing",
-    hint: "resort and contemporary luxury trends, what's moving right now",
+    name: "Harper's Bazaar — Style",
+    url:  "https://www.harpersbazaar.com/fashion/",
+    hint: "luxury women's fashion, seasonal must-haves, best-dressed picks",
   },
   {
     name: "Refinery29 — Fashion",
     url:  "https://www.refinery29.com/en-us/fashion",
     hint: "contemporary women's fashion, accessible styling ideas, what real women buy",
+  },
+  {
+    name: "Revolve — New Arrivals",
+    url:  "https://www.revolve.com/clothing/br/d25a59/?navsrc=subclothing",
+    hint: "resort and contemporary luxury trends, what's moving right now",
+  },
+  {
+    name: "Net-a-Porter — New In",
+    url:  "https://www.net-a-porter.com/en-us/shop/new-in",
+    hint: "luxury women's designer new arrivals, season's key pieces",
   },
 ];
 
@@ -330,7 +350,7 @@ async function callClaude(scrapedData: string, today: string, weekNumber: number
     },
     body: JSON.stringify({
       model:      "claude-3-5-sonnet-20241022",
-      max_tokens: 2000,
+      max_tokens: 4096,
       system:     SYSTEM_PROMPT,
       messages:   [{ role: "user", content: buildUserPrompt(scrapedData, today, weekNumber, analytics, trendBrief) }],
     }),
@@ -919,8 +939,11 @@ export async function GET(req: NextRequest) {
   const secret      = cronSecret;
 
   try {
-    /* 1 — Skip scraping to stay within 60s budget — Claude uses expert knowledge */
-    const scrapedData = "";
+    /* 1 — Scrape fashion sources */
+    console.log("[curator] Scraping fashion sources…");
+    const snippets = await Promise.all(SCRAPE_SOURCES.map(fetchSnippet));
+    const scrapedData = snippets.filter(Boolean).join("\n") ||
+      "[Scraping unavailable — using expert knowledge only]";
 
     /* 2 — Determine week number */
     const tmpDir  = "/tmp";
@@ -938,9 +961,16 @@ export async function GET(req: NextRequest) {
       timeZone: "America/New_York",
     });
 
-    /* 3 — Generate with Claude (enhancements skipped to stay within 60s budget) */
+    /* 3 — Generate with Claude */
     console.log("[curator] Calling Claude…");
-    const lookbook = await callClaude(scrapedData, today, weekNumber, "", "");
+    const trendBrief       = await loadTrendBrief();
+    const contentDirective = await loadContentDirective();
+    const analytics        = await loadClickAnalytics();
+    if (trendBrief)       console.log("[curator] Trend brief loaded ✓");
+    if (contentDirective) console.log("[curator] Content directive loaded ✓");
+    if (analytics)        console.log("[curator] Analytics loaded ✓");
+    const combinedContext = [trendBrief, contentDirective].filter(Boolean).join("\n");
+    const lookbook = await callClaude(scrapedData, today, weekNumber, analytics, combinedContext);
 
     /* 4 — Product Hunter: upgrade Claude's search URLs to exact product links */
     /* Disabled to keep function within serverless timeout budget */
@@ -962,8 +992,15 @@ export async function GET(req: NextRequest) {
       console.log(`[curator] Product Hunter upgraded ${upgraded} links to exact products`);
     }
 
-    /* 5 — Auto-approve: save directly to Blob — no human click needed */
-    const rawLooks      = (lookbook.looks as Look[]) ?? [];
+    /* 5 — Validate & auto-repair every shop link (waterfall cascade) */
+    console.log("[curator] Running waterfall link validation…");
+    const rawLooksForValidation = (lookbook.looks as Look[]) ?? [];
+    const { repairedLooks, results: linkResults } = await validateAndRepairLooks(rawLooksForValidation);
+    const repairedCount = linkResults.filter(r => r.repaired).length;
+    console.log(`[curator] Links: ${linkResults.filter(r => (r.cascadeStep ?? 1) === 1).length}/${linkResults.length} original OK, ${repairedCount} cascaded`);
+
+    /* 6 — Auto-approve: save directly to Blob — no human click needed */
+    const rawLooks      = repairedLooks;
     const finalLookbook = { ...lookbook, looks: rawLooks, approvedAt: new Date().toISOString() };
 
     /* Also save to /tmp as fallback for approve-weekly if called manually */
