@@ -515,7 +515,7 @@ async function callClaude(scrapedData: string, today: string, weekNumber: number
     },
     body: JSON.stringify({
       model:      "claude-3-5-sonnet-20241022",
-      max_tokens: 3000,
+      max_tokens: 2000,
       system:     SYSTEM_PROMPT,
       messages:   [{ role: "user", content: buildUserPrompt(scrapedData, today, weekNumber, analytics, trendBrief) }],
     }),
@@ -1150,19 +1150,12 @@ export async function GET(req: NextRequest) {
       console.log(`[curator] Product Hunter upgraded ${upgraded} links to exact products`);
     }
 
-    /* 5 — Validate & auto-repair every shop link (waterfall cascade) */
-    console.log("[curator] Running waterfall link validation…");
-    const rawLooks = (lookbook.looks as Look[]) ?? [];
-    const { repairedLooks, results: linkResults } = await validateAndRepairLooks(rawLooks);
-    const repairedCount  = linkResults.filter(r => r.repaired).length;
-    const step1Count     = linkResults.filter(r => (r.cascadeStep ?? 1) === 1).length;
-    const cascadeBreakdown = [2,3,4,5].map(s => {
-      const n = linkResults.filter(r => (r.cascadeStep ?? 1) === s).length;
-      return n > 0 ? `step${s}:${n}` : null;
-    }).filter(Boolean).join(", ");
-    console.log(`[curator] Links: ${step1Count}/${linkResults.length} original OK, ${repairedCount} cascaded${cascadeBreakdown ? ` (${cascadeBreakdown})` : ""}`);
-    /* Write repaired looks back into lookbook before saving */
-    const finalLookbook = { ...lookbook, looks: repairedLooks };
+    /* 5 — Skip live link validation to stay within 60s budget */
+    /* Links are validated on Monday by the link-check cron instead */
+    const rawLooks   = (lookbook.looks as Look[]) ?? [];
+    const linkResults: ValidationResult[] = [];
+    const finalLookbook = { ...lookbook, looks: rawLooks };
+    console.log(`[curator] Link validation skipped — ${rawLooks.reduce((n, l) => n + (l.items?.length ?? 0), 0)} links will be checked by Monday link-check cron`);
 
     /* 5 — Save to /tmp */
     try {
