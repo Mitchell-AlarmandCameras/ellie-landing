@@ -153,7 +153,10 @@ async function markPosted() {
 /* ── Handler ──────────────────────────────────────────────────────── */
 export async function GET(req: NextRequest) {
   const secret = process.env.CRON_SECRET?.trim();
-  if (secret && req.headers.get("authorization") !== `Bearer ${secret}`) {
+  const provided = req.headers.get("authorization")?.replace("Bearer ", "").trim()
+    ?? new URL(req.url).searchParams.get("secret")?.trim()
+    ?? "";
+  if (secret && provided !== secret) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
   if (!HANDLE || !APP_PW) {
