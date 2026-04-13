@@ -149,7 +149,10 @@ async function updateBlueskyProfile(): Promise<{ ok: boolean; detail: string }> 
         },
       }),
     });
-    if (!putRes.ok) return { ok: false, detail: "Bluesky profile update failed" };
+    if (!putRes.ok) {
+      const putErr = await putRes.text();
+      return { ok: false, detail: `Bluesky profile update failed (${putRes.status}): ${putErr}` };
+    }
     return { ok: true, detail: "Bluesky avatar + bio updated" };
   } catch (e) {
     return { ok: false, detail: String(e) };
