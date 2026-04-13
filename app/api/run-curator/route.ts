@@ -3,6 +3,7 @@ import { Resend } from "resend";
 import fs from "fs";
 import path from "path";
 import { searchBestProduct } from "@/lib/product-hunter";
+import { refreshHeroImages } from "@/lib/auto-photos";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    GET /api/run-curator
@@ -1090,7 +1091,15 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    /* 6 — Send notification email (brief is live — no approval needed) */
+    /* 6 — Refresh hero images from Unsplash to match this week's looks */
+    try {
+      const { source } = await refreshHeroImages(weekNumber);
+      console.log(`[curator] Hero images refreshed from ${source}`);
+    } catch (heroErr) {
+      console.error("[curator] Hero image refresh failed (non-fatal):", heroErr);
+    }
+
+    /* 7 — Send notification email (brief is live — no approval needed) */
     if (resendKey && fromEmail && notifyEmail) {
       const resend = new Resend(resendKey);
       const looks  = rawLooks as Array<{ label: string; tagline: string; items?: Array<{ piece: string; brand: string; price: string }> }>;
