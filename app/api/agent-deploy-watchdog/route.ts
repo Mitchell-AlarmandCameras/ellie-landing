@@ -51,6 +51,10 @@ const HIGH_CONFIDENCE_PATTERNS: RegExp[] = [
   /Property .* does not exist on type/i,
   /Type .* is not assignable to type/i,
   /Argument of type .* is not assignable/i,
+  /is not assignable to parameter/i,
+  /implicitly has an 'any' type/i,
+  /is not defined/i,
+  /does not exist on type/i,
 ];
 
 function classifyError(errorText: string): Confidence {
@@ -232,20 +236,20 @@ Rules:
 - Only fix what the error is about — do not refactor or change anything else
 - If you cannot confidently fix it, return { "fixedContent": "", "explanation": "needs manual review" }`;
 
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method:  "POST",
-      headers: {
-        "x-api-key":         anthropicKey,
-        "anthropic-version": "2023-06-01",
-        "content-type":      "application/json",
-      },
-      body: JSON.stringify({
-        model:      "claude-haiku-4-5",
-        max_tokens: 4096,
-        messages:   [{ role: "user", content: prompt }],
-      }),
-    });
-
+    const models = [
+      "claude-haiku-4-5", "claude-3-5-haiku-20241022", "claude-3-5-sonnet-20241022",
+      "claude-3-5-sonnet-20240620", "claude-3-haiku-20240307",
+    ];
+    let res: Response | null = null;
+    for (const model of models) {
+      const attempt = await fetch("https://api.anthropic.com/v1/messages", {
+        method:  "POST",
+        headers: { "x-api-key": anthropicKey, "anthropic-version": "2023-06-01", "content-type": "application/json" },
+        body: JSON.stringify({ model, max_tokens: 4096, messages: [{ role: "user", content: prompt }] }),
+      });
+      if (attempt.status !== 404) { res = attempt; break; }
+    }
+    if (!res) return null;
     if (!res.ok) return null;
     const data      = await res.json() as { content: Array<{ type: string; text: string }> };
     const raw       = data.content[0]?.text?.trim() ?? "";
@@ -394,13 +398,53 @@ ${error.fullSnippet}</div>
 </body></html>`;
 }
 
+/* ─── Vercel: trigger a new deployment via API ─────────────────────────── */
+async function triggerRedeploy(token: string, projectId: string, teamId: string): Promise<boolean> {
+  try {
+    const res = await fetch(
+      `https://api.vercel.com/v13/deployments?teamId=${teamId}&forceNew=1`,
+      {
+        method:  "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ name: projectId }),
+      }
+    );
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+/* ─── Vercel: fix project settings (root directory, etc.) ─────────────── */
+async function fixVercelSettings(
+  token: string, projectId: string, teamId: string,
+  patch: Record<string, unknown>,
+): Promise<boolean> {
+  try {
+    const res = await fetch(
+      `https://api.vercel.com/v9/projects/${projectId}?teamId=${teamId}`,
+      {
+        method:  "PATCH",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify(patch),
+      }
+    );
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 /* ─── Core logic (shared between GET cron and POST webhook) ───────────── */
 async function runWatchdog(): Promise<{ action: string; deployment?: string }> {
   const vercelToken  = process.env.VERCEL_TOKEN?.trim();
   const projectId    = process.env.VERCEL_PROJECT_ID?.trim();
+  const teamId       = process.env.VERCEL_TEAM_ID?.trim() ?? "mitchell-alarmandcameras-projects";
   const githubToken  = process.env.GITHUB_TOKEN?.trim();
   const repoOwner    = process.env.GITHUB_REPO_OWNER?.trim() ?? "Mitchell-AlarmandCameras";
-  const repoName     = process.env.GITHUB_REPO_NAME?.trim()  ?? "AlarmEngine_PRO";
+  /* Style Refresh deploys from the standalone ellie-landing repo (files at root, no prefix) */
+  const repoName     = process.env.GITHUB_REPO_NAME?.trim()  ?? "ellie-landing";
+  const siteRoot     = process.env.GITHUB_SITE_ROOT?.trim()  ?? "";  /* empty = files at repo root */
   const anthropicKey = process.env.ANTHROPIC_API_KEY?.trim();
   const resendKey    = process.env.RESEND_API_KEY?.trim();
   const notifyEmail  = process.env.RESEND_NOTIFY_EMAIL?.trim();
@@ -424,8 +468,73 @@ async function runWatchdog(): Promise<{ action: string; deployment?: string }> {
   console.log(`[watchdog] Failed deployment detected: ${deployment.uid}`);
 
   /* ── Fetch build logs ──────────────────────────────────────────── */
-  const buildLog   = await getBuildLogs(vercelToken, deployment.uid);
-  const parsedErr  = parseError(buildLog);
+  const buildLog = await getBuildLogs(vercelToken, deployment.uid);
+
+  /* ── Handle Vercel config errors (not code errors) ─────────────── */
+
+  /* Root directory missing — clear it via API and redeploy */
+  if (/Root Directory.*does not exist/i.test(buildLog) || /specified Root Directory/i.test(buildLog)) {
+    console.log("[watchdog] Root directory error — clearing via Vercel API");
+    const fixed = await fixVercelSettings(vercelToken, projectId, teamId, { rootDirectory: null });
+    await markProcessed(deployment.uid);
+    if (fixed) {
+      await triggerRedeploy(vercelToken, projectId, teamId);
+      if (resendKey && notifyEmail) {
+        const resend = new Resend(resendKey);
+        await resend.emails.send({
+          from: `Ellie Watchdog <${fromEmail}>`, to: notifyEmail,
+          subject: "✅ Build error auto-fixed — Root Directory cleared",
+          html: buildAutoFixEmail(deployment,
+            { filePath: "vercel.json", errorType: "Config Error", errorDetail: "Root Directory setting pointed to non-existent subfolder", fullSnippet: "" },
+            { fixedContent: "", explanation: "Cleared the Root Directory setting via Vercel API so the project deploys from the repo root. Redeployment triggered." }),
+        }).catch(() => {});
+      }
+      return { action: "auto-fixed root directory + redeployed", deployment: deployment.uid };
+    }
+  }
+
+  /* Cron expression invalid — fix vercel.json in GitHub */
+  if (/cron_jobs_invalid_expression/i.test(buildLog) || /Expected 5 values, but got 6/i.test(buildLog)) {
+    console.log("[watchdog] Cron expression error — fixing vercel.json");
+    if (githubToken) {
+      const vercelJsonPath = siteRoot ? `${siteRoot}/vercel.json` : "vercel.json";
+      const fileData = await getGitHubFile(githubToken, repoOwner, repoName, vercelJsonPath);
+      if (fileData) {
+        const raw     = Buffer.from(fileData.content.replace(/\n/g, ""), "base64").toString("utf-8");
+        /* Fix any cron schedule with double spaces */
+        const fixed   = raw.replace(/"schedule":\s*"([^"]+)"/g, (_, sched) => `"schedule": "${sched.replace(/\s+/g, " ")}"`);
+        if (fixed !== raw) {
+          const pushed = await pushGitHubFix(githubToken, repoOwner, repoName, vercelJsonPath, fileData.sha, fixed, "fix(watchdog): normalize cron expression whitespace in vercel.json");
+          await markProcessed(deployment.uid);
+          if (pushed && resendKey && notifyEmail) {
+            const resend = new Resend(resendKey);
+            await resend.emails.send({
+              from: `Ellie Watchdog <${fromEmail}>`, to: notifyEmail,
+              subject: "✅ Build error auto-fixed — cron expression whitespace normalized",
+              html: buildAutoFixEmail(deployment,
+                { filePath: "vercel.json", errorType: "Cron Config Error", errorDetail: "Cron expression had extra whitespace causing 6-value parse failure", fullSnippet: "" },
+                { fixedContent: "", explanation: "Removed extra whitespace from cron schedule expressions in vercel.json. New deployment triggered automatically by GitHub push." }),
+            }).catch(() => {});
+          }
+          return { action: "auto-fixed cron expression in vercel.json", deployment: deployment.uid };
+        }
+      }
+    }
+  }
+
+  /* No Next.js version / wrong root dir type error */
+  if (/No Next\.js version detected/i.test(buildLog) || /Could not identify Next\.js version/i.test(buildLog)) {
+    console.log("[watchdog] Next.js version not found — likely root directory mismatch, clearing");
+    const fixed = await fixVercelSettings(vercelToken, projectId, teamId, { rootDirectory: null });
+    await markProcessed(deployment.uid);
+    if (fixed) {
+      await triggerRedeploy(vercelToken, projectId, teamId);
+      return { action: "auto-fixed root directory for Next.js version error + redeployed", deployment: deployment.uid };
+    }
+  }
+
+  /* ── Parse code error ──────────────────────────────────────────── */
+  const parsedErr = parseError(buildLog);
 
   if (!parsedErr) {
     await markProcessed(deployment.uid);
@@ -447,15 +556,17 @@ async function runWatchdog(): Promise<{ action: string; deployment?: string }> {
 
   /* ── Attempt auto-fix for HIGH confidence errors ──────────────── */
   if (confidence === "HIGH" && githubToken && anthropicKey && parsedErr.filePath) {
-    const fileData = await getGitHubFile(githubToken, repoOwner, repoName, `ellie-landing/${parsedErr.filePath}`);
+    /* siteRoot is "" for style refresh (standalone repo, files at root) */
+    const ghPath   = siteRoot ? `${siteRoot}/${parsedErr.filePath}` : parsedErr.filePath;
+    const fileData = await getGitHubFile(githubToken, repoOwner, repoName, ghPath);
 
     if (fileData) {
       const rawContent = Buffer.from(fileData.content.replace(/\n/g, ""), "base64").toString("utf-8");
       const fix        = await generateFix(anthropicKey, parsedErr.filePath, rawContent, parsedErr.fullSnippet);
 
       if (fix) {
-        const commitMsg  = `fix(watchdog): auto-fix ${parsedErr.errorType} in ${parsedErr.filePath.split("/").pop()}`;
-        const pushed     = await pushGitHubFix(githubToken, repoOwner, repoName, `ellie-landing/${parsedErr.filePath}`, fileData.sha, fix.fixedContent, commitMsg);
+        const commitMsg = `fix(watchdog): auto-fix ${parsedErr.errorType} in ${parsedErr.filePath.split("/").pop()}`;
+        const pushed    = await pushGitHubFix(githubToken, repoOwner, repoName, ghPath, fileData.sha, fix.fixedContent, commitMsg);
 
         if (pushed) {
           console.log(`[watchdog] Auto-fix pushed for ${parsedErr.filePath}`);
