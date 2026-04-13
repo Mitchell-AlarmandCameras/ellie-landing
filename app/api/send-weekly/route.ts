@@ -249,6 +249,19 @@ async function runSend(req?: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: "No approved draft found.", detail: String(err), sent: 0 }, { status: 404 });
   }
 
+  /* ── Idempotency guard: skip if already sent this week ─────────────── */
+  const weekSlug = String(lookbook.weekOf ?? "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  if (process.env.BLOB_READ_WRITE_TOKEN && weekSlug) {
+    try {
+      const { list } = await import("@vercel/blob");
+      const { blobs } = await list({ prefix: `ellie-sent/week-of-${weekSlug}` });
+      if (blobs.length > 0) {
+        console.log(`[send-weekly] Already sent week-of-${weekSlug} — skipping duplicate send`);
+        return NextResponse.json({ success: true, skipped: true, reason: "already sent this week", weekOf: lookbook.weekOf });
+      }
+    } catch { /* non-fatal — proceed with send */ }
+  }
+
   const stripeKey  = process.env.STRIPE_SECRET_KEY?.trim();
   const resendKey  = process.env.RESEND_API_KEY?.trim();
   const fromEmail  = process.env.RESEND_FROM_EMAIL?.trim();
@@ -300,7 +313,16 @@ async function runSend(req?: NextRequest): Promise<NextResponse> {
     if (i + BATCH < emails.length) await new Promise(r => setTimeout(r, 500));
   }
 
-  /* Blob brief intentionally left in place — curator overwrites it next Sunday */
+  /* Record successful send to Blob — prevents double-send if backup cron fires */
+  if (sentCount > 0 && process.env.BLOB_READ_WRITE_TOKEN && weekSlug) {
+    try {
+      const { put } = await import("@vercel/blob");
+      await put(`ellie-sent/week-of-${weekSlug}.json`,
+        JSON.stringify({ sentAt: new Date().toISOString(), sent: sentCount, weekOf: lookbook.weekOf }),
+        { access: "public", contentType: "application/json", addRandomSuffix: false }
+      );
+    } catch { /* non-fatal */ }
+  }
 
   /* ── Post teaser to Twitter/X ───────────────────────────────────────────
      Posts a Monday morning teaser when briefs go out.

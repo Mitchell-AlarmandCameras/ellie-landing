@@ -959,6 +959,27 @@ export async function GET(req: NextRequest) {
   const notifyEmail = process.env.RESEND_NOTIFY_EMAIL?.trim();
   const baseUrl     = (process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000").replace(/\/$/, "");
   const secret      = cronSecret;
+  const force       = new URL(req.url).searchParams.get("force") === "1";
+
+  /* ── Idempotency guard: skip if brief already generated within 5 days ─
+     Prevents backup cron from double-running when main cron succeeded.
+     Pass ?force=1 to override (e.g. manual re-run after bad content).   */
+  if (!force && process.env.BLOB_READ_WRITE_TOKEN) {
+    try {
+      const { list } = await import("@vercel/blob");
+      const { blobs } = await list({ prefix: "ellie-approved/" });
+      const latest = blobs
+        .filter(b => b.pathname.endsWith(".json"))
+        .sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime())[0];
+      if (latest) {
+        const ageHours = (Date.now() - new Date(latest.uploadedAt).getTime()) / 3_600_000;
+        if (ageHours < 120) { /* 5 days — same week */
+          console.log(`[curator] Brief already generated ${Math.round(ageHours)}h ago — skipping. Pass ?force=1 to override.`);
+          return NextResponse.json({ success: true, skipped: true, reason: "brief already generated this week", ageHours: Math.round(ageHours) });
+        }
+      }
+    } catch { /* non-fatal — proceed with run */ }
+  }
 
   try {
     /* 1 — Scrape fashion sources */
