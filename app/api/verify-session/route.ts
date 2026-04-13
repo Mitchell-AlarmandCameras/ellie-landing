@@ -15,7 +15,7 @@ function siteHostname(url: string): string {
 }
 
 /* ─── Welcome email HTML — Warm Minimalism / Hamptons ────────── */
-function buildWelcomeEmail(name: string, _email: string): string {
+function buildWelcomeEmail(name: string, _email: string, hasTrial = false): string {
   const firstName = name?.split(" ")[0] || "there";
   const siteUrl   = process.env.NEXT_PUBLIC_BASE_URL ?? "https://stylebyellie.com";
   const siteLabel = siteHostname(siteUrl);
@@ -38,6 +38,18 @@ function buildWelcomeEmail(name: string, _email: string): string {
             <td style="height:3px;background:linear-gradient(90deg,transparent,#C4956A,transparent);"></td>
           </tr>
 
+          ${hasTrial ? `
+          <!-- Trial notice bar -->
+          <tr>
+            <td style="background:#2C2C2C;padding:12px 40px;text-align:center;">
+              <p style="margin:0;color:#C4956A;font-size:11px;
+                         letter-spacing:0.22em;text-transform:uppercase;
+                         font-family:'Arial',sans-serif;">
+                Your 7-day free trial is active &mdash; no charge until day 8
+              </p>
+            </td>
+          </tr>` : ""}
+
           <!-- Header -->
           <tr>
             <td style="background:#EDE5D8;padding:40px 40px 32px;text-align:center;">
@@ -48,10 +60,12 @@ function buildWelcomeEmail(name: string, _email: string): string {
               </p>
               <h1 style="margin:0 0 10px;color:#2C2C2C;font-size:32px;
                           font-weight:400;letter-spacing:0.02em;font-family:'Georgia',serif;">
-                You&rsquo;re in, ${firstName}.
+                ${hasTrial ? `Your trial starts now, ${firstName}.` : `You&rsquo;re in, ${firstName}.`}
               </h1>
               <p style="margin:0;color:#6B6560;font-size:14px;font-style:italic;line-height:1.7;">
-                Your first brief lands Monday morning. Until then — here&rsquo;s everything you need to know.
+                ${hasTrial
+                  ? `You have 7 days completely free. Your first brief lands Monday morning &mdash; here&rsquo;s what to expect.`
+                  : `Your first brief lands Monday morning. Until then &mdash; here&rsquo;s everything you need to know.`}
               </p>
             </td>
           </tr>
@@ -111,7 +125,7 @@ function buildWelcomeEmail(name: string, _email: string): string {
                     </p>
                     ${[
                       ["The Executive", "Complete professional look &mdash; boardroom authority, fully sourced"],
-                      ["The Weekender", "Effortless weekend look &mdash; polished, casual, direct buy links"],
+                      ["The Weekender", "Effortless weekend look &mdash; polished, casual, every item by brand and price"],
                       ["The Wildcard", "One deliberate departure &mdash; the piece they&rsquo;ll ask you about"],
                       ["Ellie&rsquo;s Note", "Sourcing insight on every item &mdash; why it works, who makes it best"],
                     ].map(([title, desc]) => `
@@ -226,8 +240,9 @@ export async function GET(req: NextRequest) {
       expand: ["subscription"],
     });
 
-    // Reject incomplete or unpaid sessions
-    if (session.status !== "complete" && session.payment_status !== "paid") {
+    // Reject sessions that are neither complete nor on a free trial
+    const isTrial = session.payment_status === "no_payment_required";
+    if (session.status !== "complete" && !isTrial) {
       console.warn("Stripe session not complete:", session.status);
       return NextResponse.redirect(new URL("/", baseUrl));
     }
@@ -247,8 +262,10 @@ export async function GET(req: NextRequest) {
       resend.emails.send({
         from:    `ELLIE <${fromEmail}>`,
         to:      customerEmail,
-        subject: "Welcome to The Style Refresh — Your First Brief Arrives Monday",
-        html:    buildWelcomeEmail(customerName, customerEmail),
+        subject: isTrial
+          ? "Your 7-day free trial has started — first brief arrives Monday"
+          : "Welcome to The Style Refresh — Your First Brief Arrives Monday",
+        html:    buildWelcomeEmail(customerName, customerEmail, isTrial),
       }).catch(err => console.error("Welcome email failed:", err));
 
       // Internal notification → your business inbox

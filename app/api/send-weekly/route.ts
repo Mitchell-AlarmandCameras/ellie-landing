@@ -90,12 +90,6 @@ function buildMemberEmail(lookbook: Lookbook, dashboardUrl: string, manageUrl: s
               <span style="font-size:11px;color:#6B6560;font-family:Arial,sans-serif;line-height:1.5;">
                 ${item.note}
               </span>
-              <br/>
-              <a href="${trackLink(item.buyLink, trackBase, `brief-${look.label.toLowerCase().replace(/\s+/g,"-")}`)}"
-                 style="font-size:10px;color:#C4956A;font-family:Arial,sans-serif;
-                         letter-spacing:0.1em;text-decoration:none;">
-                Shop now →
-              </a>
             </td>
           </tr>`).join("")}
         </table>
@@ -163,8 +157,7 @@ function buildMemberEmail(lookbook: Lookbook, dashboardUrl: string, manageUrl: s
       ${mailingAddress}
     </p>
     <p style="margin:4px 0 0;color:#B5A99A;font-size:10px;font-family:Arial,sans-serif;">
-      Links in this email may include affiliate links. We may earn a small commission
-      at no extra cost to you. This never influences our curation.
+      Every brand and price in this brief was sourced by Ellie. All editorial. No affiliate links.
     </p>
   </td></tr>
 
@@ -216,34 +209,57 @@ async function runSend(req?: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  /* Read approved lookbook from /tmp */
-  const approvedPath = path.join("/tmp", "ellie-approved.json");
-  if (!fs.existsSync(approvedPath)) {
-    /* Email Ellie that no draft was approved */
+  /* Read approved lookbook from Vercel Blob */
+  let lookbook: Lookbook;
+  try {
+    const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
+    if (!blobToken) throw new Error("BLOB_READ_WRITE_TOKEN not set");
+
+    const { list } = await import("@vercel/blob");
+    const { blobs } = await list({ prefix: "ellie-approved/" });
+
+    /* Find the most recently uploaded approved brief */
+    const latest = blobs
+      .filter(b => b.pathname.endsWith(".json"))
+      .sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime())[0];
+
+    if (!latest) throw new Error("no_brief");
+
+    const res = await fetch(latest.url, { cache: "no-store" });
+    if (!res.ok) throw new Error(`Blob fetch failed: ${res.status}`);
+    lookbook = await res.json() as Lookbook;
+  } catch (err) {
+    const missing = String(err).includes("no_brief") || String(err).includes("BLOB_READ_WRITE_TOKEN");
     const resendKey   = process.env.RESEND_API_KEY?.trim();
     const fromEmail   = process.env.RESEND_FROM_EMAIL?.trim();
     const notifyEmail = process.env.RESEND_NOTIFY_EMAIL?.trim();
-    if (resendKey && fromEmail && notifyEmail) {
+    if (missing && resendKey && fromEmail && notifyEmail) {
       const resend = new Resend(resendKey);
       await resend.emails.send({
         from:    `Ellie Curator <${fromEmail}>`,
         to:      notifyEmail,
         subject: "[ACTION NEEDED] No approved draft — Monday send skipped",
         html: `<p style="font-family:sans-serif;color:#111;padding:20px;">
-          The Monday Style Refresh send was skipped because no approved draft was found.<br/><br/>
-          This usually means the Sunday approval wasn't clicked in time, or the server restarted.<br/><br/>
-          To send manually, go to Vercel → your project → run the curator again from the dashboard.
+          The Monday Style Refresh send was skipped because no approved draft was found in Blob storage.<br/><br/>
+          This usually means the Sunday curator didn't run or failed silently.<br/><br/>
+          Manually trigger: <a href="${(process.env.NEXT_PUBLIC_BASE_URL ?? "https://stylebyellie.com").replace(/\/$/, "")}/api/run-curator">run the curator</a>, then hit this endpoint again.
         </p>`,
       });
     }
-    return NextResponse.json({ error: "No approved draft found. Ellie has been notified.", sent: 0 }, { status: 404 });
+    return NextResponse.json({ error: "No approved draft found.", detail: String(err), sent: 0 }, { status: 404 });
   }
 
-  let lookbook: Lookbook;
-  try {
-    lookbook = JSON.parse(fs.readFileSync(approvedPath, "utf8")) as Lookbook;
-  } catch (err) {
-    return NextResponse.json({ error: "Could not read approved draft.", detail: String(err) }, { status: 500 });
+  /* ── Idempotency guard: skip if already sent this week ─────────────── */
+  const weekSlug = String(lookbook.weekOf ?? "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  if (process.env.BLOB_READ_WRITE_TOKEN && weekSlug) {
+    try {
+      const { list } = await import("@vercel/blob");
+      const { blobs } = await list({ prefix: `ellie-sent/week-of-${weekSlug}` });
+      if (blobs.length > 0) {
+        console.log(`[send-weekly] Already sent week-of-${weekSlug} — skipping duplicate send`);
+        return NextResponse.json({ success: true, skipped: true, reason: "already sent this week", weekOf: lookbook.weekOf });
+      }
+    } catch { /* non-fatal — proceed with send */ }
   }
 
   const stripeKey  = process.env.STRIPE_SECRET_KEY?.trim();
@@ -273,7 +289,7 @@ async function runSend(req?: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ success: true, sent: 0, message: "No active subscribers yet." });
   }
 
-  const stripePortal = "https://billing.stripe.com/p/login/test_00g00000000000000000";
+  const stripePortal = process.env.STRIPE_PORTAL_URL ?? `${baseUrl}/dashboard`;
   const emailHtml = buildMemberEmail(lookbook, `${baseUrl}/dashboard`, stripePortal, baseUrl);
   const subject   = `Your Monday Style Brief — Week of ${lookbook.weekOf}`;
   let sentCount   = 0;
@@ -297,8 +313,16 @@ async function runSend(req?: NextRequest): Promise<NextResponse> {
     if (i + BATCH < emails.length) await new Promise(r => setTimeout(r, 500));
   }
 
-  /* Clean up approved file so it doesn't send again */
-  try { fs.unlinkSync(approvedPath); } catch { /* ignore */ }
+  /* Record successful send to Blob — prevents double-send if backup cron fires */
+  if (sentCount > 0 && process.env.BLOB_READ_WRITE_TOKEN && weekSlug) {
+    try {
+      const { put } = await import("@vercel/blob");
+      await put(`ellie-sent/week-of-${weekSlug}.json`,
+        JSON.stringify({ sentAt: new Date().toISOString(), sent: sentCount, weekOf: lookbook.weekOf }),
+        { access: "public", contentType: "application/json", addRandomSuffix: false }
+      );
+    } catch { /* non-fatal */ }
+  }
 
   /* ── Post teaser to Twitter/X ───────────────────────────────────────────
      Posts a Monday morning teaser when briefs go out.
@@ -317,7 +341,7 @@ async function runSend(req?: NextRequest): Promise<NextResponse> {
       const tweetText  =
         `This week's edit just dropped for members.\n\n` +
         `${lookLabels}\n\n` +
-        `Three complete looks. Every buy link sourced.\n\n` +
+        `Three complete looks. Every item by brand and price.\n\n` +
         `Join → stylebyellie.com\n\n` +
         `#StyleRefresh #WomensFashion #PersonalStylist #WeeklyLooks`;
 

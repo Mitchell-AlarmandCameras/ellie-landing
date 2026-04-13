@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
+import { refreshHeroImages } from "@/lib/auto-photos";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    GET /api/approve-weekly?secret=xxx
@@ -159,34 +160,12 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  /* ── Save hero images to Vercel Blob so homepage carousel updates ──
-     Claude picks 4 matching Unsplash images as part of the weekly brief.
-     On approval, we save them to ellie-hero/current.json.
-     The HeroCarousel component fetches /api/hero-images which reads here. */
-  type HeroImage = { id: string; alt: string; mood?: string };
-  const rawHeroImages = (lookbook.heroImages as HeroImage[]) ?? [];
-  if (process.env.BLOB_READ_WRITE_TOKEN && rawHeroImages.length === 4) {
-    try {
-      const { put } = await import("@vercel/blob");
-      const heroData = {
-        weekOf:    lookbook.weekOf,
-        updatedAt: new Date().toISOString(),
-        images: rawHeroImages.map(img => ({
-          url:  `https://images.unsplash.com/photo-${img.id}?auto=format&fit=crop&w=900&q=85`,
-          alt:  img.alt,
-          mood: img.mood ?? "editorial",
-        })),
-      };
-      await put("ellie-hero/current.json", JSON.stringify(heroData), {
-        access:          "public",
-        contentType:     "application/json",
-        addRandomSuffix: false,
-      });
-      console.log("[approve-weekly] Hero carousel images saved to Blob.");
-    } catch (blobErr) {
-      console.error("[approve-weekly] Hero image Blob save failed (non-fatal):", blobErr);
-    }
-  }
+  /* ── Refresh hero carousel images via Unsplash API ─────────────────
+     Fetches 4 fresh fashion-themed photos and saves to Blob.
+     Replaces the old system that relied on Claude guessing photo IDs.
+     Falls back to static defaults if no Unsplash key is set.         */
+  const weekNumber = Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000));
+  const { images: freshHeroImages } = await refreshHeroImages(weekNumber);
 
   /* ── Publish SEO blog post to Vercel Blob ─────────────────────────────
      Creates a public blog post at /blog/week-of-[date] so Google can index
@@ -309,7 +288,7 @@ export async function GET(req: NextRequest) {
           `${look.description}\n\n` +
           `${itemList}\n\n` +
           `Ellie's note: ${look.editorsNote}\n\n` +
-          `Full brief + every buy link → stylebyellie.com\n\n` +
+          `Full brief → stylebyellie.com\n\n` +
           `#StyleRefresh #WomensFashion #PersonalStylist #WeeklyLooks #FashionCuration #OOTD #StyleInspiration`;
 
         const pinRes = await fetch("https://api.pinterest.com/v5/pins", {
@@ -344,14 +323,14 @@ export async function GET(req: NextRequest) {
   /* ── Post to Twitter / X ─────────────────────────────────────────────────
      Fires after approval every Sunday. Needs 4 env vars in Vercel:
        TWITTER_API_KEY, TWITTER_API_SECRET,
-       TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_SECRET
+       TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET
      Uses OAuth 1.0a (Twitter v2 endpoint) — no app-level read permissions needed.
      The tweet teases the three looks and links to the site — no buy links shown.  */
   if (
     process.env.TWITTER_API_KEY &&
     process.env.TWITTER_API_SECRET &&
     process.env.TWITTER_ACCESS_TOKEN &&
-    process.env.TWITTER_ACCESS_SECRET
+    process.env.TWITTER_ACCESS_TOKEN_SECRET
   ) {
     try {
       type TweetLook = { label: string; tagline: string };
@@ -367,7 +346,7 @@ export async function GET(req: NextRequest) {
         `This week's Style Refresh is live ✨\n\n` +
         `${String(lookbook.editorialLead ?? "").substring(0, 120)}\n\n` +
         `${lookLines}\n\n` +
-        `Full brief + every buy link → ${siteUrl}\n\n` +
+        `Full brief → ${siteUrl}\n\n` +
         `#StyleRefresh #PersonalStylist #WomensFashion #MondayLooks #FashionCuration`;
 
       /* OAuth 1.0a signature for Twitter API v2 */
@@ -390,7 +369,7 @@ export async function GET(req: NextRequest) {
         const sigBase = `${method}&${encodeURIComponent(url)}&${encodeURIComponent(paramStr)}`;
         const sigKey  =
           `${encodeURIComponent(process.env.TWITTER_API_SECRET!)}&` +
-          `${encodeURIComponent(process.env.TWITTER_ACCESS_SECRET!)}`;
+          `${encodeURIComponent(process.env.TWITTER_ACCESS_TOKEN_SECRET!)}`;
 
         /* Crypto is available in Vercel Node.js runtime */
         const { createHmac } = await import("crypto");
@@ -450,7 +429,7 @@ export async function GET(req: NextRequest) {
         `"${fbLead}"\n\n` +
         `Week of ${fbWeekOf} — three complete looks:\n\n` +
         `${fbLookLines}\n\n` +
-        `Members get every brand, price, and direct buy link in Monday's brief.\n\n` +
+        `Members get every brand and price in Monday's brief — Ellie's editorial curation.\n\n` +
         `Join for $19/month → ${siteUrl}\n\n` +
         `#TheStyleRefresh #WomensFashion #PersonalStylist #WeeklyLooks #FashionCuration #OOTD`;
 
@@ -509,7 +488,7 @@ export async function GET(req: NextRequest) {
         `"${igAutoLead}"\n\n` +
         `Week of ${igAutoWeekOf}:\n\n` +
         `${igAutoLookLines}\n\n` +
-        `Members get every brand, price, and direct buy link.\n` +
+        `Members get every brand and price — Ellie's editorial curation.\n` +
         `Link in bio → ${igAutoSite}\n\n` +
         `${igAutoHashtags}`;
 
@@ -600,7 +579,7 @@ export async function GET(req: NextRequest) {
     `${igLead}\n\n` +
     `Week of ${weekOfStr} — three complete looks:\n\n` +
     `${igLookLines}\n\n` +
-    `Members get every brand, price, and direct buy link in Monday's brief.\n` +
+    `Members get every brand and price in Monday's brief — Ellie's editorial curation.\n` +
     `Link in bio → stylebyellie.com\n\n` +
     `${igHashtags}`;
 
@@ -666,7 +645,6 @@ export async function GET(req: NextRequest) {
     ${linkCheckHtml}
 
     <!-- ── Instagram Photos ─────────────────────────────────────── -->
-    ${rawHeroImages.length > 0 ? `
     <div style="margin-top:32px;text-align:left;background:#FDFAF5;border:1px solid #DDD4C5;padding:22px 24px;">
       <p style="color:#C4956A;font-size:10px;letter-spacing:0.28em;text-transform:uppercase;
                  font-family:Arial,sans-serif;margin:0 0 6px;">
@@ -676,12 +654,10 @@ export async function GET(req: NextRequest) {
         Pick one of these for your Instagram post. Tap and hold on your phone → Save Image, or right-click on desktop → Save.
       </p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        ${rawHeroImages.map((img: { id: string; alt: string }) => `
-          <a href="https://images.unsplash.com/photo-${img.id}?auto=format&fit=crop&w=1080&q=90"
-             target="_blank"
-             style="display:block;text-decoration:none;">
+        ${freshHeroImages.map(img => `
+          <a href="${img.url}" target="_blank" style="display:block;text-decoration:none;">
             <img
-              src="https://images.unsplash.com/photo-${img.id}?auto=format&fit=crop&w=400&q=80"
+              src="${img.url.replace("w=1600", "w=400")}"
               alt="${img.alt}"
               style="width:100%;height:180px;object-fit:cover;display:block;border:1px solid #DDD4C5;"
             />
@@ -693,7 +669,7 @@ export async function GET(req: NextRequest) {
       <p style="color:#B5A99A;font-size:10px;font-family:Arial,sans-serif;margin:12px 0 0;">
         Photos by Unsplash · Free to use · No credit required for Instagram
       </p>
-    </div>` : ""}
+    </div>
 
     <!-- ── Instagram Caption ───────────────────────────────────── -->
     <div style="margin-top:16px;text-align:left;background:#FDFAF5;border:1px solid #DDD4C5;padding:22px 24px;">

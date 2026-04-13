@@ -59,6 +59,9 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    /* Monthly plan gets a 7-day free trial — annual plan starts immediately */
+    const trialDays = (plan === "monthly" && !promoCode) ? 7 : 0;
+
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       payment_method_types: ["card"],
       mode:                 "subscription",
@@ -66,12 +69,18 @@ export async function POST(req: NextRequest) {
       success_url:          `${baseUrl}/api/verify-session?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url:           `${baseUrl}/`,
       billing_address_collection: "required",
-      subscription_data:    { metadata: { product: "ellie_style_refresh", plan } },
+      automatic_tax:        { enabled: true },
+      subscription_data:    {
+        metadata:            { product: "ellie_style_refresh", plan },
+        ...(trialDays > 0 && { trial_period_days: trialDays }),
+      },
       custom_text:          {
         submit: {
           message: plan === "annual"
             ? "Your annual membership begins immediately. You save $48 versus monthly billing."
-            : "Your Style Refresh membership begins immediately after payment.",
+            : trialDays > 0
+              ? "Your card will not be charged until after your 7-day free trial. Cancel anytime during the trial at no cost."
+              : "Your Style Refresh membership begins immediately after payment.",
         },
       },
     };

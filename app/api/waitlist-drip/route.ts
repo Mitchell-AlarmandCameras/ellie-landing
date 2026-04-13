@@ -57,8 +57,8 @@ function drip1Html(firstName: string): string {
     </p>
     <p style="margin:0 0 18px;font-size:15px;color:#2C2C2C;font-family:Georgia,serif;line-height:1.75;">
       Every Monday morning, members wake up to three complete looks in their inbox — 
-      sourced from the best retailers right now, with direct buy links to every single item. 
-      No browsing, no guessing, no wasted hours. Just open, click, and dress.
+      every item named by brand and price, sourced personally by Ellie.
+      No browsing, no guessing, no wasted hours. Just open and dress.
     </p>
     <p style="margin:0 0 28px;font-size:14px;color:#6B6560;font-family:Georgia,serif;line-height:1.7;font-style:italic;">
       This week I'm watching how the season is shifting — the pieces moving fastest 
@@ -71,10 +71,10 @@ function drip1Html(firstName: string): string {
        style="display:inline-block;background:#2C2C2C;color:#FDFAF5;padding:14px 40px;
                font-family:Arial,sans-serif;font-size:11px;letter-spacing:0.22em;
                text-transform:uppercase;text-decoration:none;">
-      Join for $19/month
+      Try Free for 7 Days
     </a>
     <p style="margin:14px 0 0;font-size:11px;color:#B5A99A;font-family:Arial,sans-serif;">
-      Cancel anytime. Secure checkout via Stripe.
+      No charge for 7 days. Then $19/mo. Cancel anytime.
     </p>
   </td></tr>
   <tr><td style="padding:0 36px;">
@@ -140,14 +140,14 @@ function drip2Html(firstName: string, preview: Record<string, unknown> | null): 
     </p>
     <p style="margin:0 0 20px;font-size:15px;color:#2C2C2C;font-family:Georgia,serif;line-height:1.75;">
       Members opened their inbox this Monday to three complete looks — brand, price, 
-      and a direct link to every single item. Here's a preview of what they received:
+      and Ellie's note for every single item. Here's a preview of what they received:
     </p>
     <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin-bottom:20px;">
       ${looksSnippet}
     </table>
     <p style="margin:0 0 10px;font-size:13px;color:#4A4A4A;font-family:Georgia,serif;line-height:1.7;
                background:#F0E8D8;padding:14px 16px;border-left:3px solid #C4956A;">
-      Members see the full look — every item, every price, every direct buy link. 
+      Members see the full look — every item, every brand, every price.
       The waitlist only sees this teaser.
     </p>
   </td></tr>
@@ -156,10 +156,10 @@ function drip2Html(firstName: string, preview: Record<string, unknown> | null): 
        style="display:inline-block;background:#C4956A;color:#FDFAF5;padding:15px 42px;
                font-family:Arial,sans-serif;font-size:11px;letter-spacing:0.22em;
                text-transform:uppercase;text-decoration:none;">
-      Get Full Access — $19/month
+      Start Free Trial — 7 Days
     </a>
     <p style="margin:12px 0 0;font-size:11px;color:#B5A99A;font-family:Arial,sans-serif;">
-      Cancel anytime · Secure checkout via Stripe
+      No charge for 7 days · Then $19/mo · Cancel anytime
     </p>
   </td></tr>
   <tr><td style="padding:0 36px;">
@@ -205,11 +205,11 @@ function drip3Html(firstName: string): string {
     <p style="margin:0 0 18px;font-size:15px;color:#2C2C2C;font-family:Georgia,serif;line-height:1.75;">
       I've spent 20 years in fashion consulting. What I built here is simple: 
       every Monday, you get exactly three looks — the kind I would actually put on a real client. 
-      Sourced from real brands. Priced for the real world. With a direct link to buy every single piece.
+      Sourced from real brands. Priced for the real world. Every item named so you know exactly where to look.
     </p>
     <p style="margin:0 0 18px;font-size:15px;color:#2C2C2C;font-family:Georgia,serif;line-height:1.75;">
-      It's $19 a month. You can cancel the same day if it's not right. I don't make it complicated 
-      because the point is to make your life <em>less</em> complicated.
+      The first 7 days are free — no charge, no commitment. After that it's $19 a month and 
+      you can cancel any time. I don't make it complicated because the point is to make your life <em>less</em> complicated.
     </p>
     <p style="margin:0 0 28px;font-size:14px;color:#6B6560;font-family:Georgia,serif;line-height:1.7;font-style:italic;">
       If the timing isn't right, your spot on the waitlist is permanent. I'll be here 
@@ -224,10 +224,10 @@ function drip3Html(firstName: string): string {
        style="display:inline-block;background:#2C2C2C;color:#FDFAF5;padding:14px 40px;
                font-family:Arial,sans-serif;font-size:11px;letter-spacing:0.22em;
                text-transform:uppercase;text-decoration:none;">
-      Join for $19/month — Start This Monday
+      Start Free — First 7 Days On Me
     </a>
     <p style="margin:12px 0 0;font-size:11px;color:#B5A99A;font-family:Arial,sans-serif;">
-      No commitment. Cancel anytime.
+      No charge for 7 days. Then $19/mo. Cancel anytime.
     </p>
   </td></tr>
   <tr><td style="padding:0 36px;">
@@ -411,7 +411,7 @@ export async function GET(req: NextRequest) {
     </p>
     <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
       <tr><td align="center">
-        <a href="${baseUrl}/review"
+        <a href="${SITE_URL}/review"
            style="display:inline-block;background:#C4956A;color:#FDFAF5;padding:14px 36px;
                   font-family:Arial,sans-serif;font-size:11px;letter-spacing:0.22em;
                   text-transform:uppercase;text-decoration:none;">

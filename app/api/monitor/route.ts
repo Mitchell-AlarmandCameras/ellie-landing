@@ -142,6 +142,38 @@ async function runChecks(baseUrl: string): Promise<Check[]> {
     });
   }
 
+  /* 7 — Dashboard page reachable (redirects to /login for non-members = 200 or 307, both fine) */
+  const dash = await probe(`${baseUrl}/dashboard`);
+  checks.push({
+    name:   "VIP Room (dashboard)",
+    ok:     dash.ok,
+    detail: dash.ok ? `Reachable (${dash.status})` : `DOWN — ${dash.status}`,
+  });
+
+  /* 8 — Current-preview API returns JSON (homepage brief cards) */
+  const preview = await probe(`${baseUrl}/api/current-preview`);
+  checks.push({
+    name:   "Current-preview API",
+    ok:     preview.ok,
+    detail: preview.ok ? `Responding (${preview.status})` : `DOWN — ${preview.status}`,
+  });
+
+  /* 9 — Sitemap accessible (important for SEO indexing) */
+  const sitemap = await probe(`${baseUrl}/sitemap.xml`);
+  checks.push({
+    name:   "Sitemap (/sitemap.xml)",
+    ok:     sitemap.ok,
+    detail: sitemap.ok ? `Accessible (${sitemap.status})` : `DOWN — ${sitemap.status}`,
+  });
+
+  /* 10 — Contact page reachable (member support) */
+  const contact = await probe(`${baseUrl}/contact`);
+  checks.push({
+    name:   "Contact page",
+    ok:     contact.ok,
+    detail: contact.ok ? `Reachable (${contact.status})` : `DOWN — ${contact.status}`,
+  });
+
   return checks;
 }
 

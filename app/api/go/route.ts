@@ -74,11 +74,15 @@ export async function GET(req: NextRequest) {
 
   console.log(`[affiliate] src=${source} url=${targetUrl}`);
 
-  /* ── Sovrn Commerce affiliate redirect ─────────────────────────── */
-  const sovrnKey = process.env.SOVRN_PUBLISHER_KEY?.trim();
-  if (sovrnKey) {
+  /* ── Skimlinks affiliate redirect ───────────────────────────────
+     SOVRN NOTE: Sovrn Commerce was denied (Apr 2026) — they reject
+     paywalled/subscription sites. Do not reapply on any Ellie site.
+     Skimlinks is the replacement — pending approval (mitchell@alarmandcameras.net).
+     Add SKIMLINKS_PUBLISHER_ID to Vercel env vars once approved.       */
+  const skimlinksId = process.env.SKIMLINKS_PUBLISHER_ID?.trim();
+  if (skimlinksId) {
     return NextResponse.redirect(
-      `https://redirect.viglink.com/?key=${encodeURIComponent(sovrnKey)}&u=${encodeURIComponent(targetUrl)}&cuid=${encodeURIComponent(source)}`,
+      `https://go.skimresources.com?id=${encodeURIComponent(skimlinksId)}&url=${encodeURIComponent(targetUrl)}`,
       { status: 302 }
     );
   }

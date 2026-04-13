@@ -50,7 +50,7 @@ export default function SaveButton({ item }: SaveButtonProps) {
     <button
       onClick={handleSave}
       disabled={state === "saving" || isSaved}
-      title="Save to My Edit"
+      title="Save for later"
       style={{
         background:    "transparent",
         border:        `1px solid ${isSaved ? "var(--blush)" : "var(--sand-border)"}`,

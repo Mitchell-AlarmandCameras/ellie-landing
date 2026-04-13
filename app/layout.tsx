@@ -21,20 +21,20 @@ export const metadata: Metadata = {
 
   description:
     "The Style Refresh is a private $19/month membership delivering three complete, " +
-    "sourced looks to your inbox every Monday — with direct buy links to every item. " +
+    "sourced looks to your inbox every Monday — every item named by brand and price. " +
     "A 20-year veteran consultant. No algorithms. No feeds. Just the edit that matters.",
 
   keywords: [
     "personal stylist",
     "private style membership",
     "women's fashion subscription",
-    "curated fashion buy links",
+    "editorial fashion curation",
     "Hamptons style",
     "weekly lookbook",
     "executive style consultant",
     "the style refresh",
     "fashion subscription newsletter",
-    "direct buy links clothing",
+    "women's fashion editorial",
     "women's fashion curation",
     "Monday style brief",
   ],
@@ -46,14 +46,14 @@ export const metadata: Metadata = {
     siteName:    "ELLIE",
     title:       "ELLIE | The Style Refresh",
     description:
-      "Three complete looks. Direct buy links. Every Monday. " +
+      "Three complete looks. Every item by brand and price. Every Monday. " +
       "Private $19/month membership — cancel anytime.",
     images: [
       {
         url:    "/opengraph-image",
         width:  1200,
         height: 630,
-        alt:    "Ellie — The Style Refresh. Curated looks with direct buy links.",
+        alt:    "Ellie — The Style Refresh. Three curated looks every Monday.",
       },
     ],
   },
@@ -63,7 +63,7 @@ export const metadata: Metadata = {
     card:        "summary_large_image",
     title:       "ELLIE | The Style Refresh",
     description:
-      "Three complete looks. Direct buy links. Every Monday. " +
+      "Three complete looks. Every item named by brand and price. Every Monday. " +
       "Private $19/month membership.",
     images: ["/opengraph-image"],
   },
@@ -117,7 +117,7 @@ const orgSchema = {
       logo:          { "@type": "ImageObject", url: `${BASE_URL}/favicon.png` },
       description:
         "Private $19/month membership delivering three curated women's fashion looks " +
-        "with direct buy links every Monday.",
+        "every Monday — every item named by brand and price.",
       sameAs: [
         "https://www.instagram.com/elliestylerefresh",
         "https://www.facebook.com/profile.php?id=61574230690395",
@@ -130,7 +130,7 @@ const orgSchema = {
       url:           BASE_URL,
       name:          "ELLIE — The Style Refresh",
       description:
-        "Three complete women's fashion looks with direct buy links, every Monday. " +
+        "Three complete women's fashion looks, every item by brand and price, every Monday. " +
         "$19/month private membership.",
       publisher:     { "@id": `${BASE_URL}/#organization` },
       potentialAction: {
@@ -144,8 +144,8 @@ const orgSchema = {
       "@id":          `${BASE_URL}/#membership`,
       name:           "The Style Refresh Membership",
       description:
-        "Three complete, curated women's fashion looks with direct buy links to every item, " +
-        "delivered every Monday. Includes brand, price, and link for each piece.",
+        "Three complete, curated women's fashion looks delivered every Monday. " +
+        "Includes brand, price, and Ellie's sourcing note for each piece.",
       brand:          { "@id": `${BASE_URL}/#organization` },
       offers: {
         "@type":       "Offer",
@@ -180,27 +180,23 @@ export default function RootLayout({
         />
 
         {/* Google Search Console verification */}
-        <meta name="google-site-verification" content="4gKd6v209O9t3fsyYGAmVd2-xiK99dBBUzdDonuVCUM" />
+        <meta name="google-site-verification" content="ZEIuovs8zArOtaFG5_lmeW-cRdWe44REnVc6wKHvZRA" />
 
-        {/* Google Analytics 4 — in <head> so Google Search Console can verify via GA method */}
-        {GA_ID && (
-          <>
-            <script
-              async
-              src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
-            />
-            <script
-              dangerouslySetInnerHTML={{
-                __html: `
-                  window.dataLayer = window.dataLayer || [];
-                  function gtag(){dataLayer.push(arguments);}
-                  gtag('js', new Date());
-                  gtag('config', '${GA_ID}', { anonymize_ip: true });
-                `,
-              }}
-            />
-          </>
-        )}
+        {/* Pinterest domain verification */}
+        <meta name="p:domain_verify" content="b4adb01e199c467ae5948cc76b868ca7" />
+
+        {/* Google Analytics 4 */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-RRE593QHX2" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-RRE593QHX2', { anonymize_ip: true });
+            `,
+          }}
+        />
 
         {/* Global structured data — tells Google exactly what this site is */}
         <script
@@ -210,17 +206,76 @@ export default function RootLayout({
       </head>
 
       <body>
+        {/* ── Ellie Collection cross-site bar ──────────────────────────── */}
+        <div
+          style={{
+            backgroundColor: "#F5EFE3",
+            borderBottom: "1px solid rgba(80,50,20,0.10)",
+            padding: "0 20px",
+            height: "36px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "20px",
+            position: "sticky",
+            top: 0,
+            zIndex: 55,
+          }}
+        >
+          <span
+            style={{
+              fontSize: "9px",
+              letterSpacing: "0.20em",
+              textTransform: "uppercase",
+              color: "#7A5C3A",
+              opacity: 0.6,
+              fontWeight: 500,
+            }}
+          >
+            By Ellie
+          </span>
+          <span style={{ color: "#C8A87A", fontSize: "10px" }}>·</span>
+          <span
+            style={{
+              fontSize: "9px",
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: "#3D2B1F",
+              fontWeight: 700,
+            }}
+          >
+            The Style Refresh
+          </span>
+          <span style={{ color: "#C8A87A", fontSize: "10px" }}>·</span>
+          <a
+            href="https://skincarebyellie.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              fontSize: "9px",
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: "#7A5C3A",
+              fontWeight: 500,
+              textDecoration: "none",
+              borderBottom: "1px solid rgba(122,92,58,0.35)",
+              paddingBottom: "1px",
+            }}
+          >
+            Skincare by Ellie ↗
+          </a>
+        </div>
+
         {children}
         <CookieBanner />
 
         {/* Skimlinks auto-monetises every outbound retail link.
             Add SKIMLINKS_PUBLISHER_ID to Vercel env vars to activate. */}
-        {process.env.SKIMLINKS_PUBLISHER_ID && (
-          <script
-            async
-            src={`https://s.skimresources.com/js/${process.env.SKIMLINKS_PUBLISHER_ID}X.skimlinks.js`}
-          />
-        )}
+        <script
+          type="text/javascript"
+          src="https://s.skimresources.com/js/301293X1789234.skimlinks.js"
+          async
+        />
       </body>
     </html>
   );

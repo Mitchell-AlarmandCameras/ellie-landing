@@ -139,7 +139,7 @@ const faqs = [
   },
   {
     q: "How does The Style Refresh help with my capsule wardrobe?",
-    a: "Every Monday I publish three complete looks built from capsule principles — pieces that are versatile, quality-forward, and directly buyable. Members get exact brand, price, and direct link for every item.",
+    a: "Every Monday I publish three complete looks built from capsule principles — pieces that are versatile and quality-forward. Members get exact brand and price for every item.",
   },
 ];
 
@@ -303,8 +303,8 @@ export default function CapsuleWardrobePage() {
             margin: "0 auto 28px", maxWidth: "460px", color: "#4A4A4A",
             fontSize: "14px", lineHeight: 1.75,
           }}>
-            Every Monday — three complete capsule-friendly looks with every piece, every price,
-            and a direct link to buy. No searching. No guessing. Just the edit.
+            Every Monday — three complete capsule-friendly looks with every piece and every price.
+            No searching. No guessing. Just the edit.
           </p>
           <Link href="/#join" style={{
             display: "inline-block", background: "#C4956A", color: "#FDFAF5",

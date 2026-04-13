@@ -12,7 +12,7 @@ const sections = [
   },
   {
     heading: "2. The Service",
-    body: `The Style Refresh is a private membership that delivers three curated fashion looks to your email inbox every Monday morning. Each brief includes editorial descriptions, sourcing notes, and direct buy links to third-party retailers. Membership also includes access to the VIP Room — an archive of all previously published briefs.
+    body: `The Style Refresh is a private membership that delivers three curated fashion looks to your email inbox every Monday morning. Each brief includes editorial descriptions, sourcing notes, and brand and price for every item. Membership also includes access to the VIP Room — an archive of all previously published briefs.
 
 The specific looks, brands, and price points featured each week are selected at our sole editorial discretion.`,
   },
@@ -45,7 +45,7 @@ Exception: If you experience a technical failure that prevents you from accessin
     heading: "6. Content & Intellectual Property",
     body: `All editorial content, curation, sourcing notes, look descriptions, and design elements of The Style Refresh are our intellectual property and are protected by copyright law.
 
-You may use our recommendations, buy links, and looks for your own personal shopping and style decisions. You may not:
+You may use our recommendations, sourcing notes, and looks for your own personal shopping and style decisions. You may not:
 
 • Republish, resell, license, or distribute our curated content
 • Share membership credentials or provide access to non-subscribers
@@ -55,10 +55,10 @@ You may use our recommendations, buy links, and looks for your own personal shop
 Links to third-party retailers are provided for your convenience. We have no control over third-party websites, their content, pricing, or availability.`,
   },
   {
-    heading: "7. Affiliate Disclosure (FTC Compliance)",
-    body: `Some links in our Monday briefs and on this website may be affiliate links. This means we may earn a small commission when you purchase through those links, at no additional cost to you. This compensation never influences which items we include. We only recommend products we would genuinely endorse.
+    heading: "7. Editorial Integrity",
+    body: `The Style Refresh is a fully editorial membership. We do not use affiliate links and are not compensated by any brand, retailer, or product manufacturer featured in our briefs. Every item is selected solely on the basis of editorial merit — quality, fit, value, and relevance to the week's looks.
 
-This disclosure is made in compliance with the Federal Trade Commission's guidelines on endorsements and testimonials (16 C.F.R. Part 255).`,
+Our recommendations reflect our honest opinion. This editorial independence is fundamental to the membership.`,
   },
   {
     heading: "8. Disclaimer of Warranties",

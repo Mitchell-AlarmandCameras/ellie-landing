@@ -155,7 +155,7 @@ export default function BagPage() {
         <div style={{ textAlign: "center", marginBottom: 40 }}>
           <p style={{ margin: "0 0 6px", fontFamily: "Arial,sans-serif", fontSize: "10px",
             letterSpacing: "0.34em", textTransform: "uppercase", color: "#C4956A" }}>
-            My Edit
+            Saved
           </p>
           <h1 style={{ margin: "0 0 10px", fontFamily: "DM Serif Display,serif", fontSize: "clamp(26px,5vw,36px)",
             fontWeight: 400, color: "#2C2C2C" }}>
@@ -337,7 +337,7 @@ export default function BagPage() {
             borderTop: "1px solid #DDD4C5", paddingTop: 28 }}>
             <p style={{ margin: "0 0 4px", fontFamily: "Arial,sans-serif",
               fontSize: "11px", color: "#6B6560" }}>
-              Ready to shop everything? Each Shop button takes you directly to the brand.
+              Every saved item shows brand and price — search directly on the brand's site.
             </p>
             <p style={{ margin: 0, fontFamily: "Arial,sans-serif", fontSize: "10px", color: "#B5A99A" }}>
               If a link has changed, Google Shopping will find the same item from other retailers.

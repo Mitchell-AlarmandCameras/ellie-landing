@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import fs from "fs";
 import path from "path";
+import { searchBestProduct } from "@/lib/product-hunter";
+import { refreshHeroImages } from "@/lib/auto-photos";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    GET /api/run-curator
@@ -16,8 +18,9 @@ import path from "path";
      4. Email Ellie a preview with an Approve button
 ═══════════════════════════════════════════════════════════════════════════ */
 
-export const runtime    = "nodejs";
-export const maxDuration = 60;
+export const runtime     = "nodejs";
+export const maxDuration = 300;
+export const dynamic     = "force-dynamic";
 
 /* ─── Scrape sources — 10 sources across editorial + retail ────── */
 const SCRAPE_SOURCES = [
@@ -52,11 +55,6 @@ const SCRAPE_SOURCES = [
     hint: "contemporary women's fashion, accessible styling ideas, what real women buy",
   },
   {
-    name: "Shopbop — New Arrivals",
-    url:  "https://www.shopbop.com/new-arrivals/br/v=1/N-16de.htm",
-    hint: "what contemporary luxury women are buying right now — real trending pieces",
-  },
-  {
     name: "Revolve — New Arrivals",
     url:  "https://www.revolve.com/clothing/br/d25a59/?navsrc=subclothing",
     hint: "resort and contemporary luxury trends, what's moving right now",
@@ -65,11 +63,6 @@ const SCRAPE_SOURCES = [
     name: "Net-a-Porter — New In",
     url:  "https://www.net-a-porter.com/en-us/shop/new-in",
     hint: "luxury women's designer new arrivals, season's key pieces",
-  },
-  {
-    name: "Mr Porter — Style",
-    url:  "https://www.mrporter.com/en-us/mens/clothing",
-    hint: "luxury menswear styling and editorial inspiration",
   },
 ];
 
@@ -106,16 +99,119 @@ async function fetchSnippet(source: { name: string; url: string; hint: string })
 }
 
 /* ─── Claude prompt ─────────────────────────────────────────────── */
-const SYSTEM_PROMPT = `You are Ellie, a private style consultant with twenty years dressing executives,
-editors, and high-net-worth individuals — primarily women, with an eye for men's style too.
+const SYSTEM_PROMPT = `You are Ellie — twenty years working alongside the quietly powerful women
+who ran the room. You dressed the executives, the editors, the women whose presence was felt
+before they spoke. You know fashion the way a trusted insider knows it: what actually works,
+what is overrated, and exactly where to find the right piece at the right price.
+
 You run "The Style Refresh" — a $19/month membership delivering three complete, sourced looks
-every Monday morning with direct buy links.
+every Monday morning. Brand, price, and your editorial note for every piece. Your members are
+professional women who want to look polished and intentional without spending hours on it.
 
-Your clientele is predominantly women who want to look polished, current, and effortlessly
-intentional. Occasionally you include a look suitable for men or both.
+TONE AND WRITING RULES — NON-NEGOTIABLE:
+- Write like a real person with opinions, not a content generator.
+- Be specific. Name the brand. Name the price point. Name the reason it belongs in this look.
+- Short sentences earn their place. So do long ones — but only when the idea requires it.
+- Use first person sparingly. When you do, mean it.
+- One em-dash per section maximum.
 
-Tone: authoritative, specific, warm. No filler. No "chic" or "stunning". 
-Speak as if writing a short note to a trusted client — not a magazine spread.`;
+BANNED WORDS — never write these:
+elevate, seamlessly, transformative, game-changing, curated (use: sourced/chosen/selected),
+stunning, chic, luxurious, intuitive, innovative, cutting-edge, empower, journey, discover
+(as a CTA), thoughtfully, intentional (as a vague adjective), premium (just say why it's good),
+nourishing, effortless (unless earned by specifics), comprehensive, bespoke, tailored (vague).
+
+BANNED PHRASES — never write these:
+"In today's world...", "It's no secret that...", "Take your style to the next level",
+"Look no further", "Whether you're a beginner or seasoned...", "Say goodbye to X and hello to Y",
+"The perfect solution", "Designed with you in mind", "Like having a stylist in your pocket",
+"...and so much more!", "Unlock your potential", "Your style journey".
+
+PRODUCT NOTES — this is where AI reveals itself most:
+BAD: "This luxurious blazer elevates any look with its sophisticated silhouette."
+GOOD: "Ivory bouclé, Vince. Worn open over a silk shell this is a closing-meeting blazer. Belted with wide-leg trousers it's something else entirely."
+
+The reader is a woman who reads Vogue, buys $300 shoes, and immediately recognizes generic copy.
+Write as if a senior editor at a premium fashion publication reviewed every word.`;
+
+
+/* ─── Load Trend Scout brief from Blob ────────────────────────── */
+async function loadTrendBrief(): Promise<string> {
+  try {
+    const token = process.env.BLOB_READ_WRITE_TOKEN;
+    if (!token) return "";
+    const { list } = await import("@vercel/blob");
+    const { blobs } = await list({ prefix: "ellie-trends/" });
+    const file = blobs.find(b => b.pathname === "ellie-trends/current.json");
+    if (!file) return "";
+
+    /* Only use if generated within the last 2 days */
+    const ageHours = (Date.now() - new Date(file.uploadedAt).getTime()) / 3_600_000;
+    if (ageHours > 48) return "";
+
+    const r = await fetch(file.url, { cache: "no-store" });
+    if (!r.ok) return "";
+    const brief = await r.json() as {
+      season: string;
+      dominantColors: string[];
+      keyPieces: string[];
+      mood: string;
+      trendInsights: string;
+      whatToAvoid: string[];
+      occasionContext: string;
+    };
+
+    return `
+TREND BRIEF FROM ELLIE'S RESEARCH ANALYST (generated this week):
+Season: ${brief.season}
+Editorial Mood: ${brief.mood}
+Dominant Colors This Week: ${brief.dominantColors.join(", ")}
+Key Pieces Having a Moment: ${brief.keyPieces.join(", ")}
+Trend Insights: ${brief.trendInsights}
+What Members Are Dressing For This Week: ${brief.occasionContext}
+AVOID THIS WEEK (overdone or off-brand): ${brief.whatToAvoid.join(", ")}
+→ Let this brief guide the look selection, color palette, and piece choices for this week.`;
+  } catch {
+    return "";
+  }
+}
+
+/* ─── Load Content Director directive from Blob ───────────────── */
+async function loadContentDirective(): Promise<string> {
+  try {
+    const token = process.env.BLOB_READ_WRITE_TOKEN;
+    if (!token) return "";
+    const { list } = await import("@vercel/blob");
+    const { blobs } = await list({ prefix: "ellie-directives/" });
+    const file = blobs.find(b => b.pathname === "ellie-directives/content.json");
+    if (!file) return "";
+
+    /* Only use if generated within the last 12 hours (same Sunday) */
+    const ageHours = (Date.now() - new Date(file.uploadedAt).getTime()) / 3_600_000;
+    if (ageHours > 12) return "";
+
+    const r = await fetch(file.url, { cache: "no-store" });
+    if (!r.ok) return "";
+    const d = await r.json() as {
+      emphasize?:       string[];
+      brandsToFeature?: string[];
+      brandsToRest?:    string[];
+      avoidRepeat?:     string[];
+      curatorNote?:     string;
+    };
+
+    const parts: string[] = ["\nCONTENT DIRECTOR BRIEF (set 1 hour ago):"];
+    if (d.emphasize?.length)       parts.push(`Emphasize this week: ${d.emphasize.join(", ")}`);
+    if (d.brandsToFeature?.length) parts.push(`Brands to feature (underused recently): ${d.brandsToFeature.join(", ")}`);
+    if (d.brandsToRest?.length)    parts.push(`Brands to rest (recently shown): ${d.brandsToRest.join(", ")}`);
+    if (d.avoidRepeat?.length)     parts.push(`Avoid repeating these piece types: ${d.avoidRepeat.join(", ")}`);
+    if (d.curatorNote)             parts.push(`Director's note: "${d.curatorNote}"`);
+    parts.push("→ This brief reflects CEO strategy + recent content history. Follow it.");
+    return parts.join("\n");
+  } catch {
+    return "";
+  }
+}
 
 /* ─── Load 4-week click analytics from Blob ───────────────────── */
 async function loadClickAnalytics(): Promise<string> {
@@ -181,198 +277,23 @@ ${topRetailers}
   }
 }
 
-function buildUserPrompt(scrapedData: string, today: string, weekNumber: number, analytics = ""): string {
-  return `It is Sunday. Generate this week's Monday Style Refresh brief.
+function buildUserPrompt(scrapedData: string, today: string, weekNumber: number, analytics = "", trendBrief = ""): string {
+  return `Generate this week's Monday Style Refresh brief. Today is ${today}, week ${weekNumber}.
 
-Use the scraped editorial and fashion data below as inspiration.
-Supplement with your own expertise for gaps — especially for women's luxury brands,
-current season pieces, and real product URLs.
-
-SCRAPED DATA:
-${scrapedData}
-
-TODAY: ${today}
-WEEK NUMBER: ${weekNumber}${analytics}
+${scrapedData ? `TREND CONTEXT:\n${scrapedData.substring(0, 800)}\n` : ""}${trendBrief}${analytics}
 
 REQUIREMENTS:
 • Three complete looks: The Executive, The Weekender, The Wildcard
-• Lean women's fashion (2 of 3 looks should read women's; 1 can be gender-neutral or men's)
-• Each look: 4–5 pieces with brand, price, buyer's note, and a real buyLink URL
-• Prices: mix $80–$500 (accessible) and $500–$2,500 (aspirational)
-• editorialLead: one sentence setting the week's mood/season
-• editorsNote per look: one insider observation — specific, not generic
-• buyLink: Use a THREE-TIER strategy. The more specific your search query, the closer it gets
-    to the exact item, color, fabric, and silhouette. Always include color + material + silhouette.
-
-  ─── TIER 1: Named brand's own site (BEST — use whenever you name a specific brand) ───
-    Format: https://[brand-domain]/search?q=[color+material+silhouette+item]
-    Verified brand search URLs — copy the format exactly:
-
-    FRENCH / EUROPEAN LUXURY:
-      Totême structured blazer ivory   → https://toteme-studio.com/search?type=product&q=ivory+structured+blazer
-      Totême trench coat camel         → https://toteme-studio.com/search?type=product&q=trench+coat+camel
-      Totême wrap dress silk           → https://toteme-studio.com/search?type=product&q=wrap+dress+silk
-      Jacquemus mini bag leather black → https://www.jacquemus.com/search?q=mini+bag+leather+black
-      Jacquemus linen blazer           → https://www.jacquemus.com/search?q=linen+blazer
-      A.P.C. structured blazer navy    → https://www.apc.fr/us/search/?q=structured+blazer+navy
-      A.P.C. high-rise jeans           → https://www.apc.fr/us/search/?q=high+rise+jeans+straight
-      Isabel Marant suede jacket       → https://www.isabelmarant.com/en-us/search?q=suede+jacket+camel
-      Isabel Marant ankle boot leather → https://www.isabelmarant.com/en-us/search?q=ankle+boot+leather+black
-      AMI Paris relaxed blazer         → https://www.ami-paris.com/en-us/search?q=relaxed+blazer+men
-      Ganni floral midi dress          → https://www.ganni.com/en-us/search?q=floral+midi+dress
-      Ganni denim jacket off-white     → https://www.ganni.com/en-us/search?q=denim+jacket+off+white
-      Nanushka vegan leather jacket    → https://www.nanushka.com/search?q=vegan+leather+jacket
-      Ba&sh floral silk blouse         → https://www.ba-sh.com/en_us/search?q=silk+floral+blouse
-      Sandro tailored blazer ivory     → https://www.sandro-paris.com/en/search?q=tailored+blazer+ivory
-      Maje knit midi dress             → https://www.maje.com/en/search?q=knit+midi+dress
-      IRO leather jacket biker         → https://www.iro.com/en_us/search?q=leather+biker+jacket
-
-    CONTEMPORARY LUXURY (AMERICAN):
-      Theory wide-leg trouser black    → https://www.theory.com/search?q=wide+leg+trouser+black+wool
-      Theory single-button blazer      → https://www.theory.com/search?q=single+button+blazer+ivory
-      Theory fitted knit top           → https://www.theory.com/search?q=fitted+knit+top
-      Vince silk camisole cream        → https://www.vince.com/search?q=silk+camisole+cream
-      Vince wide-leg trouser ivory     → https://www.vince.com/search?q=wide+leg+trouser+ivory
-      Vince relaxed cashmere sweater   → https://www.vince.com/search?q=cashmere+relaxed+pullover
-      L'Agence silk blouse ivory       → https://www.lagence.com/search?q=silk+blouse+ivory
-      L'Agence high-rise straight jean → https://www.lagence.com/search?q=high+rise+straight+leg+jeans
-      Frame flared jeans dark wash     → https://www.frame-store.com/search?q=le+crop+flare+dark+wash
-      Frame silk blouse ivory          → https://www.frame-store.com/search?q=silk+blouse+ivory
-      Equipment silk shirt white       → https://www.equipmentfr.com/search?q=silk+shirt+white+button+down
-      Veronica Beard dickey blazer     → https://veronicabeard.com/search?q=dickey+jacket+blazer
-      Ulla Johnson floral midi dress   → https://ullajohnson.com/search?q=floral+midi+dress
-      Alice + Olivia structured blazer → https://www.aliceandolivia.com/search?q=structured+blazer
-      Rag & Bone slim trouser black    → https://www.rag-bone.com/search?q=slim+trouser+black
-      Rag & Bone Chelsea boot leather  → https://www.rag-bone.com/search?q=chelsea+boot+leather
-      Staud midi dress floral          → https://www.staud.clothing/search?q=floral+midi+dress
-      Staud structured tote bag        → https://www.staud.clothing/search?q=structured+tote+bag
-
-    ACCESSIBLE LUXURY:
-      Reformation linen wide-leg pant  → https://www.thereformation.com/search?q=linen+wide+leg+pant
-      Reformation midi dress silk      → https://www.thereformation.com/search?q=silk+midi+dress
-      Anthropologie slip dress champ.  → https://www.anthropologie.com/search?q=slip+dress+champagne+bias+cut
-      Anthropologie linen blazer       → https://www.anthropologie.com/search?q=linen+blazer+women
-      Free People maxi dress boho      → https://www.freepeople.com/search?query=maxi+dress+linen+women
-      Club Monaco tailored blazer      → https://www.clubmonaco.com/search?q=tailored+blazer+women
-      Quince cashmere crewneck         → https://www.onequince.com/search?q=cashmere+crewneck+women
-      Everlane fitted white tee        → https://www.everlane.com/search?q=fitted+crew+tee+white+cotton
-      Everlane wide-leg trouser        → https://www.everlane.com/search?q=wide+leg+trouser+women
-      Banana Republic tailored blazer  → https://bananarepublic.gap.com/browse/search.do?searchText=tailored+blazer+women
-
-    EUROPEAN MID-RANGE:
-      COS oversized linen blazer       → https://www.cos.com/en_usd/search.html?q=oversized+linen+blazer
-      COS wide-leg trouser linen       → https://www.cos.com/en_usd/search.html?q=wide+leg+linen+trouser
-      & Other Stories silk midi dress  → https://www.stories.com/en_usd/search.html?q=silk+midi+dress
-      & Other Stories tailored blazer  → https://www.stories.com/en_usd/search.html?q=tailored+blazer
-      Arket linen shirt dress          → https://www.arket.com/en_usd/search?q=linen+shirt+dress
-      Mango linen blazer women         → https://www.mango.com/us/search?q=linen+blazer+women
-      Massimo Dutti tailored trousers  → https://www.massimodutti.com/us/search?q=tailored+trousers+women
-
-    JEWELRY & ACCESSORIES:
-      Mejuri bold gold hoops           → https://mejuri.com/search?q=bold+gold+hoop+earrings
-      Mejuri fine chain necklace gold  → https://mejuri.com/search?q=fine+chain+necklace+gold
-      Mejuri stackable rings           → https://mejuri.com/search?q=gold+stacking+rings
-      Monica Vinader layered necklace  → https://www.monicavinader.com/us/search?q=layered+gold+necklace
-      Gorjana dainty gold necklace     → https://gorjana.com/search?q=layered+gold+necklace
-      Tory Burch structured tote       → https://www.toryburch.com/en-us/search?q=structured+leather+tote
-      Tory Burch leather ballet flat   → https://www.toryburch.com/en-us/search?q=leather+ballet+flat
-      Kate Spade satchel bag           → https://www.katespade.com/search?q=leather+satchel+bag
-      Stuart Weitzman pointed pump     → https://www.stuartweitzman.com/search?q=pointed+toe+pump+leather
-      Schutz heeled sandal strappy     → https://www.schutz-shoes.com/search?q=strappy+heeled+sandal
-      Adidas Stan Smith white women    → https://www.adidas.com/us/search?q=stan+smith+white+women
-
-  ─── TIER 2: Luxury multi-brand retailers (USE when no specific brand is named, ───
-  ─── or when a broader curated selection fits the brief better)                 ───
-    Shopbop (contemporary luxury, ships fast, great search):
-      https://www.shopbop.com/s/search?q=[color+material+item+women]
-      e.g. cream silk blouse women → https://www.shopbop.com/s/search?q=cream+silk+blouse+women
-    Revolve (resort/contemporary, young luxury):
-      https://www.revolve.com/r/Search.jsp?q=[color+item+style]
-      e.g. linen wide leg pant → https://www.revolve.com/r/Search.jsp?q=linen+wide+leg+pant+women
-    SSENSE (designer, avant-garde, curated):
-      https://www.ssense.com/en-us/women/search?q=[item+keywords]
-      e.g. structured trench coat → https://www.ssense.com/en-us/women/search?q=structured+trench+coat
-    Mytheresa (ultra-luxury designer only):
-      https://www.mytheresa.com/en-us/shop/women?q=[item+keywords]
-      e.g. cashmere turtleneck → https://www.mytheresa.com/en-us/shop/women?q=cashmere+turtleneck+women
-    Farfetch (global luxury, widest selection):
-      https://www.farfetch.com/shopping/women/search/items.aspx?q=[item+keywords]
-      e.g. tailored blazer beige → https://www.farfetch.com/shopping/women/search/items.aspx?q=tailored+blazer+beige+women
-    Saks Fifth Avenue (classic American luxury):
-      https://www.saksfifthavenue.com/search?query=[item+keywords]
-      e.g. chain strap bag → https://www.saksfifthavenue.com/search?query=chain+strap+shoulder+bag+women
-    Neiman Marcus (American luxury, designer):
-      https://www.neimanmarcus.com/en-us/c.cat?q=[item+keywords]
-      e.g. cashmere wrap coat → https://www.neimanmarcus.com/en-us/c.cat?q=cashmere+wrap+coat+women
-    Bloomingdale's (broad luxury, great for accessories):
-      https://www.bloomingdales.com/shop/search?Q=[item+keywords]
-      e.g. leather tote cognac → https://www.bloomingdales.com/shop/search?Q=leather+tote+cognac+women
-
-  ─── TIER 3: Nordstrom (USE for truly generic/unbranded items only) ───
-    https://www.nordstrom.com/sr?origin=keywordsearch&keyword=[color+material+item+women]
-    Always include "women" and be specific: color + material + silhouette
-    e.g. black pointed heel pump women → https://www.nordstrom.com/sr?origin=keywordsearch&keyword=black+pointed+toe+pump+leather+women
-
-  ─── NON-NEGOTIABLE LINK RULES ───
-    ✅ Brand shown on the card MUST match the brand/retailer in the buyLink URL
-    ✅ Always include color + material + silhouette in search queries for closer results
-    ✅ Always include "women" in multi-brand retailer searches
-    ❌ NEVER use Net-a-Porter for buyLinks — search URLs fail externally (use for trend research only)
-    ❌ NEVER use Google Shopping — mixes luxury and cheap, destroys editorial quality
-    ❌ NEVER use a direct product URL — it expires when the item sells out
-    ❌ NEVER use a brand homepage or collection landing page
-    ❌ BLOCKED SITES (server rejects all external requests) — never link to:
-       Sézane, Madewell, J.Crew, ASOS, Zara, H&M, Sam Edelman
-
-WOMEN'S BRANDS TO DRAW FROM — pull from across this full universe:
-
-  FRENCH / EUROPEAN LUXURY: Totême, Jacquemus, A.P.C., Isabel Marant, AMI Paris,
-    Nanushka, Ganni, Ba&sh, Sandro, Maje, IRO, Wandler
-
-  CONTEMPORARY LUXURY (AMERICAN): Theory, Vince, L'Agence, Frame, Veronica Beard,
-    Equipment, Ulla Johnson, Alice + Olivia, Rag & Bone, Staud, SMYTHE, 10 Crosby
-
-  ACCESSIBLE LUXURY: Reformation, Anthropologie, Free People, Club Monaco, Quince,
-    Everlane, Banana Republic
-
-  EUROPEAN MID-RANGE: COS, & Other Stories, Arket, Mango, Massimo Dutti
-
-  JEWELRY: Mejuri, Aurate, Monica Vinader, Gorjana, Sophie Buhai
-
-  SHOES: Stuart Weitzman, Schutz, Loeffler Randall, Isabel Marant, Tory Burch, Adidas Stan Smith
-
-  MULTI-BRAND RETAILERS (when no specific brand is named):
-    Shopbop, Revolve, SSENSE, Mytheresa, Farfetch, Saks Fifth Avenue, Neiman Marcus,
-    Bloomingdale's, Nordstrom
-
-MEN'S BRANDS (for the one men's/neutral look):
-  A.P.C., COS, AMI Paris, Sunspel, Norse Projects, Common Projects, Acne Studios, Incotex
-
-HERO IMAGES — pick exactly 4 from this verified pool to match this week's mood.
-Each image must come from the list below — do NOT invent photo IDs.
-Select images whose mood best matches the three looks you're generating:
-
-  EXECUTIVE / POWER:
-    id: "1483985988355-763728e1935b"  — fashion models walking, sophisticated
-    id: "1469334031218-e382a71b716b"  — elegant woman, polished portrait
-    id: "1529139574466-a303027ee77f"  — tailored, confident, editorial
-    id: "1594938298603-7f787ef8b22f"  — luxury fashion, structured
-
-  WEEKEND / CASUAL:
-    id: "1490481651871-ab68de25d43d"  — effortless casual style, relaxed
-    id: "1581044777550-4cfa2d08b18a"  — weekend chic, natural light
-    id: "1512436991641-6745cdb1723f"  — easy lifestyle, relaxed polish
-
-  EDITORIAL / WILDCARD:
-    id: "1515886657613-9f3515b0c78f"  — bold editorial model pose
-    id: "1539109136881-3be0616acf4b"  — high fashion editorial
-    id: "1595777457583-95e059d581b8"  — statement look, editorial
-
-  ACCESSORIES / DETAIL:
-    id: "1558769132-cb1aea458c5e"     — jewelry and accessories flatlay
-    id: "1509631179647-0177331693ae"  — woman walking, detail shot
-
-All image URLs follow: https://images.unsplash.com/photo-{id}?auto=format&fit=crop&w=900&q=85
+• Use brands from: Totême, A.P.C., Theory, Vince, L'Agence, Frame, Rag & Bone, Reformation, COS, & Other Stories, Arket, Isabel Marant, Ganni, Staud, Ulla Johnson, Everlane, Club Monaco, Mejuri, Gorjana, Stuart Weitzman, Schutz
+• buyLink format: brand search URL e.g. https://www.theory.com/search?q=wide+leg+trouser+black — NEVER direct product URLs, NEVER Shopbop, NEVER Net-a-Porter, NEVER Sézane, NEVER Madewell, NEVER Zara, NEVER Amazon
+• 2 women's looks + 1 gender-neutral or men's look
+• Each look: 4–5 pieces with brand, price, note, buyLink
+• Prices: mix $80–$500 and $500–$2,500
+• Piece names: Title Case always (e.g. "Wide-Leg Trouser in Ivory Stretch-Twill")
+• editorialLead: one sentence setting the week's mood
+• editorsNote per look: one specific insider observation
+• buyLink: brand search URL with color+material+item keywords (e.g. https://www.theory.com/search?q=wide+leg+trouser+ivory+wool). Use brand's own site when named. Fallback: revolve.com or nordstrom.com search. NEVER direct product URLs, NEVER Shopbop, NEVER Net-a-Porter.
+• heroImages: pick 4 ids from: "1483985988355-763728e1935b", "1469334031218-e382a71b716b", "1529139574466-a303027ee77f", "1490481651871-ab68de25d43d", "1581044777550-4cfa2d08b18a", "1515886657613-9f3515b0c78f", "1539109136881-3be0616acf4b", "1595777457583-95e059d581b8"
 
 Return ONLY valid JSON — no markdown, no extra text — matching this structure exactly:
 
@@ -417,39 +338,60 @@ Return ONLY valid JSON — no markdown, no extra text — matching this structur
 }`;
 }
 
-async function callClaude(scrapedData: string, today: string, weekNumber: number, analytics = ""): Promise<Record<string, unknown>> {
+async function callClaude(scrapedData: string, today: string, weekNumber: number, analytics = "", trendBrief = ""): Promise<Record<string, unknown>> {
   const apiKey = process.env.ANTHROPIC_API_KEY?.trim();
   if (!apiKey) throw new Error("ANTHROPIC_API_KEY not set");
 
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "x-api-key":         apiKey,
-      "anthropic-version": "2023-06-01",
-      "content-type":      "application/json",
-    },
-    body: JSON.stringify({
-      model:      "claude-opus-4-5",
-      max_tokens: 4096,
-      system:     SYSTEM_PROMPT,
-      messages:   [{ role: "user", content: buildUserPrompt(scrapedData, today, weekNumber, analytics) }],
-    }),
-  });
+  /* Try models in order until one works */
+  const models = [
+    process.env.ANTHROPIC_MODEL?.trim(),
+    "claude-opus-4-5",
+    "claude-sonnet-4-5",
+    "claude-3-7-sonnet-20250219",
+    "claude-3-5-sonnet-20241022",
+    "claude-3-5-sonnet-20240620",
+    "claude-3-opus-20240229",
+    "claude-3-sonnet-20240229",
+  ].filter(Boolean) as string[];
 
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Claude API error ${res.status}: ${err}`);
+  let lastError = "";
+  for (const model of models) {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "x-api-key":         apiKey,
+        "anthropic-version": "2023-06-01",
+        "content-type":      "application/json",
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: 4096,
+        system:     SYSTEM_PROMPT,
+        messages:   [{ role: "user", content: buildUserPrompt(scrapedData, today, weekNumber, analytics, trendBrief) }],
+      }),
+    });
+
+    if (res.status === 404) {
+      console.log(`[curator] Model ${model} not available, trying next…`);
+      lastError = `Model ${model} not found`;
+      continue;
+    }
+
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(`Claude API error ${res.status}: ${err}`);
+    }
+
+    console.log(`[curator] Using model: ${model}`);
+    const json = await res.json() as { content: Array<{ text: string }> };
+    let raw = json.content[0]?.text ?? "";
+    raw = raw.trim();
+    if (raw.startsWith("```")) raw = raw.split("\n").slice(1).join("\n");
+    if (raw.endsWith("```")) raw = raw.split("```").slice(0, -1).join("```");
+    return JSON.parse(raw.trim()) as Record<string, unknown>;
   }
 
-  const json = await res.json() as { content: Array<{ text: string }> };
-  let raw = json.content[0]?.text ?? "";
-
-  /* Strip accidental markdown fences */
-  raw = raw.trim();
-  if (raw.startsWith("```")) raw = raw.split("\n").slice(1).join("\n");
-  if (raw.endsWith("```")) raw = raw.split("```").slice(0, -1).join("```");
-
-  return JSON.parse(raw.trim()) as Record<string, unknown>;
+  throw new Error(`No available Claude model found. Last error: ${lastError}`);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -958,7 +900,7 @@ async function generateSEOArticle(keyword: string): Promise<Record<string, unkno
 
   const prompt = `Write a 650-750 word SEO article for stylebyellie.com targeting the keyword: "${keyword}"
 
-stylebyellie.com is a $19/month subscription where members receive 3 expertly curated fashion looks every Monday morning with direct buy links — like having a personal stylist in their inbox.
+stylebyellie.com is a $19/month subscription where members receive 3 expertly curated fashion looks every Monday morning — brand, price, and editorial notes for every piece, like having a personal stylist in their inbox.
 
 Requirements:
 - H1 title that naturally contains the keyword
@@ -986,7 +928,7 @@ Return ONLY valid JSON:
         "content-type":      "application/json",
       },
       body: JSON.stringify({
-        model:      "claude-opus-4-5",
+        model:      "claude-3-5-sonnet-20241022",
         max_tokens: 2500,
         messages:   [{ role: "user", content: prompt }],
       }),
@@ -1005,9 +947,10 @@ Return ONLY valid JSON:
 /* ─── GET handler ───────────────────────────────────────────────── */
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get("authorization") ?? "";
+  const qSecret    = new URL(req.url).searchParams.get("secret") ?? "";
   const cronSecret = process.env.CRON_SECRET?.trim() ?? process.env.CURATOR_APPROVE_SECRET?.trim() ?? "";
 
-  if (authHeader !== `Bearer ${cronSecret}`) {
+  if (authHeader !== `Bearer ${cronSecret}` && qSecret !== cronSecret) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -1016,9 +959,30 @@ export async function GET(req: NextRequest) {
   const notifyEmail = process.env.RESEND_NOTIFY_EMAIL?.trim();
   const baseUrl     = (process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000").replace(/\/$/, "");
   const secret      = cronSecret;
+  const force       = new URL(req.url).searchParams.get("force") === "1";
+
+  /* ── Idempotency guard: skip if brief already generated within 5 days ─
+     Prevents backup cron from double-running when main cron succeeded.
+     Pass ?force=1 to override (e.g. manual re-run after bad content).   */
+  if (!force && process.env.BLOB_READ_WRITE_TOKEN) {
+    try {
+      const { list } = await import("@vercel/blob");
+      const { blobs } = await list({ prefix: "ellie-approved/" });
+      const latest = blobs
+        .filter(b => b.pathname.endsWith(".json"))
+        .sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime())[0];
+      if (latest) {
+        const ageHours = (Date.now() - new Date(latest.uploadedAt).getTime()) / 3_600_000;
+        if (ageHours < 120) { /* 5 days — same week */
+          console.log(`[curator] Brief already generated ${Math.round(ageHours)}h ago — skipping. Pass ?force=1 to override.`);
+          return NextResponse.json({ success: true, skipped: true, reason: "brief already generated this week", ageHours: Math.round(ageHours) });
+        }
+      }
+    } catch { /* non-fatal — proceed with run */ }
+  }
 
   try {
-    /* 1 — Scrape */
+    /* 1 — Scrape fashion sources */
     console.log("[curator] Scraping fashion sources…");
     const snippets = await Promise.all(SCRAPE_SOURCES.map(fetchSnippet));
     const scrapedData = snippets.filter(Boolean).join("\n") ||
@@ -1042,57 +1006,163 @@ export async function GET(req: NextRequest) {
 
     /* 3 — Generate with Claude */
     console.log("[curator] Calling Claude…");
-    /* Load 4-week click performance data to feed back into Claude */
-    const analytics = await loadClickAnalytics();
-    if (analytics) console.log("[curator] Analytics loaded:", analytics.substring(0, 120));
+    const trendBrief       = await loadTrendBrief();
+    const contentDirective = await loadContentDirective();
+    const analytics        = await loadClickAnalytics();
+    if (trendBrief)       console.log("[curator] Trend brief loaded ✓");
+    if (contentDirective) console.log("[curator] Content directive loaded ✓");
+    if (analytics)        console.log("[curator] Analytics loaded ✓");
+    const combinedContext = [trendBrief, contentDirective].filter(Boolean).join("\n");
+    const lookbook = await callClaude(scrapedData, today, weekNumber, analytics, combinedContext);
 
-    const lookbook = await callClaude(scrapedData, today, weekNumber, analytics);
-
-    /* 4 — Validate & auto-repair every shop link (5-step waterfall cascade) */
-    console.log("[curator] Running waterfall link validation…");
-    const rawLooks = (lookbook.looks as Look[]) ?? [];
-    const { repairedLooks, results: linkResults } = await validateAndRepairLooks(rawLooks);
-    const repairedCount  = linkResults.filter(r => r.repaired).length;
-    const step1Count     = linkResults.filter(r => (r.cascadeStep ?? 1) === 1).length;
-    const cascadeBreakdown = [2,3,4,5].map(s => {
-      const n = linkResults.filter(r => (r.cascadeStep ?? 1) === s).length;
-      return n > 0 ? `step${s}:${n}` : null;
-    }).filter(Boolean).join(", ");
-    console.log(`[curator] Links: ${step1Count}/${linkResults.length} original OK, ${repairedCount} cascaded${cascadeBreakdown ? ` (${cascadeBreakdown})` : ""}`);
-    /* Write repaired looks back into lookbook before saving */
-    const finalLookbook = { ...lookbook, looks: repairedLooks };
-
-    /* 5 — Save to /tmp */
-    try {
-      fs.writeFileSync(draftPath, JSON.stringify(finalLookbook), "utf8");
-      console.log("[curator] Draft saved to /tmp/ellie-draft.json");
-    } catch (fsErr) {
-      console.warn("[curator] Could not write /tmp/ellie-draft.json:", fsErr);
+    /* 4 — Product Hunter: upgrade Claude's search URLs to exact product links */
+    /* Disabled to keep function within serverless timeout budget */
+    const serperKey = null;
+    if (serperKey && lookbook.looks) {
+      console.log("[curator] Running Product Hunter — upgrading to exact product links…");
+      const rawLooksForHunter = lookbook.looks as Array<{ items: Array<{ piece: string; brand: string; price: string; buyLink: string }> }>;
+      const allHunterItems: Array<{ look: typeof rawLooksForHunter[0]; item: typeof rawLooksForHunter[0]["items"][0] }> = [];
+      for (const look of rawLooksForHunter) {
+        for (const item of (look.items ?? [])) allHunterItems.push({ look, item });
+      }
+      const hunterResults = await Promise.all(
+        allHunterItems.map(({ item }) => searchBestProduct(serperKey, item.piece, item.brand, item.price))
+      );
+      let upgraded = 0;
+      hunterResults.forEach((exactUrl, idx) => {
+        if (exactUrl) { allHunterItems[idx].item.buyLink = exactUrl; upgraded++; }
+      });
+      console.log(`[curator] Product Hunter upgraded ${upgraded} links to exact products`);
     }
 
-    /* 6 — Send approval email */
-    const approveUrl = `${baseUrl}/api/approve-weekly?secret=${encodeURIComponent(secret)}`;
+    /* 5 — Validate & auto-repair every shop link (waterfall cascade) */
+    console.log("[curator] Running waterfall link validation…");
+    const rawLooksForValidation = (lookbook.looks as Look[]) ?? [];
+    const { repairedLooks, results: linkResults } = await validateAndRepairLooks(rawLooksForValidation);
+    const repairedCount = linkResults.filter(r => r.repaired).length;
+    console.log(`[curator] Links: ${linkResults.filter(r => (r.cascadeStep ?? 1) === 1).length}/${linkResults.length} original OK, ${repairedCount} cascaded`);
 
+    /* 6 — Auto-approve: save directly to Blob — no human click needed */
+    const rawLooks      = repairedLooks;
+    const finalLookbook = { ...lookbook, looks: rawLooks, approvedAt: new Date().toISOString() };
+
+    /* Also save to /tmp as fallback for approve-weekly if called manually */
+    try {
+      fs.writeFileSync(draftPath, JSON.stringify(finalLookbook), "utf8");
+    } catch { /* non-fatal */ }
+
+    if (process.env.BLOB_READ_WRITE_TOKEN) {
+      try {
+        const { put, list } = await import("@vercel/blob");
+        const slug = String(finalLookbook.weekOf ?? "")
+          .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+        /* Save approved brief */
+        await put(
+          `ellie-approved/${slug}.json`,
+          JSON.stringify(finalLookbook),
+          { access: "public", contentType: "application/json", addRandomSuffix: false }
+        );
+
+        /* Save homepage preview (no buy links) */
+        const previewData = {
+          weekOf:        finalLookbook.weekOf,
+          editorialLead: finalLookbook.editorialLead ?? "",
+          updatedAt:     new Date().toISOString(),
+          looks: rawLooks.map((look) => ({
+            index:   look.index,
+            label:   look.label,
+            tagline: look.tagline,
+            teaser:  (look.items ?? []).slice(0, 4).map((item) => item.piece),
+          })),
+        };
+        await put("ellie-preview/current.json", JSON.stringify(previewData), {
+          access: "public", contentType: "application/json", addRandomSuffix: false,
+        });
+
+        /* Publish SEO blog post */
+        const postSlug = `week-of-${String(finalLookbook.weekOf ?? "")
+          .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "")}`;
+        await put(`blog/posts/${postSlug}.json`, JSON.stringify({
+          slug:          postSlug,
+          weekOf:        finalLookbook.weekOf,
+          publishedAt:   new Date().toISOString(),
+          editorialLead: String(finalLookbook.editorialLead ?? ""),
+          looks: rawLooks.map(look => ({
+            index: look.index, label: look.label, tagline: look.tagline,
+            editorsNote: look.editorsNote ?? "",
+            teaser: (look.items ?? []).slice(0, 5).map(i => i.piece),
+          })),
+        }), { access: "public", contentType: "application/json", addRandomSuffix: false });
+
+        /* Update blog index */
+        const { blobs: idxBlobs } = await list({ prefix: "blog/index" });
+        let blogIndex: Array<Record<string, unknown>> = [];
+        if (idxBlobs[0]) {
+          try { const r = await fetch(idxBlobs[0].url); if (r.ok) blogIndex = await r.json(); } catch { /* start fresh */ }
+        }
+        const idxEntry = { slug: postSlug, weekOf: finalLookbook.weekOf, publishedAt: new Date().toISOString(), editorialLead: String(finalLookbook.editorialLead ?? "").substring(0, 140), lookLabels: rawLooks.map(l => l.label) };
+        const existingIdx = blogIndex.findIndex((p) => p.slug === postSlug);
+        if (existingIdx >= 0) blogIndex[existingIdx] = idxEntry; else blogIndex.unshift(idxEntry);
+        await put("blog/index.json", JSON.stringify(blogIndex.slice(0, 52)), { access: "public", contentType: "application/json", addRandomSuffix: false });
+
+        console.log(`[curator] Auto-approved and saved to Blob — week of ${String(finalLookbook.weekOf ?? "")}`);
+      } catch (blobErr) {
+        console.error("[curator] Blob save failed:", blobErr);
+      }
+    }
+
+    /* 6 — Refresh hero images from Unsplash to match this week's looks */
+    try {
+      const { source } = await refreshHeroImages(weekNumber);
+      console.log(`[curator] Hero images refreshed from ${source}`);
+    } catch (heroErr) {
+      console.error("[curator] Hero image refresh failed (non-fatal):", heroErr);
+    }
+
+    /* 7 — Send notification email (brief is live — no approval needed) */
     if (resendKey && fromEmail && notifyEmail) {
       const resend = new Resend(resendKey);
+      const looks  = rawLooks as Array<{ label: string; tagline: string; items?: Array<{ piece: string; brand: string; price: string }> }>;
+      const notifyHtml = `<!DOCTYPE html><html><body style="background:#F5EFE4;font-family:Georgia,serif;padding:36px 16px;">
+<table width="580" cellpadding="0" cellspacing="0" style="background:#FDFAF5;max-width:580px;margin:0 auto;border:1px solid #DDD4C5;">
+  <tr><td style="height:3px;background:linear-gradient(90deg,transparent,#C4956A,transparent);"></td></tr>
+  <tr><td style="padding:28px 36px;text-align:center;background:#EDE5D8;">
+    <p style="margin:0;color:#C4956A;font-size:10px;letter-spacing:0.32em;text-transform:uppercase;font-family:Arial,sans-serif;">Ellie · The Style Refresh</p>
+    <h1 style="margin:8px 0 0;color:#2C2C2C;font-size:22px;font-weight:400;">✓ This week's brief is live</h1>
+    <p style="margin:8px 0 0;color:#6B6560;font-size:13px;font-family:Arial,sans-serif;">Week of ${String(finalLookbook.weekOf ?? "")} · Auto-approved · Sends Monday 7 AM ET</p>
+  </td></tr>
+  <tr><td style="padding:24px 36px;">
+    <p style="margin:0 0 16px;font-size:14px;color:#4A4A4A;font-family:Georgia,serif;font-style:italic;line-height:1.7;">${String(finalLookbook.editorialLead ?? "")}</p>
+    ${looks.map(look => `
+    <div style="margin-bottom:20px;border-left:2px solid #C4956A;padding-left:14px;">
+      <p style="margin:0 0 4px;font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:#C4956A;font-family:Arial,sans-serif;">${look.label}</p>
+      <p style="margin:0 0 8px;font-size:15px;color:#2C2C2C;font-family:Georgia,serif;font-style:italic;">"${look.tagline}"</p>
+      ${(look.items ?? []).map(item => `<p style="margin:3px 0;font-size:12px;font-family:Arial,sans-serif;color:#4A4A4A;">${item.piece} — <span style="color:#C4956A;">${item.brand} · ${item.price}</span></p>`).join("")}
+    </div>`).join("")}
+  </td></tr>
+  <tr><td style="padding:0 36px 28px;text-align:center;">
+    <p style="color:#8A8580;font-size:11px;font-family:Arial,sans-serif;margin:0;">
+      Brief auto-approved and scheduled · No action needed<br/>
+      <a href="${baseUrl}/api/send-weekly" style="color:#C4956A;">Send now instead →</a>
+    </p>
+  </td></tr>
+</table></body></html>`;
+
       const { error } = await resend.emails.send({
         from:    `Ellie Curator <${fromEmail}>`,
         to:      notifyEmail,
-        subject: `[APPROVE] Style Refresh Draft — Week of ${String(finalLookbook.weekOf ?? "")}`,
-        html:    buildApprovalEmail(finalLookbook, approveUrl, linkResults),
+        subject: `✓ Style Refresh auto-approved — Week of ${String(finalLookbook.weekOf ?? "")} · Sends Monday 7 AM`,
+        html:    notifyHtml,
       });
-      if (error) {
-        console.error("[curator] Email send failed:", error);
-      } else {
-        console.log("[curator] Approval email sent to", notifyEmail);
-      }
-    } else {
-      console.error("[curator] Resend env not configured — no approval email sent.");
+      if (error) console.error("[curator] Notification email failed:", error);
+      else        console.log("[curator] Notification email sent to", notifyEmail);
     }
 
     /* 7 — Monthly SEO article (first Sunday of each month only) */
+    /* Skipped inline — runs separately to avoid timeout */
     let seoArticleSlug: string | null = null;
-    if (isFirstSundayOfMonth() && process.env.BLOB_READ_WRITE_TOKEN) {
+    if (false && isFirstSundayOfMonth() && process.env.BLOB_READ_WRITE_TOKEN) {
       try {
         const month   = new Date().getMonth();
         const keyword = SEO_KEYWORDS[month] ?? "women's fashion style guide";
@@ -1137,14 +1207,13 @@ export async function GET(req: NextRequest) {
     }
 
     return NextResponse.json({
-      success:          true,
-      weekOf:           finalLookbook.weekOf,
+      success:        true,
+      weekOf:         finalLookbook.weekOf,
       weekNumber,
-      approveUrl,
-      linksValidated:   linkResults.length,
-      linksOriginalOK:  step1Count,
-      linksCascaded:    repairedCount,
-      seoArticle:       seoArticleSlug ?? "not this week",
+      autoApproved:   true,
+      linksValidated: linkResults.length,
+      linksCascaded:  repairedCount,
+      seoArticle:     seoArticleSlug ?? "not this week",
     });
   } catch (err) {
     console.error("[curator] Fatal error:", err);
