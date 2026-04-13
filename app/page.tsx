@@ -108,6 +108,7 @@ export default function Home() {
   const [activePreviews,  setActivePreviews]  = useState(previews);
   const [liveWeekOf,      setLiveWeekOf]      = useState<string | null>(null);
   const [editorialLead,   setEditorialLead]   = useState<string | null>(null);
+  const [lookImages,      setLookImages]      = useState<Array<{ url: string; alt: string }> | null>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
@@ -129,6 +130,16 @@ export default function Home() {
     }
   }, []);
 
+  /* Fetch look-card images from Blob (weekly fashion photos, never skincare) */
+  useEffect(() => {
+    fetch("/api/hero-images")
+      .then(r => r.ok ? r.json() : null)
+      .then((data: { lookImages?: Array<{ url: string; alt: string }> } | null) => {
+        if (data?.lookImages?.length === 3) setLookImages(data.lookImages);
+      })
+      .catch(() => {});
+  }, []);
+
   /* Fetch live curated preview from Vercel Blob (auto-updates every Monday) */
   useEffect(() => {
     fetch("/api/current-preview")
@@ -142,14 +153,14 @@ export default function Home() {
         editorialLead?: string;
       } | null) => {
         if (data?.looks?.length === 3) {
-          setActivePreviews(
-            data.looks.map((look, i) => ({
-              ...previews[i % previews.length],
+          setActivePreviews(prev =>
+            data.looks!.map((look, i) => ({
+              ...prev[i % prev.length],
               index:       look.index,
               label:       look.label,
               tagline:     look.tagline,
               description: look.description,
-              teaser:      Array.isArray(look.teaser) ? look.teaser : previews[i % previews.length].teaser,
+              teaser:      Array.isArray(look.teaser) ? look.teaser : prev[i % prev.length].teaser,
             }))
           );
         }
@@ -835,8 +846,8 @@ export default function Home() {
                     {/* Editorial photo at top of card */}
                     <div className="relative overflow-hidden" style={{ height: "240px" }}>
                       <Image
-                        src={card.image}
-                        alt={`${card.label} — The Style Refresh`}
+                        src={lookImages?.[i]?.url ?? card.image}
+                        alt={lookImages?.[i]?.alt ?? `${card.label} — The Style Refresh`}
                         fill
                         sizes="(min-width: 1024px) 30vw, 90vw"
                         style={{ objectFit: "cover", objectPosition: "center top", transition: "transform 0.5s ease" }}
