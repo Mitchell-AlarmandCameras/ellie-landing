@@ -209,34 +209,44 @@ async function runSend(req?: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  /* Read approved lookbook from /tmp */
-  const approvedPath = path.join("/tmp", "ellie-approved.json");
-  if (!fs.existsSync(approvedPath)) {
-    /* Email Ellie that no draft was approved */
+  /* Read approved lookbook from Vercel Blob */
+  let lookbook: Lookbook;
+  try {
+    const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
+    if (!blobToken) throw new Error("BLOB_READ_WRITE_TOKEN not set");
+
+    const { list } = await import("@vercel/blob");
+    const { blobs } = await list({ prefix: "ellie-approved/" });
+
+    /* Find the most recently uploaded approved brief */
+    const latest = blobs
+      .filter(b => b.pathname.endsWith(".json"))
+      .sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime())[0];
+
+    if (!latest) throw new Error("no_brief");
+
+    const res = await fetch(latest.url, { cache: "no-store" });
+    if (!res.ok) throw new Error(`Blob fetch failed: ${res.status}`);
+    lookbook = await res.json() as Lookbook;
+  } catch (err) {
+    const missing = String(err).includes("no_brief") || String(err).includes("BLOB_READ_WRITE_TOKEN");
     const resendKey   = process.env.RESEND_API_KEY?.trim();
     const fromEmail   = process.env.RESEND_FROM_EMAIL?.trim();
     const notifyEmail = process.env.RESEND_NOTIFY_EMAIL?.trim();
-    if (resendKey && fromEmail && notifyEmail) {
+    if (missing && resendKey && fromEmail && notifyEmail) {
       const resend = new Resend(resendKey);
       await resend.emails.send({
         from:    `Ellie Curator <${fromEmail}>`,
         to:      notifyEmail,
         subject: "[ACTION NEEDED] No approved draft — Monday send skipped",
         html: `<p style="font-family:sans-serif;color:#111;padding:20px;">
-          The Monday Style Refresh send was skipped because no approved draft was found.<br/><br/>
-          This usually means the Sunday approval wasn't clicked in time, or the server restarted.<br/><br/>
-          To send manually, go to Vercel → your project → run the curator again from the dashboard.
+          The Monday Style Refresh send was skipped because no approved draft was found in Blob storage.<br/><br/>
+          This usually means the Sunday curator didn't run or failed silently.<br/><br/>
+          Manually trigger: <a href="${(process.env.NEXT_PUBLIC_BASE_URL ?? "https://stylebyellie.com").replace(/\/$/, "")}/api/run-curator">run the curator</a>, then hit this endpoint again.
         </p>`,
       });
     }
-    return NextResponse.json({ error: "No approved draft found. Ellie has been notified.", sent: 0 }, { status: 404 });
-  }
-
-  let lookbook: Lookbook;
-  try {
-    lookbook = JSON.parse(fs.readFileSync(approvedPath, "utf8")) as Lookbook;
-  } catch (err) {
-    return NextResponse.json({ error: "Could not read approved draft.", detail: String(err) }, { status: 500 });
+    return NextResponse.json({ error: "No approved draft found.", detail: String(err), sent: 0 }, { status: 404 });
   }
 
   const stripeKey  = process.env.STRIPE_SECRET_KEY?.trim();
@@ -290,8 +300,7 @@ async function runSend(req?: NextRequest): Promise<NextResponse> {
     if (i + BATCH < emails.length) await new Promise(r => setTimeout(r, 500));
   }
 
-  /* Clean up approved file so it doesn't send again */
-  try { fs.unlinkSync(approvedPath); } catch { /* ignore */ }
+  /* Blob brief intentionally left in place — curator overwrites it next Sunday */
 
   /* ── Post teaser to Twitter/X ───────────────────────────────────────────
      Posts a Monday morning teaser when briefs go out.
